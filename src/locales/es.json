@@ -1,0 +1,57 @@
+{
+    "nav": {
+        "map": "Mapa",
+        "feed": "Novedades",
+        "profile": "Perfil"
+    },
+    "auth": {
+        "signIn": "Iniciar Sesión",
+        "signUp": "Crear Cuenta",
+        "welcome": "Bienvenido de nuevo",
+        "createAccount": "Crear Cuenta",
+        "clientRole": "Soy Cliente",
+        "traderRole": "Soy Comerciante",
+        "clientDesc": "Descubre ofertas de negocios locales",
+        "traderDesc": "Promociona mi negocio a clientes cercanos",
+        "fullName": "Nombre Completo",
+        "email": "Correo",
+        "password": "Contraseña",
+        "haveAccount": "¿Ya tienes cuenta?",
+        "noAccount": "¿No tienes cuenta?"
+    },
+    "feed": {
+        "latestShouts": "Últimos Gritos",
+        "expiring": "Expira pronto",
+        "ago": "hace",
+        "viewOnMap": "Ver en mapa"
+    },
+    "map": {
+        "premium": "Premium",
+        "viewDetails": "Ver Detalles"
+    },
+    "profile": {
+        "welcome": "Bienvenido a GeoPulse",
+        "signInDesc": "Inicia sesión para ver tu perfil y ofertas guardadas",
+        "account": "Cuenta",
+        "settings": "Ajustes",
+        "theme": "Tema",
+        "language": "Idioma",
+        "signOut": "Cerrar Sesión",
+        "manageBusiness": "Gestionar Negocio",
+        "createShout": "Crear Grito"
+    },
+    "themes": {
+        "dark": "GeoPulse Oscuro",
+        "light": "Día",
+        "midnight": "Medianoche OLED"
+    },
+    "languages": {
+        "en": "Inglés",
+        "es": "Español",
+        "fr": "Francés"
+    },
+    "common": {
+        "loading": "Cargando...",
+        "error": "Ocurrió un error"
+    }
+}

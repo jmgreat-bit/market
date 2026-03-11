@@ -1,0 +1,57 @@
+{
+    "nav": {
+        "map": "Map",
+        "feed": "Feed",
+        "profile": "Profile"
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "signUp": "Create Account",
+        "welcome": "Welcome back",
+        "createAccount": "Create Account",
+        "clientRole": "I'm a Client",
+        "traderRole": "I'm a Trader",
+        "clientDesc": "Discover deals from local businesses",
+        "traderDesc": "Promote my business to nearby customers",
+        "fullName": "Full Name",
+        "email": "Email",
+        "password": "Password",
+        "haveAccount": "Already have an account?",
+        "noAccount": "Don't have an account?"
+    },
+    "feed": {
+        "latestShouts": "Latest Shouts",
+        "expiring": "Expiring",
+        "ago": "ago",
+        "viewOnMap": "View on map"
+    },
+    "map": {
+        "premium": "Premium",
+        "viewDetails": "View Details"
+    },
+    "profile": {
+        "welcome": "Welcome to GeoPulse",
+        "signInDesc": "Sign in to access your profile and saved deals",
+        "account": "Account",
+        "settings": "Settings",
+        "theme": "Theme",
+        "language": "Language",
+        "signOut": "Sign Out",
+        "manageBusiness": "Manage Business",
+        "createShout": "Create Shout"
+    },
+    "themes": {
+        "dark": "GeoPulse Dark",
+        "light": "Daylight",
+        "midnight": "Midnight OLED"
+    },
+    "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "An error occurred"
+    }
+}

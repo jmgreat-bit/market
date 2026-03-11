@@ -1,0 +1,57 @@
+{
+    "nav": {
+        "map": "Carte",
+        "feed": "Actus",
+        "profile": "Profil"
+    },
+    "auth": {
+        "signIn": "Se Connecter",
+        "signUp": "Créer un Compte",
+        "welcome": "Bon retour",
+        "createAccount": "Créer un Compte",
+        "clientRole": "Je suis Client",
+        "traderRole": "Je suis Commerçant",
+        "clientDesc": "Découvrez les offres des commerces locaux",
+        "traderDesc": "Promouvoir mon entreprise auprès des clients",
+        "fullName": "Nom Complet",
+        "email": "Email",
+        "password": "Mot de passe",
+        "haveAccount": "Vous avez déjà un compte ?",
+        "noAccount": "Pas encore de compte ?"
+    },
+    "feed": {
+        "latestShouts": "Derniers Cris",
+        "expiring": "Expire bientôt",
+        "ago": "il y a",
+        "viewOnMap": "Voir sur la carte"
+    },
+    "map": {
+        "premium": "Premium",
+        "viewDetails": "Voir Détails"
+    },
+    "profile": {
+        "welcome": "Bienvenue sur GeoPulse",
+        "signInDesc": "Connectez-vous pour accéder à votre profil",
+        "account": "Compte",
+        "settings": "Paramètres",
+        "theme": "Thème",
+        "language": "Langue",
+        "signOut": "Se Déconnecter",
+        "manageBusiness": "Gérer l'entreprise",
+        "createShout": "Créer un Cri"
+    },
+    "themes": {
+        "dark": "GeoPulse Sombre",
+        "light": "Jour",
+        "midnight": "Minuit OLED"
+    },
+    "languages": {
+        "en": "Anglais",
+        "es": "Espagnol",
+        "fr": "Français"
+    },
+    "common": {
+        "loading": "Chargement...",
+        "error": "Une erreur est survenue"
+    }
+}
