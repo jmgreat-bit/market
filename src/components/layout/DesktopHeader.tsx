@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Map, Newspaper, User, Search, Compass } from 'lucide-react';
+import { Map, Newspaper, Settings, Search, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -13,17 +13,18 @@ export function DesktopHeader() {
 
     const tabs = [
         { href: ROUTES.FEED, label: t.nav.feed, icon: Newspaper },
+        { href: ROUTES.SEARCH, label: 'Search', icon: Search },
         { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
-        { href: ROUTES.PROFILE, label: t.nav.profile, icon: User },
         { href: ROUTES.MAP, label: 'Map', icon: Map },
+        { href: ROUTES.MENU, label: 'Menu', icon: Settings },
     ];
 
     return (
-        <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-[#0e0e0f]/80 backdrop-blur-lg bg-[#131314]">
+        <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/40">
             <div className="flex items-center gap-4">
                 <Link href={ROUTES.FEED} className="flex items-center">
                     <h1 className="font-display font-black text-primary tracking-tighter text-2xl">
-                        GeoPulse
+                        MarketPLC
                     </h1>
                 </Link>
             </div>
@@ -48,9 +49,9 @@ export function DesktopHeader() {
                 })}
             </div>
 
-            <button className="text-muted-foreground hover:text-primary transition-colors">
+            <Link href={ROUTES.SEARCH} className="text-muted-foreground hover:text-primary transition-colors">
                 <Search className="w-5 h-5" />
-            </button>
+            </Link>
         </nav>
     );
 }

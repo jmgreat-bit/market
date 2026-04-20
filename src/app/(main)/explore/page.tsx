@@ -63,7 +63,7 @@ const trendingPosts = [
 
 export default function ExplorePage() {
     return (
-        <div className="min-h-screen bg-surface pb-32 md:pb-12">
+        <div className="min-h-screen bg-background pb-32 md:pb-12 text-foreground">
             {/* Explore Header */}
             <div className="relative pt-20 md:pt-28 pb-8 px-6 md:px-10 max-w-3xl mx-auto w-full z-10">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50 pointer-events-none" />
@@ -79,15 +79,15 @@ export default function ExplorePage() {
 
                 {/* Sub-navigation Pills */}
                 <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-                    <button className="px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold text-sm shadow-[0_0_15px_rgba(143,245,255,0.2)]">
+                    <button className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-display font-bold text-sm shadow-sm group">
                         🔥 Trending Now
                     </button>
-                    <button className="px-5 py-2.5 rounded-full bg-[#1a191b]/80 border border-white/5 text-foreground hover:bg-[#2c2c2d] font-sans font-medium text-sm whitespace-nowrap">
-                        <Zap className="w-4 h-4 inline-block mr-1.5 align-text-bottom text-[#ff6e84]" />
+                    <button className="px-5 py-2.5 rounded-full bg-secondary border border-border/10 text-foreground hover:bg-muted font-sans font-medium text-sm whitespace-nowrap">
+                        <Zap className="w-4 h-4 inline-block mr-1.5 align-text-bottom text-primary" />
                         Flash Discounts
                     </button>
-                    <button className="px-5 py-2.5 rounded-full bg-[#1a191b]/80 border border-white/5 text-foreground hover:bg-[#2c2c2d] font-sans font-medium text-sm whitespace-nowrap">
-                        <MapPin className="w-4 h-4 inline-block mr-1.5 align-text-bottom text-[#d674ff]" />
+                    <button className="px-5 py-2.5 rounded-full bg-secondary border border-border/10 text-foreground hover:bg-muted font-sans font-medium text-sm whitespace-nowrap">
+                        <MapPin className="w-4 h-4 inline-block mr-1.5 align-text-bottom text-primary" />
                         Local Events
                     </button>
                 </div>

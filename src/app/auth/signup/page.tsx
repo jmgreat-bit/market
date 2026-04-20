@@ -95,7 +95,7 @@ export default function SignupPage() {
 
             // Redirect based on role
             if (role === 'trader') {
-                router.push(ROUTES.PROFILE);
+                router.push(ROUTES.MENU);
             } else {
                 router.push(ROUTES.MAP);
             }
@@ -137,11 +137,11 @@ export default function SignupPage() {
                             <Map className="w-8 h-8 text-[#003f43]" />
                         </div>
                         <h1 className="text-2xl font-bold text-foreground font-display">
-                            {step === 'role' ? 'Join GeoPulse' : 'Create Account'}
+                            {step === 'role' ? 'Join MarketPLC' : 'Create Account'}
                         </h1>
                         <p className="text-muted-foreground text-sm text-center mt-1">
                             {step === 'role'
-                                ? 'Choose how you want to use GeoPulse'
+                                ? 'Choose how you want to use MarketPLC'
                                 : role === 'trader' ? 'Set up your business presence' : 'Start discovering local businesses'}
                         </p>
                     </div>

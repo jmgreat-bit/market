@@ -24,7 +24,7 @@ export function PostHeader({ businessName, category, isPremium, createdAt, expir
     return (
         <div className="p-4 pb-3 flex items-start gap-3">
             <Avatar className="w-11 h-11 ring-2 ring-primary/20 shadow-geo-glow">
-                <AvatarFallback className="geo-gradient text-on-primary-fixed font-bold font-display">
+                <AvatarFallback className="bg-primary text-primary-foreground font-bold font-display">
                     {businessName?.charAt(0) || 'B'}
                 </AvatarFallback>
             </Avatar>
@@ -35,12 +35,12 @@ export function PostHeader({ businessName, category, isPremium, createdAt, expir
                         {businessName || 'Business'}
                     </h3>
                     {isPremium && (
-                        <Star className="w-3.5 h-3.5 text-accent fill-accent flex-shrink-0 drop-shadow-[0_0_8px_rgba(0,238,252,0.8)]" />
+                        <Star className="w-3.5 h-3.5 text-primary fill-primary flex-shrink-0" />
                     )}
                 </div>
                 <div className="flex items-center gap-2 text-[13px] text-muted-foreground mt-0.5 font-sans">
                     {category && (
-                        <span className="font-semibold text-primary drop-shadow-[0_0_4px_rgba(143,245,255,0.4)]">
+                        <span className="font-semibold text-primary">
                             {category}
                         </span>
                     )}

@@ -2,6 +2,6 @@ import { redirect } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 
 export default function HomePage() {
-  // Redirect to feed page as the main view
-  redirect(ROUTES.FEED);
+    // Send to login — middleware will redirect to /feed if already authenticated
+    redirect(ROUTES.LOGIN);
 }

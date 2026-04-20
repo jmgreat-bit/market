@@ -52,6 +52,13 @@ export function useUser() {
                     isAuthenticated: false,
                 });
             }
+        }).catch(() => {
+            setState({
+                user: null,
+                profile: null,
+                isLoading: false,
+                isAuthenticated: false,
+            });
         });
 
         // Listen for auth changes

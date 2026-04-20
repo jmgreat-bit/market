@@ -38,8 +38,8 @@ export default function ProfilePage() {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                <div className="w-20 h-20 rounded-full geo-gradient flex items-center justify-center mb-6">
-                    <User className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6">
+                    <User className="w-10 h-10 text-primary-foreground" />
                 </div>
                 <h1 className="text-2xl font-bold text-foreground mb-2 font-display">{t.profile.welcome}</h1>
                 <p className="text-muted-foreground text-center mb-8 max-w-xs">
@@ -47,12 +47,12 @@ export default function ProfilePage() {
                 </p>
                 <div className="flex flex-col gap-3 w-full max-w-xs">
                     <Link href={ROUTES.LOGIN}>
-                        <Button className="w-full bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold">
+                        <Button className="w-full bg-primary text-primary-foreground font-display font-bold">
                             {t.auth.signIn}
                         </Button>
                     </Link>
                     <Link href={ROUTES.SIGNUP}>
-                        <Button variant="outline" className="w-full border-[rgba(72,72,73,0.15)] bg-[#2c2c2d]/30 text-foreground font-display hover:border-primary/50">
+                        <Button variant="outline" className="w-full border-border bg-secondary text-foreground font-display hover:border-primary/50">
                             {t.auth.createAccount}
                         </Button>
                     </Link>
@@ -95,18 +95,18 @@ export default function ProfilePage() {
                             </div>
                         </div>
                     </div>
-                    <button className="w-10 h-10 rounded-full bg-[#2c2c2d]/30 border border-[rgba(72,72,73,0.15)] flex items-center justify-center text-foreground hover:text-primary transition-colors">
+                    <button className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center text-foreground hover:text-primary transition-colors">
                         <Bookmark className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-4 w-full">
-                    <button className="flex-1 bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                    <button className="flex-1 bg-primary text-primary-foreground font-display font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
                         <Navigation className="w-5 h-5" />
                         Navigate
                     </button>
-                    <button className="flex-1 bg-[#2c2c2d]/30 border border-[rgba(72,72,73,0.15)] text-foreground font-display font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-primary/50 transition-colors">
+                    <button className="flex-1 bg-secondary border border-border text-foreground font-display font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-primary/50 transition-colors">
                         <MessageCircle className="w-5 h-5" />
                         Message
                     </button>
@@ -114,14 +114,14 @@ export default function ProfilePage() {
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#1a191b]/50 rounded-lg p-4 border border-[rgba(72,72,73,0.15)]">
+                    <div className="bg-card rounded-lg p-4 border border-border">
                         <div className="text-muted-foreground text-xs mb-1">Status</div>
                         <div className="text-primary font-display font-medium flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(143,245,255,0.8)]" />
+                            <span className="w-2 h-2 rounded-full bg-primary" />
                             Online
                         </div>
                     </div>
-                    <div className="bg-[#1a191b]/50 rounded-lg p-4 border border-[rgba(72,72,73,0.15)]">
+                    <div className="bg-card rounded-lg p-4 border border-border">
                         <div className="text-muted-foreground text-xs mb-1">Pulse Rating</div>
                         <div className="text-foreground font-display font-medium flex items-center gap-2">
                             <Zap className="w-4 h-4 text-primary" />
@@ -144,8 +144,8 @@ export default function ProfilePage() {
                                 className={`
                                     flex flex-col items-center justify-center p-4 rounded-xl transition-all cursor-pointer
                                     ${theme === tValue
-                                        ? 'bg-primary/10 border border-primary/30 text-primary shadow-[0_0_20px_rgba(143,245,255,0.1)]'
-                                        : 'bg-[#1a191b]/30 border border-[rgba(72,72,73,0.15)] text-muted-foreground hover:bg-[#1a191b]/50'}
+                                        ? 'bg-primary text-primary-foreground font-bold shadow-sm'
+                                        : 'bg-secondary border border-border text-muted-foreground hover:bg-muted'}
                                 `}
                             >
                                 {tValue === 'light' && <Sun className="w-6 h-6 mb-2" />}

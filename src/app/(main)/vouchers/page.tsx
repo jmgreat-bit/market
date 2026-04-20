@@ -10,7 +10,7 @@ export default function VouchersIntelPage() {
     return (
         <div className="bg-surface text-foreground font-sans min-h-screen selection:bg-primary/30 selection:text-primary">
             {/* TopAppBar Blueprint Execution */}
-            <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-[rgba(72,72,73,0.1)]">
+            <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/10">
                 <button className="text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200 p-2 -ml-2 rounded-full focus:outline-none focus:ring-1 focus:ring-primary/50 flex items-center justify-center">
                     <Menu className="w-6 h-6" />
                 </button>
@@ -32,13 +32,13 @@ export default function VouchersIntelPage() {
                     <h2 className="font-display text-4xl font-bold text-foreground leading-tight tracking-tight">
                         My Intel <span className="text-primary drop-shadow-[0_0_12px_rgba(143,245,255,0.3)]">Cache</span>
                     </h2>
-                    <div className="flex bg-[#131314] rounded-xl p-1 gap-1 border border-[rgba(72,72,73,0.15)]">
+                    <div className="flex bg-secondary rounded-xl p-1 gap-1 border border-border/10">
                         <button 
                             onClick={() => setActiveTab('active')}
                             className={cn(
                                 "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                                 activeTab === 'active' 
-                                    ? "bg-[#262627]/60 text-primary backdrop-blur-md shadow-[0_0_15px_rgba(143,245,255,0.1)]" 
+                                    ? "bg-card text-primary backdrop-blur-md shadow-sm" 
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
@@ -49,7 +49,7 @@ export default function VouchersIntelPage() {
                             className={cn(
                                 "flex-1 py-2.5 px-4 rounded-lg font-medium text-sm transition-all",
                                 activeTab === 'saved' 
-                                    ? "bg-[#262627]/60 text-primary backdrop-blur-md shadow-[0_0_15px_rgba(143,245,255,0.1)]" 
+                                    ? "bg-card text-primary backdrop-blur-md shadow-sm" 
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
@@ -61,7 +61,7 @@ export default function VouchersIntelPage() {
                 {/* Voucher Cards Grid (Bento Style) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Voucher Card 1 (Neon Coral Accent) */}
-                    <div className="relative rounded-[1.5rem] bg-[#1a191b]/50 backdrop-blur-[30px] p-6 border border-[rgba(72,72,73,0.15)] flex flex-col gap-6 overflow-hidden group">
+                    <div className="relative rounded-[1.5rem] bg-card p-6 border border-border/10 flex flex-col gap-6 overflow-hidden group">
                         {/* Background Ambient Glow */}
                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#ff6e84]/10 rounded-full blur-[40px] pointer-events-none"></div>
                         
@@ -77,7 +77,7 @@ export default function VouchersIntelPage() {
                                 </div>
                                 <div>
                                     <h3 className="font-display text-lg font-bold text-foreground">Neon Bites</h3>
-                                    <p className="text-xs text-[#ff6e84] flex items-center gap-1 font-medium">
+                                    <p className="text-xs text-primary flex items-center gap-1 font-medium">
                                         <Timer className="w-3 h-3" />
                                         Expires in 45m
                                     </p>
@@ -102,7 +102,7 @@ export default function VouchersIntelPage() {
                                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#ff6e84]/20 to-transparent translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000 ease-in-out"></div>
                                 </div>
                             </div>
-                            <button className="bg-gradient-to-r from-[#ff6e84] to-[#ff3b5c] text-white font-medium px-6 py-3 rounded-full hover:shadow-[0_0_20px_rgba(253,59,102,0.3)] transition-all">
+                            <button className="bg-primary text-primary-foreground font-medium px-6 py-3 rounded-full shadow-sm transition-all">
                                 Reveal Code
                             </button>
                         </div>
@@ -150,7 +150,7 @@ export default function VouchersIntelPage() {
                                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000 ease-in-out"></div>
                                 </div>
                             </div>
-                            <button className="bg-gradient-to-r from-primary to-accent text-[#003f43] font-medium px-6 py-3 rounded-full hover:shadow-[0_0_20px_rgba(143,245,255,0.3)] transition-all">
+                            <button className="bg-primary text-primary-foreground font-medium px-6 py-3 rounded-full shadow-sm transition-all">
                                 Reveal Code
                             </button>
                         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useBusinesses } from '@/hooks/useBusinesses';
@@ -11,6 +11,8 @@ import { BusinessMarker } from './BusinessMarker';
 import { MapSearchHUD } from './MapSearchHUD';
 import { MapDetailPeek } from './MapDetailPeek';
 import { useSettings } from '@/contexts/SettingsContext';
+import { BusinessDetails } from '@/types';
+import { AnimatePresence } from 'framer-motion';
 import 'leaflet/dist/leaflet.css';
 
 // Component to handle map center updates
@@ -24,6 +26,14 @@ function MapCenterUpdater({ center }: { center: LatLngExpression }) {
     return null;
 }
 
+// Component to handle map clicks
+function MapClickHandler({ onClick }: { onClick: () => void }) {
+    useMapEvents({
+        click: () => onClick(),
+    });
+    return null;
+}
+
 export function MapView() {
     const { theme } = useSettings();
     const { coordinates, isLoading: locationLoading } = useGeolocation();
@@ -32,6 +42,7 @@ export function MapView() {
         DEFAULT_MAP_CENTER.lat,
         DEFAULT_MAP_CENTER.lng,
     ]);
+    const [selectedBusiness, setSelectedBusiness] = useState<BusinessDetails | null>(null);
 
     // Update map center when user location is available
     useEffect(() => {
@@ -40,10 +51,18 @@ export function MapView() {
         }
     }, [coordinates]);
 
-    // Choose tile layer based on theme
     const tileUrl = theme === 'light' 
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+    const handleBusinessSelect = (business: BusinessDetails) => {
+        setMapCenter([business.latitude, business.longitude]);
+        setSelectedBusiness(business);
+    };
+
+    const handleMapClick = () => {
+        setSelectedBusiness(null);
+    };
 
     return (
         <div className="relative w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)]">
@@ -63,6 +82,7 @@ export function MapView() {
                 className="w-full h-full z-10"
                 zoomControl={false}
             >
+                <MapClickHandler onClick={handleMapClick} />
                 {/* Dynamic tile layer based on theme */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -84,6 +104,7 @@ export function MapView() {
                     <BusinessMarker
                         key={business.id}
                         business={business}
+                        onClick={handleBusinessSelect}
                     />
                 ))}
             </MapContainer>
@@ -102,7 +123,14 @@ export function MapView() {
             <MapSearchHUD />
 
             {/* Detail Peek Sheet */}
-            <MapDetailPeek />
+            <AnimatePresence>
+                {selectedBusiness && (
+                    <MapDetailPeek 
+                        business={selectedBusiness} 
+                        onClose={() => setSelectedBusiness(null)} 
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

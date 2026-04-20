@@ -15,21 +15,11 @@ export function useAnalytics() {
     const [error, setError] = useState<Error | null>(null);
 
     // Track a view on a specific post
-    const logPostView = useCallback(async (postId: string) => {
-        try {
-            const userId = profile?.id || null;
-            const supabase = getSupabaseClient();
-            
-            await supabase
-                .from('post_views')
-                .insert({
-                    post_id: postId,
-                    viewer_id: userId
-                });
-        } catch (err) {
-            console.error('Failed to log post view', err);
-        }
-    }, [profile?.id]);
+    // NOTE: Silenced until post_views table is created in Supabase
+    const logPostView = useCallback(async (_postId: string) => {
+        // Table not yet deployed — no-op to prevent 400 errors
+        return;
+    }, []);
 
     // Track navigation to a business
     const logNavigation = useCallback(async (businessId: string) => {

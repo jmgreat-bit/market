@@ -20,14 +20,14 @@ export default function AnalyticsDashboardPage() {
     const { metrics, isLoading } = useAnalytics();
 
     return (
-        <div className="font-sans min-h-screen flex flex-col antialiased relative selection:bg-primary/30 selection:text-primary pb-24 md:pb-0 md:pl-72 bg-surface">
+        <div className="font-sans min-h-screen flex flex-col antialiased relative selection:bg-primary/30 selection:text-primary pb-24 md:pb-0 md:pl-72 bg-background text-foreground">
             {/* ... Mobile TopAppBar and Desktop Sidebar remain standard UI ... */}
-            <header className="fixed top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-[rgba(72,72,73,0.1)] md:hidden">
+            <header className="fixed top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/10 md:hidden">
                 <button className="text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200 p-2">
                     <Menu className="w-6 h-6" />
                 </button>
-                <h1 className="font-display tracking-widest uppercase text-xl font-bold text-primary drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
-                <div className="w-10 h-10 rounded-full bg-[#1a191b] overflow-hidden ring-1 ring-[rgba(72,72,73,0.3)] text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200">
+                <h1 className="font-display tracking-widest uppercase text-xl font-bold text-primary">NAVIGATOR</h1>
+                <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden ring-1 ring-border/30 text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200">
                     <img 
                         alt="Trader Profile" 
                         className="w-full h-full object-cover" 
@@ -37,7 +37,7 @@ export default function AnalyticsDashboardPage() {
             </header>
 
             {/* Desktop Side NavigationDrawer */}
-            <aside className="hidden md:flex flex-col bg-[#0e0e0f] rounded-r-3xl h-full shadow-2xl shadow-cyan-900/20 divide-y divide-[rgba(72,72,73,0.2)] max-w-[300px] w-full fixed left-0 top-0 z-[60] overflow-y-auto">
+            <aside className="hidden md:flex flex-col bg-card rounded-r-3xl h-full shadow-2xl divide-y divide-border/10 max-w-[300px] w-full fixed left-0 top-0 z-[60] overflow-y-auto border-r border-border/10">
                 <div className="p-6 flex items-center gap-4">
                     <img 
                         alt="Merchant Logo" 
@@ -55,19 +55,19 @@ export default function AnalyticsDashboardPage() {
                         <Store className="w-6 h-6" />
                         Business Profile
                     </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-[#1a191b] transition-colors duration-300" href="#">
+                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
                         <Megaphone className="w-6 h-6" />
                         Ad Manager
                     </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-[#1a191b] transition-colors duration-300" href="#">
+                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
                         <ShieldCheck className="w-6 h-6" />
                         Security
                     </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-[#1a191b] transition-colors duration-300" href="#">
+                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
                         <Users className="w-6 h-6" />
                         Team Access
                     </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-[#1a191b] transition-colors duration-300" href="#">
+                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
                         <HelpCircle className="w-6 h-6" />
                         Support
                     </a>
@@ -85,7 +85,7 @@ export default function AnalyticsDashboardPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
                     {/* Main Chart Card */}
-                    <section className="lg:col-span-2 bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-[rgba(72,72,73,0.15)] shadow-[0_10px_40px_-15px_rgba(143,245,255,0.08)]">
+                    <section className="lg:col-span-2 bg-card rounded-xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-border/40 shadow-sm">
                         <div className="flex justify-between items-start mb-8 relative z-10">
                             <div>
                                 <div className="flex items-center gap-4">
@@ -94,8 +94,8 @@ export default function AnalyticsDashboardPage() {
                                 </div>
                                 <p className="font-sans text-sm text-muted-foreground mt-1">Unique views across all active zones (Last 24h)</p>
                             </div>
-                            <div className="flex items-center gap-2 bg-[#201f21]/80 px-3 py-1.5 rounded-full border border-[rgba(72,72,73,0.2)]">
-                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#8ff5ff]"></span>
+                            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full border border-border/20">
+                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                                 <span className="font-sans text-xs font-medium text-primary tracking-wider uppercase">Live</span>
                             </div>
                         </div>
@@ -139,7 +139,7 @@ export default function AnalyticsDashboardPage() {
                             </div>
                             <div>
                                 {isLoading ? (
-                                    <div className="h-10 bg-[#2c2c2d] rounded animate-pulse w-24 mb-1"></div>
+                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
                                 ) : (
                                     <div className="font-display text-4xl font-bold text-foreground mb-1">
                                         {metrics ? metrics.total_views.toLocaleString() : '0'}
@@ -153,21 +153,21 @@ export default function AnalyticsDashboardPage() {
                         </div>
 
                         {/* Stat Card 2 */}
-                        <div className="bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 border border-[rgba(72,72,73,0.15)] flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(187,0,253,0.05)] relative overflow-hidden">
-                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#bb00fd]/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div className="bg-card rounded-xl p-6 border border-border/40 flex-1 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
                             <div className="flex items-center gap-3 text-muted-foreground mb-4 relative z-10">
                                 <Activity className="w-5 h-5" />
                                 <h3 className="font-display text-sm font-medium">Shout Engagement</h3>
                             </div>
                             <div className="relative z-10">
                                 {isLoading ? (
-                                    <div className="h-10 bg-[#2c2c2d] rounded animate-pulse w-24 mb-1"></div>
+                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
                                 ) : (
                                     <div className="font-display text-4xl font-bold text-foreground mb-1">
                                         {metrics ? `${metrics.engagement_rate}%` : '0%'}
                                     </div>
                                 )}
-                                <div className="font-sans text-sm text-[#d674ff] flex items-center gap-1">
+                                <div className="font-sans text-sm text-primary flex items-center gap-1">
                                     <TrendingUp className="w-4 h-4" />
                                     <span>{metrics ? metrics.total_engagements.toLocaleString() : '0'} total interactions</span>
                                 </div>
@@ -175,21 +175,21 @@ export default function AnalyticsDashboardPage() {
                         </div>
 
                         {/* Stat Card 3 */}
-                        <div className="bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 border border-[rgba(72,72,73,0.15)] flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(255,110,132,0.05)]">
+                        <div className="bg-card rounded-xl p-6 border border-border/40 flex-1 flex flex-col justify-between shadow-sm">
                             <div className="flex items-center gap-3 text-muted-foreground mb-4">
                                 <Footprints className="w-5 h-5" />
                                 <h3 className="font-display text-sm font-medium">Store Navigations</h3>
                             </div>
                             <div>
                                 {isLoading ? (
-                                    <div className="h-10 bg-[#2c2c2d] rounded animate-pulse w-24 mb-1"></div>
+                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
                                 ) : (
                                     <div className="font-display text-4xl font-bold text-foreground mb-1">
                                         {metrics ? metrics.total_navigations.toLocaleString() : '0'}
                                     </div>
                                 )}
-                                <div className="font-sans text-sm text-[#ff6e84] flex items-center gap-1">
-                                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                                <div className="font-sans text-sm text-primary flex items-center gap-1">
+                                    <TrendingUp className="w-4 h-4" />
                                     <span className="text-muted-foreground">Clicks to navigate</span>
                                 </div>
                             </div>
@@ -198,7 +198,7 @@ export default function AnalyticsDashboardPage() {
                 </div>
 
                 {/* Active Shouts Section */}
-                <section className="bg-[#131314] rounded-xl p-6 lg:p-8 relative z-10">
+                <section className="bg-card border border-border/40 rounded-xl p-6 lg:p-8 relative z-10 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="font-display text-xl font-bold text-foreground">Active Shouts</h2>
                         <button className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
@@ -208,7 +208,7 @@ export default function AnalyticsDashboardPage() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Shout Item 1 */}
-                        <div className="bg-[#1a191b]/30 rounded-md p-4 flex items-center gap-4 border border-[rgba(72,72,73,0.1)] hover:bg-[#1a191b]/50 transition-colors cursor-pointer group">
+                        <div className="bg-secondary rounded-md p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group">
                             <div className="w-12 h-12 rounded-md overflow-hidden shrink-0">
                                 <img 
                                     alt="Promo Thumbnail" 
@@ -228,7 +228,7 @@ export default function AnalyticsDashboardPage() {
                         </div>
 
                         {/* Shout Item 2 */}
-                        <div className="bg-[#1a191b]/30 rounded-md p-4 flex items-center gap-4 border border-[rgba(72,72,73,0.1)] hover:bg-[#1a191b]/50 transition-colors cursor-pointer group">
+                        <div className="bg-secondary rounded-md p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group">
                             <div className="w-12 h-12 rounded-md overflow-hidden shrink-0">
                                 <img 
                                     alt="Promo Thumbnail" 

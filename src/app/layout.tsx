@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GeoPulse - Discover Local Businesses",
+  title: "MarketPLC - Discover Local Businesses",
   description: "Find amazing local businesses and their latest deals on an interactive map",
   keywords: ["local business", "deals", "map", "discovery", "nearby"],
 };
