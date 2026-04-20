@@ -73,7 +73,7 @@ export function FeedList({ posts, isLoading, error }: FeedListProps) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-4"
+            className="space-y-8"
         >
             {posts.map((post) => (
                 <motion.div key={post.id} variants={itemVariants}>

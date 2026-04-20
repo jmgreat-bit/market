@@ -11,35 +11,20 @@ interface BusinessMarkerProps {
     business: BusinessDetails;
 }
 
-// Custom icon for business markers
+// Custom icon for business markers using external CSS
 const createBusinessIcon = (isPremium: boolean) => {
-    const color = isPremium ? '#00d4ff' : '#635bff';
-
     return L.divIcon({
         className: 'custom-business-marker',
         html: `
-      <div style="
-        width: 36px;
-        height: 36px;
-        background: ${color};
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        border: 2px solid white;
-      ">
-        <div style="
-          transform: rotate(45deg);
-          color: white;
-          font-size: 14px;
-        ">📍</div>
+      <div class="business-marker-wrapper ${isPremium ? 'is-premium' : ''}">
+        <div class="pulse-ring-1"></div>
+        <div class="pulse-ring-2"></div>
+        <div class="marker-core"></div>
       </div>
     `,
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -36],
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -12],
     });
 };
 

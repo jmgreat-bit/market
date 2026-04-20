@@ -8,6 +8,8 @@ import { useBusinesses } from '@/hooks/useBusinesses';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/lib/constants';
 import { UserLocationDot } from './UserLocationDot';
 import { BusinessMarker } from './BusinessMarker';
+import { MapSearchHUD } from './MapSearchHUD';
+import { MapDetailPeek } from './MapDetailPeek';
 import 'leaflet/dist/leaflet.css';
 
 // Component to handle map center updates
@@ -88,6 +90,12 @@ export function MapView() {
                     −
                 </button>
             </div>
+
+            {/* Glassmorphic Search HUD */}
+            <MapSearchHUD />
+
+            {/* Detail Peek Sheet */}
+            <MapDetailPeek />
         </div>
     );
 }

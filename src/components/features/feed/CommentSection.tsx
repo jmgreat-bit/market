@@ -3,11 +3,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Comment } from '@/types';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { formatDistanceToNow } from 'date-fns';
 import { Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { CommentItem } from './CommentItem';
 
 interface CommentSectionProps {
     comments: Comment[];
@@ -19,6 +18,7 @@ export function CommentSection({ comments, commentsCount, postId }: CommentSecti
     const [isExpanded, setIsExpanded] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [localComments, setLocalComments] = useState(comments);
+    const [isFocused, setIsFocused] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,36 +41,12 @@ export function CommentSection({ comments, commentsCount, postId }: CommentSecti
     const displayComments = isExpanded ? localComments : localComments.slice(0, 2);
 
     return (
-        <div className="border-t border-border/50">
+        <div className="flex flex-col">
             {/* Comments List */}
-            <div className="px-4 py-3">
+            <div className="px-4 py-4 space-y-1">
                 <AnimatePresence>
                     {displayComments.map((comment, index) => (
-                        <motion.div
-                            key={comment.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex gap-2 mb-3 last:mb-0"
-                        >
-                            <Avatar className="w-7 h-7 flex-shrink-0">
-                                <AvatarFallback className="text-xs bg-secondary">
-                                    {comment.user_name.charAt(0)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="font-medium text-sm text-foreground">
-                                        {comment.user_name}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-foreground/90">{comment.content}</p>
-                            </div>
-                        </motion.div>
+                        <CommentItem key={comment.id} comment={comment} index={index} />
                     ))}
                 </AnimatePresence>
 
@@ -78,16 +54,16 @@ export function CommentSection({ comments, commentsCount, postId }: CommentSecti
                 {commentsCount > 2 && (
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
+                        className="flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground hover:text-primary transition-colors mt-4 pb-1 pl-1"
                     >
                         {isExpanded ? (
                             <>
-                                <ChevronUp className="w-3 h-3" />
-                                Show less
+                                <ChevronUp className="w-3.5 h-3.5" />
+                                Hide comments
                             </>
                         ) : (
                             <>
-                                <ChevronDown className="w-3 h-3" />
+                                <ChevronDown className="w-3.5 h-3.5" />
                                 View all {commentsCount} comments
                             </>
                         )}
@@ -96,22 +72,25 @@ export function CommentSection({ comments, commentsCount, postId }: CommentSecti
             </div>
 
             {/* Add Comment Input */}
-            <form onSubmit={handleSubmit} className="px-4 pb-3 flex gap-2">
-                <Input
-                    type="text"
-                    placeholder="Add a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="flex-1 h-9 text-sm bg-secondary/50 border-0"
-                />
+            <form onSubmit={handleSubmit} className="px-4 pb-4 pt-1 flex gap-3 relative">
+                <div className={`flex-1 relative transition-all duration-300 border-b ${isFocused ? 'border-primary shadow-[0_1px_8px_-2px_rgba(143,245,255,0.4)]' : 'border-white/15'}`}>
+                    <Input
+                        type="text"
+                        placeholder="Add a comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        className="w-full h-10 text-[14px] bg-transparent border-0 rounded-none px-1 focus-visible:ring-0 placeholder:text-muted-foreground/50"
+                    />
+                </div>
                 <Button
                     type="submit"
-                    size="sm"
-                    variant="ghost"
+                    size="icon"
                     disabled={!newComment.trim()}
-                    className="px-3"
+                    className={`h-10 w-10 flex-shrink-0 transition-all duration-300 rounded-full ${newComment.trim() ? 'bg-gradient-to-r from-primary to-accent text-on-primary-fixed shadow-geo-glow hover:scale-105' : 'bg-surface-container text-muted-foreground'}`}
                 >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-4 h-4 ml-0.5" />
                 </Button>
             </form>
         </div>

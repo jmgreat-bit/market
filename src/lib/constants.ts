@@ -4,8 +4,8 @@ export const APP_DESCRIPTION = 'Discover local businesses and their latest offer
 
 // Map defaults
 export const DEFAULT_MAP_CENTER = {
-    lat: 40.7128,
-    lng: -74.006,
+    lat: -1.9441,
+    lng: 30.0619,
 } as const;
 
 export const DEFAULT_MAP_ZOOM = 13;
@@ -26,10 +26,14 @@ export const BUSINESS_CATEGORIES = [
 export const ROUTES = {
     HOME: '/',
     MAP: '/map',
+    EXPLORE: '/explore',
     FEED: '/feed',
     PROFILE: '/profile',
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
+    ALERTS: '/alerts',
+    ANALYTICS: '/analytics',
+    VOUCHERS: '/vouchers',
 } as const;
 
 // Post/Shout settings

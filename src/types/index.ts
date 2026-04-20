@@ -5,6 +5,8 @@ export type UserRole = 'client' | 'trader';
 export interface Profile {
   id: string;
   email: string;
+  username: string | null;
+  phone: string | null;
   full_name: string | null;
   avatar_url: string | null;
   role: UserRole;

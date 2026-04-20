@@ -6,7 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -152,49 +153,49 @@
 
 /* Midnight (OLED) theme */
 [data-theme='midnight'] {
-  --background: #000000;
+  --background: #0e0e0f;
   --foreground: #ffffff;
 
-  --card: #000000;
+  --card: #1a191b;
   --card-foreground: #ffffff;
 
-  --popover: #000000;
+  --popover: #131314;
   --popover-foreground: #ffffff;
 
-  --primary: #d97706;
-  /* Sovereign Amber */
-  --primary-foreground: #ffffff;
+  /* Sovereign Amber replaced with Neon Cyan */
+  --primary: #8ff5ff;
+  --primary-foreground: #003f43;
 
-  --secondary: #1a1a1a;
+  --secondary: #1a191b;
   --secondary-foreground: #ffffff;
 
-  --muted: #1a1a1a;
-  --muted-foreground: #a1a1aa;
+  --muted: #131314;
+  --muted-foreground: #adaaab;
 
-  --accent: #fbbf24;
-  /* Luminous Gold */
-  --accent-foreground: #000000;
+  /* Luminous Gold replaced with Primary Container */
+  --accent: #00eefc;
+  --accent-foreground: #003f43;
 
   --destructive: #ff0055;
 
-  --border: #333333;
-  --input: #333333;
-  --ring: #d97706;
+  --border: rgba(72, 72, 73, 0.15); /* Ghost border */
+  --input: transparent;
+  --ring: #8ff5ff;
 
-  --sidebar: #000000;
+  --sidebar: #0e0e0f;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #d97706;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a1a;
+  --sidebar-primary: #8ff5ff;
+  --sidebar-primary-foreground: #003f43;
+  --sidebar-accent: #1a191b;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #333333;
-  --sidebar-ring: #d97706;
+  --sidebar-border: rgba(72, 72, 73, 0.15);
+  --sidebar-ring: #8ff5ff;
 
-  --geo-gradient-start: #b45309;
-  --geo-gradient-end: #fbbf24;
-  --geo-glow: 0 0 30px rgba(217, 119, 6, 0.4);
-  --geo-glass: rgba(0, 0, 0, 0.8);
-  --geo-glass-border: #333333;
+  --geo-gradient-start: #8ff5ff;
+  --geo-gradient-end: #00eefc;
+  --geo-glow: 0 0 32px rgba(143, 245, 255, 0.08);
+  --geo-glass: rgba(38, 38, 39, 0.5); /* 50% opacity surface container */
+  --geo-glass-border: rgba(72, 72, 73, 0.15);
 }
 
 @layer base {
@@ -234,6 +235,8 @@
 
   /* Pulsing animation for user location */
   .pulse-dot {
+    transform-origin: center;
+    transform-box: fill-box;
     animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   }
 
@@ -246,6 +249,74 @@
     100% {
       transform: scale(2);
       opacity: 0;
+    }
+  }
+
+  /* Business Marker Pulse Animations */
+  .business-marker-wrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .business-marker-wrapper .marker-core {
+    width: 12px;
+    height: 12px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: 0 0 10px var(--primary);
+    transition: all 0.3s ease;
+  }
+
+  .business-marker-wrapper.is-premium .marker-core {
+    background-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent);
+  }
+
+  .business-marker-wrapper .pulse-ring-1, 
+  .business-marker-wrapper .pulse-ring-2 {
+    position: absolute;
+    inset: -100%;
+    border-radius: 50%;
+    border: 1px solid var(--primary);
+    opacity: 0;
+    animation: geo-sonar 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  }
+  
+  .business-marker-wrapper.is-premium .pulse-ring-1, 
+  .business-marker-wrapper.is-premium .pulse-ring-2 {
+    border-color: var(--accent);
+  }
+
+  .business-marker-wrapper .pulse-ring-2 {
+    animation-delay: 1.25s;
+  }
+  
+  [data-theme='light'] .business-marker-wrapper .marker-core {
+      width: 20px;
+      height: 20px;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  [data-theme='light'] .business-marker-wrapper .pulse-ring-1,
+  [data-theme='light'] .business-marker-wrapper .pulse-ring-2 {
+      display: none;
+  }
+
+  @keyframes geo-sonar {
+    0% {
+      transform: scale(0.2);
+      opacity: 0.8;
+      border-width: 2px;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+      border-width: 0.5px;
     }
   }
 
