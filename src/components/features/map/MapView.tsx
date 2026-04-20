@@ -10,6 +10,7 @@ import { UserLocationDot } from './UserLocationDot';
 import { BusinessMarker } from './BusinessMarker';
 import { MapSearchHUD } from './MapSearchHUD';
 import { MapDetailPeek } from './MapDetailPeek';
+import { useSettings } from '@/contexts/SettingsContext';
 import 'leaflet/dist/leaflet.css';
 
 // Component to handle map center updates
@@ -24,6 +25,7 @@ function MapCenterUpdater({ center }: { center: LatLngExpression }) {
 }
 
 export function MapView() {
+    const { theme } = useSettings();
     const { coordinates, isLoading: locationLoading } = useGeolocation();
     const { businesses } = useBusinesses();
     const [mapCenter, setMapCenter] = useState<LatLngExpression>([
@@ -37,6 +39,11 @@ export function MapView() {
             setMapCenter([coordinates.latitude, coordinates.longitude]);
         }
     }, [coordinates]);
+
+    // Choose tile layer based on theme
+    const tileUrl = theme === 'light' 
+        ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
     return (
         <div className="relative w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-4rem)]">
@@ -56,10 +63,10 @@ export function MapView() {
                 className="w-full h-full z-10"
                 zoomControl={false}
             >
-                {/* Dark mode tile layer */}
+                {/* Dynamic tile layer based on theme */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    url={tileUrl}
                 />
 
                 {/* User location */}
