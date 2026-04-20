@@ -12,16 +12,16 @@ export function DesktopHeader() {
     const { t } = useSettings();
 
     const tabs = [
-        { href: ROUTES.MAP, label: 'Map', icon: Map },
-        { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
         { href: ROUTES.FEED, label: t.nav.feed, icon: Newspaper },
+        { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
         { href: ROUTES.PROFILE, label: t.nav.profile, icon: User },
+        { href: ROUTES.MAP, label: 'Map', icon: Map },
     ];
 
     return (
         <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-[#0e0e0f]/80 backdrop-blur-lg bg-[#131314]">
             <div className="flex items-center gap-4">
-                <Link href={ROUTES.MAP} className="flex items-center">
+                <Link href={ROUTES.FEED} className="flex items-center">
                     <h1 className="font-display font-black text-primary tracking-tighter text-2xl">
                         GeoPulse
                     </h1>

@@ -11,17 +11,14 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Map, Loader2, Mail, Lock, ArrowLeft, Phone } from 'lucide-react';
-
-type LoginMethod = 'email' | 'phone';
-
+import { Map, Loader2, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+    
 export default function LoginPage() {
     const router = useRouter();
     const { t } = useSettings();
-    const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -33,19 +30,11 @@ export default function LoginPage() {
         try {
             const supabase = getSupabaseClient();
 
-            if (loginMethod === 'email') {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-            } else {
-                const { error } = await supabase.auth.signInWithPassword({
-                    phone,
-                    password,
-                });
-                if (error) throw error;
-            }
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (error) throw error;
 
             router.push(ROUTES.MAP);
         } catch (err) {
@@ -93,68 +82,21 @@ export default function LoginPage() {
                                 </div>
                             )}
 
-                            {/* Login method toggle */}
-                            <div className="flex bg-[#131314] rounded-lg p-1 gap-1 border border-[rgba(72,72,73,0.15)]">
-                                <button
-                                    type="button"
-                                    onClick={() => setLoginMethod('email')}
-                                    className={`flex-1 py-2 px-3 rounded-md font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                                        loginMethod === 'email'
-                                            ? 'bg-[#262627]/60 text-primary shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    <Mail className="w-4 h-4" />
-                                    Email
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setLoginMethod('phone')}
-                                    className={`flex-1 py-2 px-3 rounded-md font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                                        loginMethod === 'phone'
-                                            ? 'bg-[#262627]/60 text-primary shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    <Phone className="w-4 h-4" />
-                                    Phone
-                                </button>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                        required
+                                    />
+                                </div>
                             </div>
-
-                            {/* Email or Phone input */}
-                            {loginMethod === 'email' ? (
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="you@example.com"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-foreground text-sm">Phone Number</Label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                        <Input
-                                            id="phone"
-                                            type="tel"
-                                            placeholder="+250 7XX XXX XXX"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Password */}
                             <div className="space-y-2">
@@ -163,13 +105,20 @@ export default function LoginPage() {
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
                                         id="password"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                        className="pl-10 pr-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
                                 </div>
                             </div>
 

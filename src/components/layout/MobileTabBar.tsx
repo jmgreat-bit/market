@@ -12,10 +12,10 @@ export function MobileTabBar() {
     const { t } = useSettings();
 
     const tabs = [
-        { href: ROUTES.MAP, label: 'Map', icon: Map },
-        { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
         { href: ROUTES.FEED, label: t.nav.feed, icon: Newspaper },
+        { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
         { href: ROUTES.PROFILE, label: t.nav.profile, icon: User },
+        { href: ROUTES.MAP, label: 'Map', icon: Map },
     ];
 
     return (

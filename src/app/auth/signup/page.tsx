@@ -21,23 +21,21 @@ import {
     ArrowLeft,
     ShoppingBag,
     Store,
-    Phone,
-    AtSign
+    AtSign,
+    Eye,
+    EyeOff
 } from 'lucide-react';
-
-type SignupMethod = 'email' | 'phone';
 
 export default function SignupPage() {
     const router = useRouter();
     const { t } = useSettings();
     const [step, setStep] = useState<'role' | 'details'>('role');
     const [role, setRole] = useState<UserRole>('client');
-    const [signupMethod, setSignupMethod] = useState<SignupMethod>('email');
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -59,52 +57,40 @@ export default function SignupPage() {
             return;
         }
 
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters');
+            setIsLoading(false);
+            return;
+        }
+
+        if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+            setError('Password must contain at least one letter and one number');
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const supabase = getSupabaseClient();
 
-            if (signupMethod === 'email') {
-                const { data, error: signUpError } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        data: {
-                            full_name: fullName,
-                            username: username.toLowerCase().trim(),
-                            role: role,
-                        },
-                    },
-                });
-                if (signUpError) throw signUpError;
-
-                // Update the profile with username after signup
-                if (data.user) {
-                    await supabase.from('profiles').update({
-                        username: username.toLowerCase().trim(),
+            const { data, error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
                         full_name: fullName,
-                    }).eq('id', data.user.id);
-                }
-            } else {
-                // Phone signup
-                const { data, error: signUpError } = await supabase.auth.signUp({
-                    phone,
-                    password,
-                    options: {
-                        data: {
-                            full_name: fullName,
-                            username: username.toLowerCase().trim(),
-                            role: role,
-                        },
-                    },
-                });
-                if (signUpError) throw signUpError;
-
-                if (data.user) {
-                    await supabase.from('profiles').update({
                         username: username.toLowerCase().trim(),
-                        full_name: fullName,
-                        phone: phone,
-                    }).eq('id', data.user.id);
-                }
+                        role: role,
+                    },
+                },
+            });
+            if (signUpError) throw signUpError;
+
+            // Update the profile with username after signup
+            if (data.user) {
+                await supabase.from('profiles').update({
+                    username: username.toLowerCase().trim(),
+                    full_name: fullName,
+                }).eq('id', data.user.id);
             }
 
             // Redirect based on role
@@ -211,33 +197,6 @@ export default function SignupPage() {
                                     </div>
                                 )}
 
-                                {/* Signup method toggle */}
-                                <div className="flex bg-[#131314] rounded-lg p-1 gap-1 border border-[rgba(72,72,73,0.15)]">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSignupMethod('email')}
-                                        className={`flex-1 py-2 px-3 rounded-md font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                                            signupMethod === 'email'
-                                                ? 'bg-[#262627]/60 text-primary shadow-sm'
-                                                : 'text-muted-foreground hover:text-foreground'
-                                        }`}
-                                    >
-                                        <Mail className="w-4 h-4" />
-                                        Email
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSignupMethod('phone')}
-                                        className={`flex-1 py-2 px-3 rounded-md font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                                            signupMethod === 'phone'
-                                                ? 'bg-[#262627]/60 text-primary shadow-sm'
-                                                : 'text-muted-foreground hover:text-foreground'
-                                        }`}
-                                    >
-                                        <Phone className="w-4 h-4" />
-                                        Phone
-                                    </button>
-                                </div>
 
                                 {/* Full Name */}
                                 <div className="space-y-2">
@@ -275,41 +234,22 @@ export default function SignupPage() {
                                     <p className="text-xs text-muted-foreground">Letters, numbers, and underscores only</p>
                                 </div>
 
-                                {/* Email or Phone */}
-                                {signupMethod === 'email' ? (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="you@example.com"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
-                                                required
-                                            />
-                                        </div>
+                                {/* Email */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-foreground text-sm">Email</Label>
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="you@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            required
+                                        />
                                     </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone" className="text-foreground text-sm">Phone Number</Label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                            <Input
-                                                id="phone"
-                                                type="tel"
-                                                placeholder="+250 7XX XXX XXX"
-                                                value={phone}
-                                                onChange={(e) => setPhone(e.target.value)}
-                                                className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
-                                                required
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground">Include country code (e.g. +250)</p>
-                                    </div>
-                                )}
+                                </div>
 
                                 {/* Password */}
                                 <div className="space-y-2">
@@ -318,17 +258,24 @@ export default function SignupPage() {
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                         <Input
                                             id="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             placeholder="••••••••"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
-                                            minLength={6}
+                                            className="pl-10 pr-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            minLength={8}
                                             required
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
                                     </div>
                                     <p className="text-xs text-muted-foreground">
-                                        Must be at least 6 characters
+                                        Min 8 chars, including at least 1 number and 1 letter.
                                     </p>
                                 </div>
 
