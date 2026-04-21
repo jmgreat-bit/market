@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse - Trader Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-dim": "#bb00fd",
+                        "on-surface": "#ffffff",
+                        "tertiary-fixed": "#ff909d",
+                        "on-tertiary-fixed": "#39000d",
+                        "primary-dim": "#00deec",
+                        "on-surface-variant": "#adaaab",
+                        "error-container": "#9f0519",
+                        "primary": "#8ff5ff",
+                        "outline": "#767576",
+                        "surface-container-low": "#131314",
+                        "surface-bright": "#2c2c2d",
+                        "tertiary-dim": "#ff6e84",
+                        "surface-container-highest": "#262627",
+                        "error-dim": "#d7383b",
+                        "on-tertiary-container": "#000000",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "surface": "#0e0e0f",
+                        "on-primary": "#005d63",
+                        "on-tertiary": "#490013",
+                        "secondary-fixed": "#f0c1ff",
+                        "primary-fixed-dim": "#00deec",
+                        "primary-container": "#00eefc",
+                        "on-secondary-fixed": "#580079",
+                        "surface-container": "#1a191b",
+                        "surface-tint": "#8ff5ff",
+                        "on-error-container": "#ffa8a3",
+                        "tertiary-container": "#fd3b66",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "on-primary-fixed": "#003f43",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "inverse-primary": "#006a71",
+                        "inverse-surface": "#fcf8f9",
+                        "secondary-container": "#9800d0",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "outline-variant": "#484849",
+                        "surface-container-high": "#201f21",
+                        "surface-container-lowest": "#000000",
+                        "on-secondary": "#390050",
+                        "surface-dim": "#0e0e0f",
+                        "on-error": "#490006",
+                        "on-background": "#ffffff",
+                        "primary-fixed": "#00eefc",
+                        "background": "#0e0e0f",
+                        "error": "#ff716c",
+                        "on-primary-container": "#005359",
+                        "surface-variant": "#262627",
+                        "tertiary": "#ff6e84",
+                        "on-primary-fixed-variant": "#005e64",
+                        "secondary": "#d674ff",
+                        "on-secondary-container": "#fff5fc",
+                        "inverse-on-surface": "#565556"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0e0e0f; color: #ffffff; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body text-on-surface antialiased bg-surface min-h-screen relative overflow-hidden flex flex-col items-center justify-end">
+<!-- Top Navigation (Mobile Hidden, Web Flex) -->
+<header class="hidden md:flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50 bg-[#0e0e0f]/80 backdrop-blur-lg">
+<div class="flex items-center gap-4">
+<button class="text-[#8ff5ff] hover:text-[#00eefc] transition-colors duration-300 active:scale-95">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline font-bold tracking-tight text-2xl font-black text-[#8ff5ff] tracking-tighter">GeoPulse</h1>
+</div>
+<nav class="flex gap-6">
+<a class="text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 font-headline font-medium" href="#">Explore</a>
+<a class="text-[#8ff5ff] font-bold font-headline" href="#">Map</a>
+<a class="text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 font-headline font-medium" href="#">Notifications</a>
+<a class="text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 font-headline font-medium" href="#">Profile</a>
+</nav>
+<button class="text-[#8ff5ff] hover:text-[#00eefc] transition-colors duration-300 active:scale-95">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</header>
+<!-- Map Background Simulation -->
+<div class="absolute inset-0 z-0 bg-surface-container-low flex items-center justify-center">
+<!-- Glowing Map Marker Simulation -->
+<div class="relative w-8 h-8 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-2 border-primary-dim opacity-20"></div>
+<div class="absolute w-4 h-4 rounded-full border border-primary-dim opacity-50"></div>
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(143,245,255,0.8)]"></div>
+</div>
+</div>
+<!-- Scrim -->
+<div class="absolute inset-0 z-10 bg-surface-container-lowest/70 backdrop-blur-sm"></div>
+<!-- Trader Profile Bottom Sheet -->
+<div class="relative z-40 w-full max-w-2xl bg-surface-container-highest/60 backdrop-blur-[30px] rounded-t-xl shadow-[0_-8px_32px_rgba(143,245,255,0.05)] border-t border-outline-variant/15 px-6 pt-2 pb-safe-bottom flex flex-col gap-6 md:mb-12 md:rounded-xl md:border md:shadow-[0_0_32px_rgba(143,245,255,0.08)]">
+<!-- Drag Handle -->
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full mx-auto mt-2 mb-4"></div>
+<!-- Header Section -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full overflow-hidden border border-outline-variant/15 relative">
+<img class="w-full h-full object-cover" data-alt="A close-up shot of a dimly lit, high-end neon-lit cocktail bar or cafe interior with atmospheric lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKtHFJNSXfkp0owkwXwsSb-bl6NAyESzjOCVMqERGfWqdPFaRdeJUOY7_aKgWgSo6wfgenotlV8tweg8x2FKDItgXYKBPTTH3JuT7MXVMMRjm1aWcusbION_3g0Ic8JVI0UPhn0aQiykG00y6Tx6yyw-rGuFuQpdCihNv0p1b8ZHXO41baRykyXMybQoPYHJkzDfPQcBRoaLy3D8eBBi1PurYGnBFYsXgZ6cXbQHfn2ESEfWEzZ5Utp_FwnBcGI-iA187JKgu-egI"/>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline text-2xl font-bold text-on-surface">Neon Brews</h2>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-label text-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            Verified
+                        </span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mt-1 text-sm font-label">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="location_on">location_on</span>
+<span>250m away</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Cafe &amp; Bar</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-bright/30 border border-outline-variant/15 flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4 w-full">
+<button class="flex-1 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-headline font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                Navigate
+            </button>
+<button class="flex-1 bg-surface-bright/30 border border-outline-variant/15 text-on-surface font-headline font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+                Message
+            </button>
+</div>
+<!-- Details Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container/50 rounded-lg p-4 border border-outline-variant/15">
+<div class="text-on-surface-variant font-label text-xs mb-1">Status</div>
+<div class="text-primary font-headline font-medium flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(143,245,255,0.8)]"></span>
+                     Open Now (until 2AM)
+                 </div>
+</div>
+<div class="bg-surface-container/50 rounded-lg p-4 border border-outline-variant/15">
+<div class="text-on-surface-variant font-label text-xs mb-1">Pulse Rating</div>
+<div class="text-on-surface font-headline font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                     4.9 <span class="text-on-surface-variant text-sm font-body font-normal">(120 pulses)</span>
+</div>
+</div>
+</div>
+<!-- Active Posts Grid (Bento Style) -->
+<div class="mt-2 mb-8 md:mb-4">
+<h3 class="font-headline text-lg font-bold text-on-surface mb-4">Active Pulses</h3>
+<div class="grid grid-cols-2 grid-rows-2 gap-3 h-64">
+<div class="col-span-1 row-span-2 rounded-lg overflow-hidden relative border border-outline-variant/15 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A stylish cocktail with colorful layers on a dark bar counter with neon lights in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTa0R8um5RgOt4hUYMvjhUjrqLEqNj6Bn7TcODf6LJkCHtU0nKARiFBrBRBJUEhhnhdrYz6fczHhBnu5b44AXOzA2FKOSyTyq2vKGC4WC7xb3Iy2S8FR3feUpTn-QgJP07NUU4t8QIQdUmTl3E87jdE-bzmNP5qSE_XUXTj9VGAzl9DDNyEqKuMYh4NDbKqq7Ia69hq0_TKBem0vEJBqwi9xW2cYgDpdA9GdO1K9Px03uDfVwec-UTihUXSgkW1RASICGZDRTvupY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent flex flex-col justify-end p-3">
+<span class="text-primary text-xs font-label font-bold mb-1">Tonight Only</span>
+<p class="text-on-surface font-headline text-sm font-medium leading-tight">Neon Sour Special</p>
+</div>
+</div>
+<div class="col-span-1 row-span-1 rounded-lg overflow-hidden relative border border-outline-variant/15 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A crowd of people enjoying a dimly lit, atmospheric live music event with blue and purple lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMyB7C1woH9FYVuaNtrop4wn1rhDrIqvFym4w-NUsPNeyWXNoG5VJ6gKMhSAorUFODrbTyqbg7-nPrV7FkDvsyBzPBQL3DPlgcC0kPOPGHIuYmBCWsiUFuMYV2BHTNI9xFe0InCxDYcAPJGQKIAnsRijymMnFkJK_0RzFrstdPIySfGqPNapXmb6kSw0UkX91Q3ary6N_GqIAlCUFo_ya7cWJDRgdBnT1WS8zQ4mLLmjih3tzzSBaZsxJlofb9ZELWLqOcRYjrhLc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent flex flex-col justify-end p-2">
+<p class="text-on-surface font-headline text-xs font-medium leading-tight">Live DJ Set @ 10PM</p>
+</div>
+</div>
+<div class="col-span-1 row-span-1 rounded-lg bg-surface-container/50 border border-outline-variant/15 p-3 flex flex-col justify-between hover:bg-surface-container transition-colors cursor-pointer">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="local_activity">local_activity</span>
+</div>
+<div>
+<span class="text-on-surface-variant text-[10px] font-label uppercase tracking-wider">Promo</span>
+<p class="text-on-surface font-headline text-sm font-medium">Free Entry List</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-4 left-4 right-4 rounded-full px-4 bg-[#262627]/50 backdrop-blur-2xl border-none shadow-[0_0_32px_rgba(0,240,255,0.08)] z-50 flex justify-around items-center h-20 pb-safe">
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#8ff5ff] drop-shadow-[0_0_8px_rgba(143,245,255,0.6)] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="map" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

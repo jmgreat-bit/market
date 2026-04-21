@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse - Premium Ad Placement</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#005359",
+                        "on-surface": "#ffffff",
+                        "surface-dim": "#0e0e0f",
+                        "surface-container-highest": "#262627",
+                        "on-secondary-container": "#fff5fc",
+                        "on-secondary-fixed": "#580079",
+                        "surface-bright": "#2c2c2d",
+                        "error-dim": "#d7383b",
+                        "primary-dim": "#00deec",
+                        "secondary-dim": "#bb00fd",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "on-secondary": "#390050",
+                        "surface-container-low": "#131314",
+                        "on-error": "#490006",
+                        "outline": "#767576",
+                        "inverse-on-surface": "#565556",
+                        "surface-container-lowest": "#000000",
+                        "error": "#ff716c",
+                        "outline-variant": "#484849",
+                        "primary": "#8ff5ff",
+                        "on-tertiary-fixed": "#39000d",
+                        "surface-variant": "#262627",
+                        "primary-container": "#00eefc",
+                        "on-tertiary-container": "#000000",
+                        "secondary-fixed": "#f0c1ff",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "inverse-primary": "#006a71",
+                        "on-tertiary": "#490013",
+                        "on-primary": "#005d63",
+                        "error-container": "#9f0519",
+                        "surface-container-high": "#201f21",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "on-primary-fixed-variant": "#005e64",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "secondary": "#d674ff",
+                        "tertiary-container": "#fd3b66",
+                        "primary-fixed": "#00eefc",
+                        "surface-tint": "#8ff5ff",
+                        "inverse-surface": "#fcf8f9",
+                        "surface": "#0e0e0f",
+                        "tertiary-dim": "#ff6e84",
+                        "tertiary": "#ff6e84",
+                        "on-primary-fixed": "#003f43",
+                        "secondary-container": "#9800d0",
+                        "primary-fixed-dim": "#00deec",
+                        "tertiary-fixed": "#ff909d",
+                        "on-surface-variant": "#adaaab",
+                        "surface-container": "#1a191b",
+                        "on-error-container": "#ffa8a3",
+                        "background": "#0e0e0f",
+                        "on-background": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background-color: rgba(26, 25, 27, 0.5); /* surface-container at 50% */
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        .glass-overlay {
+            background-color: rgba(38, 38, 39, 0.4); /* surface-container-highest at 40% */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .neon-shadow-primary {
+            box-shadow: 0 0 32px rgba(143, 245, 255, 0.08);
+        }
+        .neon-shadow-secondary {
+            box-shadow: 0 0 32px rgba(214, 116, 255, 0.08);
+        }
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.15); /* outline-variant at 15% */
+        }
+        /* Custom map marker pulse preview */
+        .pulse-preview-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pulse-core {
+            width: 12px;
+            height: 12px;
+            background-color: #8ff5ff; /* primary */
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .pulse-ring-1, .pulse-ring-2 {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 222, 236, 0.4); /* primary_dim */
+        }
+        .pulse-ring-1 {
+            width: 40px;
+            height: 40px;
+        }
+        .pulse-ring-2 {
+            width: 80px;
+            height: 80px;
+        }
+        
+        /* High-Voltage variant */
+        .high-voltage .pulse-core { background-color: #d674ff; }
+        .high-voltage .pulse-ring-1, .high-voltage .pulse-ring-2 { border-color: rgba(187, 0, 253, 0.4); }
+        
+        /* Solar Flare variant */
+        .solar-flare .pulse-core { background-color: #ff6e84; }
+        .solar-flare .pulse-ring-1, .solar-flare .pulse-ring-2 { border-color: rgba(255, 110, 132, 0.4); }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #8ff5ff;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(143, 245, 255, 0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(72, 72, 73, 0.3);
+            border-radius: 2px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen antialiased overflow-x-hidden selection:bg-primary/30 selection:text-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent shadow-none docked full-width top-0">
+<div class="flex items-center gap-4">
+<button class="text-cyan-400 hover:text-cyan-300 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-['Space_Grotesk'] tracking-widest uppercase text-xl font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
+</div>
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full overflow-hidden ghost-border">
+<img alt="Trader Profile" class="w-full h-full object-cover" data-alt="close up portrait of a confident man with short hair in a dimly lit high tech environment with subtle blue and purple neon lighting reflecting on his face" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOwNwEQWy_g6DxURe7PWepYgzcN1Whzgmp5I04tdhT-YuAbBrNB9wz3M0l-WqJ639YawkT2Svr0_tlPwstSAr5acX5KWYj06WtY7HskEr8Z881wZeWtR3G24wmBar-ET7uociXg2uh8CGuVY4Jeo6bL4bLO2IJvwtIRfLy-ndn874PhrzDXErlALL9VxDqqHj1TZcFm--P14JdZcNj64wThPsksJQGdMi357R0jRoJHiivKNqJqY3KZtducMChC8WIUf7QZdXGv9s"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto flex flex-col gap-8">
+<!-- Header Section -->
+<section class="flex flex-col gap-2 pt-4">
+<h2 class="font-headline text-4xl md:text-5xl font-bold text-primary tracking-tight">Amplify Your Pulse</h2>
+<p class="text-on-surface-variant text-lg max-w-2xl">Broadcast your presence across the grid. Select a pulse intensity to dominate local discovery streams and drive high-intent foot traffic.</p>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Pulse Intensity Selector (Left Column) -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Active Intensity Preview -->
+<div class="glass-panel rounded-xl p-6 ghost-border flex flex-col sm:flex-row gap-6 items-center neon-shadow-primary relative overflow-hidden">
+<!-- Subtle background map texture -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" data-alt="abstract dark map grid view resembling a digital city layout at night with glowing nodes" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBsCi3yaHOl5ubs7Zpz-Sb6vnkrO8CwgaaYKJ_U3_4ql4ghxvnwiX_iCBqqE4vq7b1qRLQPj2C4MjqJLKpjwW4aL_1iMCAWRaqq5XFcAA4z4ZA8uJ6_qdBpxy8o8L65AztWvQI1AstTD7ofneIS7relabBLlUjyWSxrLnUudXkOCD0Xkev9hwlNsVNuidGFTg-C3v2ah8LS79T5tyhAhhRWjuyLqilqsGLca9n0MKAyJLtefhkhBUnssjcXDsosfs3U9iquSembsYs'); background-size: cover; background-position: center;"></div>
+<div class="pulse-preview-container shrink-0">
+<div class="pulse-ring-2"></div>
+<div class="pulse-ring-1"></div>
+<div class="pulse-core shadow-[0_0_15px_#8ff5ff]"></div>
+</div>
+<div class="flex flex-col gap-2 z-10">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 w-fit ghost-border">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-semibold text-primary uppercase tracking-wider">Active Selection</span>
+</div>
+<h3 class="font-headline text-3xl font-bold text-on-surface">Standard Pulse</h3>
+<p class="text-on-surface-variant text-sm">Steady visibility within a 2km radius. Ideal for consistent daily foot traffic and local brand awareness.</p>
+<div class="flex items-center gap-4 mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-dim text-sm" style="font-variation-settings: 'FILL' 1;">visibility</span>
+<span class="text-xs text-on-surface font-medium">Est. 2.4k Views/Day</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary-dim text-sm" style="font-variation-settings: 'FILL' 1;">directions_walk</span>
+<span class="text-xs text-on-surface font-medium">+15% Footfall</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tier Selection Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<!-- Standard (Selected) -->
+<button class="glass-panel rounded-xl p-5 text-left flex flex-col gap-3 border border-primary/50 bg-surface-container-high relative overflow-hidden transition-all">
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">cell_tower</span>
+<span class="text-xs font-bold text-on-surface">$15<span class="text-on-surface-variant font-normal">/day</span></span>
+</div>
+<div>
+<h4 class="font-headline font-semibold text-lg text-on-surface">Standard</h4>
+<p class="text-xs text-on-surface-variant mt-1">2km Radius</p>
+</div>
+</button>
+<!-- High-Voltage -->
+<button class="glass-panel rounded-xl p-5 text-left flex flex-col gap-3 ghost-border hover:bg-surface-container-high transition-all group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-secondary text-2xl group-hover:animate-pulse" style="font-variation-settings: 'FILL' 0;">bolt</span>
+<span class="text-xs font-bold text-on-surface">$45<span class="text-on-surface-variant font-normal">/day</span></span>
+</div>
+<div>
+<h4 class="font-headline font-semibold text-lg text-on-surface">High-Voltage</h4>
+<p class="text-xs text-on-surface-variant mt-1">5km Radius + Push Alerts</p>
+</div>
+</button>
+<!-- Solar Flare -->
+<button class="glass-panel rounded-xl p-5 text-left flex flex-col gap-3 ghost-border hover:bg-surface-container-high transition-all group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-tertiary text-2xl group-hover:animate-pulse" style="font-variation-settings: 'FILL' 0;">wb_sunny</span>
+<span class="text-xs font-bold text-on-surface">$120<span class="text-on-surface-variant font-normal">/day</span></span>
+</div>
+<div>
+<h4 class="font-headline font-semibold text-lg text-on-surface">Solar Flare</h4>
+<p class="text-xs text-on-surface-variant mt-1">City-wide Dominance</p>
+</div>
+</button>
+</div>
+</div>
+<!-- Configuration & CTA (Right Column) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div class="glass-panel rounded-xl p-6 ghost-border flex flex-col gap-8 h-full justify-between">
+<div class="flex flex-col gap-8">
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-1">Campaign Configuration</h3>
+<p class="text-xs text-on-surface-variant">Fine-tune your pulse duration and budget limits.</p>
+</div>
+<!-- Duration Slider -->
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-end">
+<label class="text-sm font-medium text-on-surface">Duration</label>
+<span class="text-lg font-headline font-bold text-primary">7 Days</span>
+</div>
+<input class="w-full" max="30" min="1" type="range" value="7"/>
+<div class="flex justify-between text-xs text-on-surface-variant">
+<span>1 Day</span>
+<span>30 Days</span>
+</div>
+</div>
+<!-- Summary Block -->
+<div class="bg-surface-container-low rounded-lg p-4 flex flex-col gap-3 ghost-border mt-4">
+<div class="flex justify-between items-center">
+<span class="text-sm text-on-surface-variant">Daily Rate</span>
+<span class="text-sm text-on-surface font-medium">$15.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm text-on-surface-variant">Duration</span>
+<span class="text-sm text-on-surface font-medium">x 7 Days</span>
+</div>
+<div class="h-px w-full bg-outline-variant/30"></div>
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium text-on-surface">Estimated Total</span>
+<span class="text-xl font-headline font-bold text-primary">$105.00</span>
+</div>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="w-full py-4 rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed font-headline font-bold text-lg tracking-wide hover:shadow-[0_0_30px_rgba(0,238,252,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2 mt-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+                        IGNITE PULSE
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Hidden on md and up, typical mobile nav) -->
+<nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full px-2 py-3 z-50 flex justify-around items-center px-4 bg-zinc-900/60 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,240,255,0.08)] no-border tonal-shift">
+<button class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium mt-1">Analytics</span>
+</button>
+<button class="flex flex-col items-center justify-center text-cyan-400 relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-cyan-400 after:rounded-full after:shadow-[0_0_10px_#00f0ff] hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium mt-1">Discovery</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium mt-1">Wallet</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 0;">notifications</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium mt-1">Alerts</span>
+</button>
+</nav>
+</body></html>

@@ -34,7 +34,8 @@ const itemVariants = {
 };
 
 export function FeedList({ posts, isLoading, error }: FeedListProps) {
-    if (isLoading) {
+    // Only show full-page spinner if we have absolutely no data to show yet
+    if (isLoading && posts.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />

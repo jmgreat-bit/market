@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
-import { ROUTES } from '@/lib/constants';
 
 export default function HomePage() {
-    // Send to login — middleware will redirect to /feed if already authenticated
-    redirect(ROUTES.LOGIN);
+    // Middleware handles auth check:
+    // - If logged in → /feed stays as /feed
+    // - If not logged in → middleware catches /feed and sends to /auth/login
+    redirect('/feed');
 }

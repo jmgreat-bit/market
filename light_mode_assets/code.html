@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#191c1d",
+                    "tertiary-fixed-dim": "#ffb0cb",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#ffebef",
+                    "surface-dim": "#d9dadb",
+                    "on-secondary": "#ffffff",
+                    "outline": "#747688",
+                    "on-surface-variant": "#434656",
+                    "on-tertiary-fixed": "#3e001f",
+                    "on-primary-container": "#efefff",
+                    "on-secondary-container": "#2f4088",
+                    "primary": "#0040e0",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "background": "#f8f9fa",
+                    "primary-fixed-dim": "#b8c3ff",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-container-low": "#f3f4f5",
+                    "outline-variant": "#c4c5d9",
+                    "on-primary-fixed": "#001356",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#191c1d",
+                    "primary-fixed": "#dde1ff",
+                    "surface-tint": "#124af0",
+                    "secondary-container": "#9fafff",
+                    "surface-container-high": "#e7e8e9",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#b8c3ff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#8d004f",
+                    "on-secondary-fixed-variant": "#304189",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container": "#edeeef",
+                    "secondary-fixed": "#dde1ff",
+                    "surface-variant": "#e1e3e4",
+                    "tertiary": "#a7005e",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "secondary": "#4959a3",
+                    "tertiary-fixed": "#ffd9e3",
+                    "primary-container": "#2e5bff",
+                    "inverse-surface": "#2e3132",
+                    "secondary-fixed-dim": "#b8c3ff",
+                    "tertiary-container": "#d30078",
+                    "on-secondary-fixed": "#001356",
+                    "surface": "#f8f9fa",
+                    "on-primary-fixed-variant": "#0035be"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Space Grotesk"
+                    ],
+                    "body": [
+                            "Space Grotesk"
+                    ],
+                    "label": [
+                            "Space Grotesk"
+                    ]
+            }
+        },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32 selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-40 bg-slate-50/80 backdrop-blur-lg dark:bg-slate-950/80 shadow-[0_10px_40px_rgba(25,28,29,0.04)] flex justify-between items-center w-full px-6 py-4">
+<button class="text-slate-500 hover:opacity-80 transition-opacity scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-['Space_Grotesk'] tracking-tight uppercase font-bold text-xl tracking-[-0.02em] text-[#2E5BFF]">DISCOVERY</h1>
+<button class="h-8 w-8 rounded-full overflow-hidden hover:opacity-80 transition-opacity scale-95 duration-200 shadow-sm border border-outline-variant/20">
+<img alt="User Profile" class="h-full w-full object-cover" data-alt="minimalist user avatar profile picture with solid blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp1LdctOkStbzKNjeHMYO6XgbPUtNE45P0bmoo34XAchNaMSWchTJY228KE35b-sKT42EpMoVF75CfOWoW6RF3auG6LFdMEMfDf5ly9qZxlBwImXAoUxMeoTiWCKlSDZPW94TAvEB_NdVippxi2aP8imAj2OFxkcrc89CoIx1OhwNJ72nXMFqy9_7GsmrzLhq26Hkn-2NhlaZgF30qAZbEkUcZtUtvjqVPG3-8rD5jgV1gRWw6MXIx90jwi7u-uefEmlQNe8Fir4I"/>
+</button>
+</header>
+<main class="max-w-3xl mx-auto px-6 mt-8 space-y-12">
+<!-- Floating Glassmorphic Search -->
+<section class="relative group">
+<div class="absolute inset-0 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
+<div class="relative bg-surface-container-lowest/80 backdrop-blur-2xl rounded-full shadow-[0_10px_40px_rgba(25,28,29,0.04)] border border-outline-variant/20 flex items-center px-6 py-4 transition-transform hover:-translate-y-0.5 duration-300">
+<span class="material-symbols-outlined text-primary text-xl mr-4">search</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline font-body text-base px-0" placeholder="Search the network..." type="text"/>
+<button class="ml-4 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</section>
+<!-- Trending Pulses -->
+<section class="space-y-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">sensors</span>
+<h2 class="font-headline text-xs font-bold uppercase tracking-[0.05em] text-on-surface-variant">Trending Pulses</h2>
+</div>
+<div class="flex overflow-x-auto hide-scrollbar gap-3 pb-4 -mx-6 px-6">
+<button class="whitespace-nowrap px-5 py-2.5 bg-primary-container text-on-primary-container rounded-full font-label text-sm font-medium transition-all shadow-[0_4px_20px_rgba(46,91,255,0.2)]">
+                    # Lunar Logistics
+                </button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-high text-on-surface rounded-full font-label text-sm font-medium hover:bg-surface-container-highest transition-colors">
+                    # Quantum Synthesis
+                </button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-high text-on-surface rounded-full font-label text-sm font-medium hover:bg-surface-container-highest transition-colors">
+                    # Sector 7 Comms
+                </button>
+<button class="whitespace-nowrap px-5 py-2.5 bg-surface-container-high text-on-surface rounded-full font-label text-sm font-medium hover:bg-surface-container-highest transition-colors">
+                    # Bio-Telemetry
+                </button>
+</div>
+</section>
+<!-- Live Near You Feed -->
+<section class="space-y-6">
+<h2 class="font-headline text-xs font-bold uppercase tracking-[0.05em] text-on-surface-variant mb-6">Live Near You</h2>
+<!-- Card 1 -->
+<article class="group relative bg-surface-container-lowest/80 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_10px_40px_rgba(25,28,29,0.04)] border border-outline-variant/20 transition-all hover:shadow-[0_15px_50px_rgba(46,91,255,0.1)]">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-container z-10"></div>
+<div class="flex flex-col sm:flex-row h-full">
+<div class="sm:w-2/5 h-48 sm:h-auto relative overflow-hidden">
+<img alt="Tech Facility" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="sleek modern server room with rows of dark hardware illuminated by cool blue and magenta LED status lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3DkgiApzreecdM8m3XOv-FAsnbIUQmbMSJbpoBB_4ak16J41ucubTZYqXb0dU96DUsYgZ-mxVS6EZCu9uBdrMphaGG6DjCiSvHeiV92MZGNoIioMCBfjBXw-TORwMnFj_eovkf35_JB3lwvymOt7PkdyZBaB1j0rvZo4ApZpcEshhxGFx-aoTkAwJb9rASgdp-NcnOXe1uPzBgrm_grxjeHowV_I5r2QKqAjd6muUjIxo5SVyFp6Cck5QWwIhUGVvEHntCnvcQeE"/>
+<div class="absolute top-4 left-4 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></div>
+<span class="font-label text-[10px] font-bold uppercase tracking-wider text-on-surface">Live</span>
+</div>
+</div>
+<div class="p-6 sm:w-3/5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-xl font-bold text-on-surface tracking-tight">Mainframe Sector Alpha</h3>
+<span class="bg-surface-container-low text-primary px-2 py-1 rounded font-label text-xs font-medium">0.8km</span>
+</div>
+<p class="font-body text-sm text-on-surface-variant line-clamp-2">Anomalous data spikes detected in the cooling sub-systems. Engineering teams are monitoring the flux variance.</p>
+</div>
+<div class="mt-6 flex items-center gap-4 text-outline font-label text-xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span>24 Active</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span class="text-tertiary">98% Load</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="group relative bg-surface-container-lowest/80 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_10px_40px_rgba(25,28,29,0.04)] border border-outline-variant/20 transition-all hover:shadow-[0_15px_50px_rgba(46,91,255,0.1)]">
+<div class="flex flex-col sm:flex-row h-full">
+<div class="sm:w-2/5 h-48 sm:h-auto relative overflow-hidden">
+<img alt="Cybernetics Lab" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="close-up of advanced cybernetic prosthetic limb resting on clean white laboratory table under bright sterile lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkwqBYpPPs7jaApyb0LaNDv_z1qBDgOk1VZydGGOioWh9aHj0G2UHOw9SjpyU9RRXWsd-a6JfpornszBYAKSusEDVCrwhoDbJWOt1gJzUWyQ9z17L0MqxiA9Aa7E41eMGguZWYdhoeCIAETC9-8zFQ6Nm0Kgh7x181-QZsKXgXT-RqYKfX9lTW1fMHYHberLDafcscKm50x4PQId7WBz3yXJaschAGHTyhByGmnPfatTGcnShmJ0kZFmQ_Huv0kOPXO4d6tjcUa1U"/>
+</div>
+<div class="p-6 sm:w-3/5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-xl font-bold text-on-surface tracking-tight">Bio-Metric Sync Node</h3>
+<span class="bg-surface-container-low text-primary px-2 py-1 rounded font-label text-xs font-medium">1.2km</span>
+</div>
+<p class="font-body text-sm text-on-surface-variant line-clamp-2">Routine synchronization protocols are nominal. Awaiting next batch of neural telemetry for processing.</p>
+</div>
+<div class="mt-6 flex items-center gap-4 text-outline font-label text-xs">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">group</span>
+<span>12 Active</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="text-primary">Nominal</span>
+</div>
+</div>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-4 left-6 right-6 z-50 bg-white/70 backdrop-blur-2xl dark:bg-slate-900/70 rounded-full shadow-[0_20px_50px_rgba(46,91,255,0.15)] flex justify-around items-center px-4 py-2 border border-outline-variant/10">
+<!-- Active Tab: Explore -->
+<button class="flex flex-col items-center justify-center bg-gradient-to-br from-[#0040e0] to-[#2E5BFF] text-white rounded-full p-3 active:scale-90 transition-transform duration-300 w-16 h-16 shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Explore</span>
+</button>
+<!-- Inactive Tabs -->
+<button class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-[#2E5BFF] transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">sensors</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Pulses</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-[#2E5BFF] transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Saved</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 p-3 hover:text-[#2E5BFF] transition-colors active:scale-90 duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-[0.05em] font-medium mt-1">Profile</span>
+</button>
+</nav>
+</body></html>

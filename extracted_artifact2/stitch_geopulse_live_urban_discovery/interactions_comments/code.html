@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse Interactions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Inter:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#390050",
+                        "surface-dim": "#0e0e0f",
+                        "surface-tint": "#8ff5ff",
+                        "primary": "#8ff5ff",
+                        "surface-container-high": "#201f21",
+                        "error": "#ff716c",
+                        "background": "#0e0e0f",
+                        "primary-fixed": "#00eefc",
+                        "on-tertiary-fixed": "#39000d",
+                        "surface-container-highest": "#262627",
+                        "on-tertiary-container": "#000000",
+                        "on-surface": "#ffffff",
+                        "surface-bright": "#2c2c2d",
+                        "on-surface-variant": "#adaaab",
+                        "on-secondary-fixed": "#580079",
+                        "on-primary": "#005d63",
+                        "on-error-container": "#ffa8a3",
+                        "primary-fixed-dim": "#00deec",
+                        "surface-container": "#1a191b",
+                        "secondary": "#d674ff",
+                        "on-primary-fixed-variant": "#005e64",
+                        "secondary-container": "#9800d0",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "secondary-fixed": "#f0c1ff",
+                        "surface-container-lowest": "#000000",
+                        "error-dim": "#d7383b",
+                        "tertiary-container": "#fd3b66",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "primary-dim": "#00deec",
+                        "surface-variant": "#262627",
+                        "on-primary-container": "#005359",
+                        "surface-container-low": "#131314",
+                        "inverse-on-surface": "#565556",
+                        "tertiary": "#ff6e84",
+                        "tertiary-fixed": "#ff909d",
+                        "secondary-dim": "#bb00fd",
+                        "on-primary-fixed": "#003f43",
+                        "inverse-surface": "#fcf8f9",
+                        "inverse-primary": "#006a71",
+                        "outline-variant": "#484849",
+                        "on-tertiary": "#490013",
+                        "on-error": "#490006",
+                        "on-background": "#ffffff",
+                        "outline": "#767576",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "error-container": "#9f0519",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "surface": "#0e0e0f",
+                        "primary-container": "#00eefc",
+                        "tertiary-dim": "#ff6e84",
+                        "on-secondary-container": "#fff5fc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased min-h-screen flex flex-col pt-20 pb-24 md:flex-row md:pt-0 md:pb-0">
+<!-- TopAppBar (Mobile & Web Context - Suppressed Navigation Shell for Focused Task, replacing with simple Back header) -->
+<header class="fixed top-0 w-full z-50 flex items-center px-6 py-4 bg-zinc-950/40 backdrop-blur-2xl bg-zinc-900/50 shadow-[0_4px_30px_rgba(0,0,0,0.5)] md:hidden">
+<button aria-label="Go back" class="text-primary hover:text-primary-dim transition-colors mr-4">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold tracking-tight text-xl text-primary drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">Shout Thread</h1>
+</header>
+<!-- SideNav (Web) - Suppressed for focused task, but leaving structure if needed to map back -->
+<aside class="hidden md:flex h-full w-80 flex-col p-6 gap-4 bg-zinc-950 rounded-r-3xl bg-zinc-900/30 shadow-2xl shadow-cyan-900/20 fixed top-0 left-0 z-40 border-r border-outline-variant/15">
+<div class="flex items-center gap-4 mb-8 left_align">
+<img alt="User Avatar" class="w-12 h-12 rounded-full ring-2 ring-primary/50 shadow-[0_0_15px_rgba(143,245,255,0.3)]" data-alt="Futuristic glowing avatar profile picture with neon cyan accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtRAUdKMf4me7k16yunQDxthqHnrItjylX_BW5kpvExEW27Xd6iy7ciqyjKR3QsohZn1kl78hRzeOS2bY1IEKZ0tNQ0lwYJOJVMWTYNCIkqypNiuiKRd2ShGIk7xOGIG7_c1M03gwq3tNYlDRoTLRXlK1mqiibdUHGS3Le1Ua4Aas5BTDfuZabK_wUT8V0afKmxDo1E13umdjt2jQULAs8BSCKXw9jg6NXcoSv6zHVv90yqjHGgNS1DeZ9Z-4sASp7aYf8QMJVS_8"/>
+<div>
+<h2 class="font-headline text-primary font-bold">Navigator One</h2>
+<p class="text-xs text-on-surface-variant">Elite Urban Explorer</p>
+<p class="text-[10px] text-primary-dim mt-1">Rank #42</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-zinc-400 hover:bg-zinc-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label">Map Layers</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-zinc-400 hover:bg-zinc-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label">Saved Places</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-[#00F0FF] bg-[#00F0FF]/5 font-bold transition-all duration-300 shadow-[inset_2px_0_0_#00F0FF]" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-label">Interactions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-zinc-400 hover:bg-zinc-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">currency_exchange</span>
+<span class="font-label">Trading Hub</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-md text-zinc-400 hover:bg-zinc-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="font-label">Safety Center</span>
+</a>
+</nav>
+<a class="flex items-center gap-3 px-4 py-3 mt-auto rounded-md text-zinc-400 hover:bg-zinc-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label">Settings</span>
+</a>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col md:ml-80 h-[calc(100vh-104px)] md:h-screen overflow-hidden">
+<!-- Pinned Original Shout -->
+<div class="bg-surface-container-low p-6 md:p-8 flex-shrink-0 z-10 shadow-[0_20px_40px_rgba(0,0,0,0.8)] border-b border-outline-variant/15 relative">
+<div class="max-w-3xl mx-auto w-full">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Author" class="w-10 h-10 rounded-full" data-alt="Cyberpunk style profile image with purple neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGS1_hcQb0ZfEXM81hcjaIt2OlKl5816xjy5jCjiLSDqtAMqYCuXTctIdwlahrTlEpEvDjj4Lpin6odMHAz9lE8Pi5xxVQOYowWHFAs9-aflgUP8g75HYA97X3vFIrnb37NBpUl2c3JVpqJCpuIYwylhw6diP_UBx4JgEZKR4Qy6wxYWWudEAVwiiQWlxnmgK16R_WH2DICznn6Kzs0kFnFnfLip14VzemtKjq1hcF8jUYj2gIxZ5R6kb92Uw4-wD5Ft6lxsWuNZU"/>
+<div class="absolute inset-0 rounded-full border border-secondary shadow-[0_0_10px_rgba(214,116,255,0.4)]"></div>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Neon Rider</h3>
+<p class="text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+                                 Sector 4, The Slum Tunnels
+                                 <span class="mx-1">•</span>
+                                 2h ago
+                             </p>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<p class="text-on-surface text-lg leading-relaxed mb-6 font-light">
+                    Just found a massive cache of old tech hidden behind the false wall near the Red Dragon noodle stand. Anyone got a high-tier decryption key? I'm splitting the loot 60/40.
+                </p>
+<!-- Attached Media (Optional) -->
+<div class="mb-6 rounded-xl overflow-hidden h-48 relative border border-outline-variant/15">
+<img alt="Tech Cache" class="w-full h-full object-cover" data-alt="Dark moody cyber alleyway with neon signs reflecting in puddles, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCEM_VVsfRMRnRDWNY0P85EgFsWg-aG7HgOr3JWymvI5eUWkzIdldxii2s2Y8M4CLVpmvR9-k7blPUAb7_vHKrbm7yZcvfi3Bc-W2uyDf7ku8qzTD-N7lK9thmrHRV0KmYtidTfunqVpEoyAb0i0BFL_2hZZuVOkiMmdd2df8bMV_lxem1b6W71qY9NM2pX2HPdjK7X3OHw-7NtO7st1XJTe0KWLZxWTScdGptmcTjumKJ8rHPtlggcWfc-o1wGBgE9I8RiV8Z0-w"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent pointer-events-none"></div>
+</div>
+<div class="flex items-center gap-6 text-on-surface-variant">
+<button class="flex items-center gap-2 text-primary hover:text-primary-dim transition-colors group">
+<span class="material-symbols-outlined font-variation-settings-'FILL'-1 group-hover:drop-shadow-[0_0_8px_rgba(143,245,255,0.6)]">favorite</span>
+<span class="font-label text-sm">342</span>
+</button>
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined font-variation-settings-'FILL'-1">chat_bubble</span>
+<span class="font-label text-sm">84</span>
+</div>
+<button class="flex items-center gap-2 hover:text-on-surface transition-colors ml-auto">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Scrollable Comments Area -->
+<div class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 relative scroll-smooth bg-surface pb-32">
+<div class="max-w-3xl mx-auto w-full space-y-6">
+<!-- Comment Thread 1 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="relative w-8 h-8 rounded-full mb-2">
+<img alt="User" class="w-full h-full rounded-full" data-alt="Minimalist dark avatar profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJDL8DszqAhN8XdtUYWm89wAPqzxN10AMVg8rxNRbJaiQgWxFgBq44is8z6V6q_ACfUR3tEzOUoPPXIDQ8dWQysQ0dn7_GLjWAWcFwYTgcXM_zbCDl7mKZjFl2hUpDc75OBBp7bfhWgMY_OFyDmzE4vwStWLRHMP2it_AWZuiRF7qqtTJDRprnKE_OpDEG2J62zIQpOdUWjZNvgyqap8YdBQgOyazYO-JH57lgYKTnUq2C_tyJUxlaSgS5JlJakqJaxIEPPbBNv64"/>
+<div class="absolute inset-0 rounded-full border border-outline-variant/30"></div>
+</div>
+<div class="w-[1px] h-full bg-outline-variant/20 relative">
+<!-- Glowing line effect on hover or active -->
+<div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-primary/30 to-transparent"></div>
+</div>
+</div>
+<div class="flex-1 pb-4">
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/15 shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+<div class="flex justify-between items-center mb-2">
+<span class="font-headline font-bold text-sm text-on-surface">Cipher</span>
+<span class="text-xs text-on-surface-variant">1h ago</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-3">
+                                I've got a level 4 decrypter, but it's risky down there. Corporate security sweeps that sector every 4 hours.
+                            </p>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">favorite</span> 12
+                                </button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors text-xs font-label">Reply</button>
+</div>
+</div>
+<!-- Nested Reply -->
+<div class="flex gap-4 mt-4">
+<div class="flex flex-col items-center">
+<div class="relative w-6 h-6 rounded-full mb-2">
+<img alt="Author" class="w-full h-full rounded-full" data-alt="Cyberpunk style profile image with purple neon lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAI9XZm_EZyY8tzAKJzYmW5k3yqvFSH4hEEbJxEu7zw1oakxDLZqyFOhl_zQwJDt-2XjRoLGRnx_veFJ6Tkw7k8w_YaARNXcSDjenp5BRlMY2DGutHzKOkjLhbx7alT00HajOMC0T5Ss-7nT-bZo2X5bu5dG7-0S3hLFG0GCPmk8txQ3LdPzJ_7aichqfDW8ahN0cBqeU62ME9w7tQE347zQUKCstnnErKhsxSRqGD3Jpnq2yVRlOfnEoVK2ssL_5Tm8Ppet2pDvm8"/>
+<div class="absolute inset-0 rounded-full border border-secondary shadow-[0_0_10px_rgba(214,116,255,0.4)]"></div>
+</div>
+</div>
+<div class="flex-1">
+<div class="bg-surface-container-high p-3 rounded-xl border border-outline-variant/15 backdrop-blur-md shadow-[0_4px_12px_rgba(0,0,0,0.5)] relative overflow-hidden">
+<!-- subtle glow overlay -->
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-center mb-1 pl-2">
+<div class="flex items-center gap-2">
+<span class="font-headline font-bold text-sm text-secondary">Neon Rider</span>
+<span class="text-[10px] bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-sm border border-secondary/30">OP</span>
+</div>
+<span class="text-xs text-on-surface-variant">45m ago</span>
+</div>
+<p class="text-sm text-on-surface-variant pl-2">
+                                        Meet me at the coordinates I DM'd you. Bring the rig, I'll handle the sweepers.
+                                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Comment Thread 2 -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="relative w-8 h-8 rounded-full mb-2">
+<img alt="User" class="w-full h-full rounded-full" data-alt="Glitch art style avatar profile picture in red and dark tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4u-nF_5k1SgmWLZX2BNa1dSVslbLKuCgkDkBY6j1-8hGh424D2urTOamCNVOAxfEtVR6G8W91BXnUlvGs2k7Z5tTT8I7LGHslAFBL0LT5sLl-tbynivgVfWw7aOdlWVNMyM1-0tnH0Dj0CDviTnebsO-3nLG0SHVcLQL-n34a4HroOOBiLIDAg5_Hi3w_XmFPMaeoWP6VOJZh8y7iF9g0xO-Mk6xXDOG0md6OyAOR0ouC5EUiOXVgbzXkBpN9A7o-GJrEe4FaY9E"/>
+<div class="absolute inset-0 rounded-full border border-error shadow-[0_0_10px_rgba(255,113,108,0.3)]"></div>
+</div>
+</div>
+<div class="flex-1">
+<div class="bg-surface-container p-4 rounded-xl border border-outline-variant/15 shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+<div class="flex justify-between items-center mb-2">
+<span class="font-headline font-bold text-sm text-on-surface">Glitch Doc</span>
+<span class="text-xs text-on-surface-variant">30m ago</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-3">
+                                Careful man, those false walls usually have biometric locks. If you fry it, the cache self-destructs.
+                            </p>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-error transition-colors text-xs flex items-center gap-1 group">
+<span class="material-symbols-outlined text-[16px] group-hover:font-variation-settings-'FILL'-1 group-hover:drop-shadow-[0_0_8px_rgba(255,113,108,0.6)]">favorite</span> 4
+                                </button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors text-xs font-label">Reply</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Glassmorphic Input Area -->
+<div class="absolute bottom-0 left-0 w-full md:left-80 md:w-[calc(100%-20rem)] p-4 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/90 to-transparent pointer-events-none z-20">
+<div class="max-w-3xl mx-auto w-full pointer-events-auto">
+<div class="bg-surface-container-highest/60 backdrop-blur-2xl p-2 rounded-full border border-outline-variant/30 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-2 focus-within:border-primary/50 focus-within:shadow-[0_0_20px_rgba(143,245,255,0.1)] transition-all duration-300">
+<button aria-label="Attach file" class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none text-on-surface placeholder-on-surface-variant/50 focus:ring-0 text-sm font-body px-2 h-10" placeholder="Add a comment..." type="text"/>
+<button aria-label="Send comment" class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dim text-on-primary-fixed flex items-center justify-center shadow-[0_0_15px_rgba(143,245,255,0.4)] hover:shadow-[0_0_25px_rgba(143,245,255,0.6)] hover:scale-105 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

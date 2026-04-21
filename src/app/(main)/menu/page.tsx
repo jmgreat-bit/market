@@ -2,8 +2,6 @@
 
 import { useUser } from '@/hooks/useUser';
 import { useSettings, Theme, Language } from '@/contexts/SettingsContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { 
     User, 
     LogOut, 
@@ -13,7 +11,6 @@ import {
     HelpCircle, 
     FileText, 
     ChevronRight,
-    Loader2,
     Moon,
     Sun,
     Monitor,
@@ -21,28 +18,12 @@ import {
     CheckCircle2,
     Shield
 } from 'lucide-react';
-import Link from 'next/link';
-import { ROUTES } from '@/lib/constants';
 
 export default function MenuPage() {
-    const { profile, isLoading, isAuthenticated, signOut } = useUser();
+    const { profile, signOut } = useUser();
     const { theme, setTheme, language, setLanguage, t } = useSettings();
-    const router = useRouter();
 
-    // Redirect to login if not authenticated (middleware should handle this, but as a safety net)
-    useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            router.replace(ROUTES.LOGIN);
-        }
-    }, [isLoading, isAuthenticated, router]);
-
-    if (isLoading || !isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-        );
-    }
+    // Middleware handles auth protection — no need for a local spinner/redirect
 
     const isTrader = profile?.role === 'trader';
 

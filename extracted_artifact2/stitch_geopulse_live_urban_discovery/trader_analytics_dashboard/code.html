@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse Trader Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#005359",
+                        "on-surface": "#ffffff",
+                        "surface-dim": "#0e0e0f",
+                        "surface-container-highest": "#262627",
+                        "on-secondary-container": "#fff5fc",
+                        "on-secondary-fixed": "#580079",
+                        "surface-bright": "#2c2c2d",
+                        "error-dim": "#d7383b",
+                        "primary-dim": "#00deec",
+                        "secondary-dim": "#bb00fd",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "on-secondary": "#390050",
+                        "surface-container-low": "#131314",
+                        "on-error": "#490006",
+                        "outline": "#767576",
+                        "inverse-on-surface": "#565556",
+                        "surface-container-lowest": "#000000",
+                        "error": "#ff716c",
+                        "outline-variant": "#484849",
+                        "primary": "#8ff5ff",
+                        "on-tertiary-fixed": "#39000d",
+                        "surface-variant": "#262627",
+                        "primary-container": "#00eefc",
+                        "on-tertiary-container": "#000000",
+                        "secondary-fixed": "#f0c1ff",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "inverse-primary": "#006a71",
+                        "on-tertiary": "#490013",
+                        "on-primary": "#005d63",
+                        "error-container": "#9f0519",
+                        "surface-container-high": "#201f21",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "on-primary-fixed-variant": "#005e64",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "secondary": "#d674ff",
+                        "tertiary-container": "#fd3b66",
+                        "primary-fixed": "#00eefc",
+                        "surface-tint": "#8ff5ff",
+                        "inverse-surface": "#fcf8f9",
+                        "surface": "#0e0e0f",
+                        "tertiary-dim": "#ff6e84",
+                        "tertiary": "#ff6e84",
+                        "on-primary-fixed": "#003f43",
+                        "secondary-container": "#9800d0",
+                        "primary-fixed-dim": "#00deec",
+                        "tertiary-fixed": "#ff909d",
+                        "on-surface-variant": "#adaaab",
+                        "surface-container": "#1a191b",
+                        "on-error-container": "#ffa8a3",
+                        "background": "#0e0e0f",
+                        "on-background": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.surface'); color: theme('colors.on-surface'); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body min-h-screen flex flex-col antialiased relative selection:bg-primary-container selection:text-on-primary-container pb-24 md:pb-0 md:pl-72">
+<!-- Mobile TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent shadow-none docked full-width md:hidden">
+<button class="text-cyan-400 hover:text-cyan-300 transition-colors active:scale-95 duration-200 p-2">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-['Space_Grotesk'] tracking-widest uppercase text-xl font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden ring-1 ring-outline-variant/30 text-cyan-400 hover:text-cyan-300 transition-colors active:scale-95 duration-200">
+<img alt="Trader Profile" class="w-full h-full object-cover" data-alt="Close-up portrait of a modern urban professional with dramatic neon rim lighting against a dark city background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA28uL-vbQbN3B2T7Mzwb40EqiIVmZ07hWsZOlbwK17vm5Bh9h7Wkai5zSKjx34SSq-51FvY-BQHVg6DuAM1_GHyWyrueliy1G25jp5owgqNXEt6yqf7Rr8yqjbhhlxDr9DTSK-QIvLvSCJwALRqH5oArfQXaR4berxIDWnd2Bz53uLsNFjLQpXuphhj7cHmGZiitwmdKqt24gKrWV2iBgRhF5YHEQFkpLygIiDgr08iM24dPSKOfYK9kbInjVAgY4T2DF1siCX94I"/>
+</div>
+</header>
+<!-- Desktop Side NavigationDrawer -->
+<aside class="hidden md:flex flex-col bg-zinc-950 rounded-r-3xl h-full shadow-2xl shadow-cyan-900/20 divide-y divide-zinc-800/20 max-w-[300px] w-full fixed left-0 top-0 z-40 overflow-y-auto">
+<div class="p-6 flex items-center gap-4">
+<img alt="Merchant Logo" class="w-14 h-14 rounded-full object-cover ring-2 ring-primary/50" data-alt="Sleek abstract geometric logo for a premium trading company, metallic silver on black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-YtJkrXSyskoqCHbFMaoEkkkyoiR7vBmIp5uUuDYsF9JQQ7-aHHXRbp2wfpu51vkAnO62LyN-CzFY3UT-r5gVEEg3U1i6rWompI5EED8LIOJwv22qoHyxwc22DDqZ80V2EvtWCzpfemyxa4jrZldRCoXhXcvyRdbY6gQjVxQZKmWz1y5L0qniglHuTwGeDKa_dqqu767-2xgU2DtGVV56nzhom_cRA53S_Rb65mlDzwxd1VadPgTMib4iVLGdEXRsecafNOYDpLM"/>
+<div>
+<h2 class="font-headline font-bold text-lg text-on-surface">Apex Trading Co.</h2>
+<p class="font-body text-sm text-primary">Premium Tier Explorer</p>
+<p class="font-label text-xs text-on-surface-variant mt-1">ID: 99283-X</p>
+</div>
+</div>
+<nav class="flex-1 py-4 flex flex-col font-['Space_Grotesk']">
+<a class="flex items-center gap-4 px-6 py-4 bg-cyan-400/10 text-cyan-400 font-bold border-l-4 border-cyan-400 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+                Business Profile
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-zinc-400 hover:bg-zinc-900 transition-colors duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+                Ad Manager
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-zinc-400 hover:bg-zinc-900 transition-colors duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+                Security
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-zinc-400 hover:bg-zinc-900 transition-colors duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Team Access
+            </a>
+<a class="flex items-center gap-4 px-6 py-4 text-zinc-400 hover:bg-zinc-900 transition-colors duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="help_center">help_center</span>
+                Support
+            </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-7xl mx-auto w-full">
+<header class="mb-12">
+<h1 class="font-headline text-display-lg font-bold text-on-surface mb-2 tracking-tight">Performance Pulse</h1>
+<p class="font-body text-on-surface-variant max-w-2xl text-lg">Real-time engagement metrics and conversion tracking for your active GeoPulse campaigns.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
+<!-- Main Chart Card -->
+<section class="lg:col-span-2 bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 lg:p-8 flex flex-col relative overflow-hidden ring-1 ring-outline-variant/15 shadow-[0_10px_40px_-15px_rgba(143,245,255,0.08)]">
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Real-time Reach</h2>
+<p class="font-body text-sm text-on-surface-variant mt-1">Unique views across all active zones (Last 24h)</p>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high/80 px-3 py-1.5 rounded-full border border-outline-variant/20">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#8ff5ff]"></span>
+<span class="font-label text-xs font-medium text-primary tracking-wider uppercase">Live</span>
+</div>
+</div>
+<div class="flex-1 min-h-[240px] flex items-end relative z-10 w-full pt-8">
+<!-- Faux Neon Line Chart -->
+<div class="absolute inset-0 flex items-end opacity-20 pointer-events-none">
+<div class="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-xl"></div>
+</div>
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 300">
+<!-- Grid lines -->
+<line opacity="0.3" stroke="#484849" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="1000" y1="75" y2="75"></line>
+<line opacity="0.3" stroke="#484849" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="1000" y1="150" y2="150"></line>
+<line opacity="0.3" stroke="#484849" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="1000" y1="225" y2="225"></line>
+<!-- Glow Layer -->
+<path class="blur-md" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.15" stroke="#8ff5ff" stroke-width="16"></path>
+<path class="blur-sm" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.3" stroke="#00eefc" stroke-width="8"></path>
+<!-- Core Line -->
+<path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" stroke="#ffffff" stroke-width="3"></path>
+<!-- Data Points -->
+<circle cx="300" cy="180" fill="#0e0e0f" r="6" stroke="#8ff5ff" stroke-width="3"></circle>
+<circle cx="600" cy="120" fill="#0e0e0f" r="6" stroke="#8ff5ff" stroke-width="3"></circle>
+<circle cx="900" cy="100" fill="#0e0e0f" r="6" stroke="#8ff5ff" stroke-width="3"></circle>
+<!-- Active Point -->
+<circle class="animate-pulse shadow-[0_0_15px_#8ff5ff]" cx="1000" cy="60" fill="#8ff5ff" r="8"></circle>
+</svg>
+</div>
+</section>
+<!-- Key Stats Column -->
+<div class="flex flex-col gap-6 lg:gap-8">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 ring-1 ring-outline-variant/15 flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(214,116,255,0.05)]">
+<div class="flex items-center gap-3 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+<h3 class="font-headline text-sm font-medium">Total Views</h3>
+</div>
+<div>
+<div class="font-headline text-4xl font-bold text-on-surface mb-1">124.5K</div>
+<div class="font-body text-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+                            +14.2% vs last week
+                        </div>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 ring-1 ring-outline-variant/15 flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(187,0,253,0.05)] relative overflow-hidden">
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center gap-3 text-on-surface-variant mb-4 relative z-10">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<h3 class="font-headline text-sm font-medium">Shout Engagement</h3>
+</div>
+<div class="relative z-10">
+<div class="font-headline text-4xl font-bold text-on-surface mb-1">8.4%</div>
+<div class="font-body text-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+                            Top 5% in district
+                        </div>
+</div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 ring-1 ring-outline-variant/15 flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(255,110,132,0.05)]">
+<div class="flex items-center gap-3 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" data-icon="directions_walk">directions_walk</span>
+<h3 class="font-headline text-sm font-medium">Store Navigations</h3>
+</div>
+<div>
+<div class="font-headline text-4xl font-bold text-on-surface mb-1">1,204</div>
+<div class="font-body text-sm text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_down">trending_down</span>
+                            -2.1% due to rain
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Shouts Section -->
+<section class="bg-surface-container-low rounded-xl p-6 lg:p-8">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline text-xl font-bold text-on-surface">Active Shouts</h2>
+<button class="text-sm font-medium text-primary hover:text-primary-dim transition-colors flex items-center gap-1">
+                    View All <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Shout Item 1 -->
+<div class="bg-surface-container/30 rounded-md p-4 flex items-center gap-4 ring-1 ring-outline-variant/10 hover:bg-surface-container/50 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-md overflow-hidden shrink-0">
+<img alt="Promo Thumbnail" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Neon-lit cocktail drink on a dark glossy bar counter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDoAkudaoSR0sYu21rcnPpbUMso4ZAeXT24d5B79FJu3V11_epTXC_8HiKTiZjE63ZmrF8PyTZA2bhtEAbkcppErs61mvqTti9xUlvCCYKb525QUxlCotPpWYtYjRkuW_d1rrz7eRMKAnkAXBJ88hN9g46PCnQd6yER6qQHily5gHkZy9Jzs4EIXnodhqR2WtUKq4zwPvFeEN0zNaQ5CQfx-XiJKxn697r6UtTxDRcJZdI8-6_QnNjLoJSkJ8llP63nAVq1QbmzCg"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline text-sm font-bold text-on-surface truncate">Midnight Happy Hour Special</h4>
+<p class="font-body text-xs text-on-surface-variant truncate">Downtown District • 2h remaining</p>
+</div>
+<div class="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 30">
+<path d="M0,25 L20,20 L40,28 L60,15 L80,22 L100,5" fill="none" stroke="#8ff5ff" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- Shout Item 2 -->
+<div class="bg-surface-container/30 rounded-md p-4 flex items-center gap-4 ring-1 ring-outline-variant/10 hover:bg-surface-container/50 transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-md overflow-hidden shrink-0">
+<img alt="Promo Thumbnail" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="DJ playing on a dimly lit stage with purple laser lights cutting through smoke" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOiPifA6Qcsg62AT2MARggjcG33OrSgkbzt9ZsNVZiEqz5viZG-3tPv8yM5J9ngRb09J3GT6lXPan8P78hIMS_n32yKPvk5plQq2pZdXby6kbsT0Rh7p2g7GITxKjhb1Y3fPgx8gUaHPYiAGuQ88MnmF4KoolGhGZrY24afvgdN0m1BFnKfLPtX3yjpFobPNhcjjZK0bptxpZKMQdpeoHPJAeX4NAfAmp7r4_Z2trJBO8_QeSaxYFNnLo89UuXjiHt-Zz7R89HRf0"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline text-sm font-bold text-on-surface truncate">Guest DJ: Sonic Pulse</h4>
+<p class="font-body text-xs text-on-surface-variant truncate">Warehouse Row • 4h remaining</p>
+</div>
+<div class="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 30">
+<path d="M0,20 L20,25 L40,15 L60,10 L80,18 L100,2" fill="none" stroke="#d674ff" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile BottomNavBar -->
+<nav class="fixed bottom-6 w-full z-50 flex justify-around items-center px-4 md:hidden">
+<div class="bg-zinc-900/60 backdrop-blur-2xl fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full px-2 py-3 shadow-[0_0_30px_rgba(0,240,255,0.08)] flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-cyan-400 relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-cyan-400 after:rounded-full after:shadow-[0_0_10px_#00f0ff] hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1 text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1 text-[20px]" data-icon="explore">explore</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium">Discovery</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1 text-[20px]" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium">Wallet</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1 text-[20px]" data-icon="notifications">notifications</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium">Alerts</span>
+</a>
+</div>
+</nav>
+</body></html>

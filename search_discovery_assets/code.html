@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error": "#490006",
+                      "inverse-surface": "#fcf8f9",
+                      "inverse-on-surface": "#565556",
+                      "on-surface": "#ffffff",
+                      "on-secondary-fixed-variant": "#8300b3",
+                      "on-tertiary-container": "#000000",
+                      "secondary": "#d674ff",
+                      "primary-fixed-dim": "#00deec",
+                      "primary-fixed": "#00eefc",
+                      "surface-variant": "#262627",
+                      "primary": "#8ff5ff",
+                      "on-tertiary-fixed-variant": "#780025",
+                      "inverse-primary": "#006a71",
+                      "on-primary-fixed": "#003f43",
+                      "surface-container-highest": "#262627",
+                      "tertiary-dim": "#ff6e84",
+                      "surface-bright": "#2c2c2d",
+                      "outline-variant": "#484849",
+                      "surface-dim": "#0e0e0f",
+                      "on-secondary-fixed": "#580079",
+                      "surface": "#0e0e0f",
+                      "error-container": "#9f0519",
+                      "surface-container": "#1a191b",
+                      "on-primary-fixed-variant": "#005e64",
+                      "surface-container-low": "#131314",
+                      "surface-container-high": "#201f21",
+                      "on-tertiary": "#490013",
+                      "background": "#0e0e0f",
+                      "secondary-dim": "#bb00fd",
+                      "error-dim": "#d7383b",
+                      "primary-container": "#00eefc",
+                      "tertiary-fixed-dim": "#ff788b",
+                      "outline": "#767576",
+                      "on-surface-variant": "#adaaab",
+                      "primary-dim": "#00deec",
+                      "on-primary": "#005d63",
+                      "on-primary-container": "#005359",
+                      "on-tertiary-fixed": "#39000d",
+                      "on-secondary": "#390050",
+                      "tertiary": "#ff6e84",
+                      "surface-container-lowest": "#000000",
+                      "error": "#ff716c",
+                      "on-secondary-container": "#fff5fc",
+                      "tertiary-fixed": "#ff909d",
+                      "secondary-fixed": "#f0c1ff",
+                      "surface-tint": "#8ff5ff",
+                      "secondary-fixed-dim": "#eaaeff",
+                      "on-background": "#ffffff",
+                      "on-error-container": "#ffa8a3",
+                      "tertiary-container": "#fd3b66",
+                      "secondary-container": "#9800d0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Space Grotesk"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #0e0e0f; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .glass-card {
+            background: rgba(38, 38, 39, 0.4);
+            backdrop-filter: blur(30px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface bg-surface min-h-screen pb-32">
+<!-- Header: Search & Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#0e0e0f]/60 backdrop-blur-2xl px-6 h-20 flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex-1 glass-card border border-outline-variant/15 rounded-full px-5 py-2.5 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder-on-surface-variant font-medium" placeholder="Search pulses, events, or traders..." type="text"/>
+</div>
+<button class="text-sm font-medium text-primary uppercase tracking-wider">Cancel</button>
+</header>
+<main class="pt-24 px-6 space-y-10">
+<!-- Trending Section -->
+<section>
+<h2 class="font-headline text-lg font-bold tracking-tight mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+                Trending Pulses
+            </h2>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<div class="glass-card px-4 py-2 rounded-full border border-outline-variant/10 whitespace-nowrap flex items-center gap-2 hover:border-primary/40 transition-all cursor-pointer">
+<span class="text-primary text-sm font-bold">#</span>
+<span class="text-sm font-medium text-on-surface">MidnightRamen</span>
+</div>
+<div class="glass-card px-4 py-2 rounded-full border border-outline-variant/10 whitespace-nowrap flex items-center gap-2 hover:border-primary/40 transition-all cursor-pointer">
+<span class="text-primary text-sm font-bold">#</span>
+<span class="text-sm font-medium text-on-surface">SecretRave</span>
+</div>
+<div class="glass-card px-4 py-2 rounded-full border border-outline-variant/10 whitespace-nowrap flex items-center gap-2 hover:border-primary/40 transition-all cursor-pointer">
+<span class="text-primary text-sm font-bold">#</span>
+<span class="text-sm font-medium text-on-surface">NeonFashion</span>
+</div>
+<div class="glass-card px-4 py-2 rounded-full border border-outline-variant/10 whitespace-nowrap flex items-center gap-2 hover:border-primary/40 transition-all cursor-pointer">
+<span class="text-primary text-sm font-bold">#</span>
+<span class="text-sm font-medium text-on-surface">CyberBrunch</span>
+</div>
+</div>
+</section>
+<!-- Categories Grid -->
+<section>
+<div class="grid grid-cols-4 gap-4">
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square glass-card rounded-2xl flex items-center justify-center border border-outline-variant/10 group-hover:border-primary/40 group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-primary text-3xl">restaurant</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Food</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square glass-card rounded-2xl flex items-center justify-center border border-outline-variant/10 group-hover:border-primary/40 group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-primary text-3xl">shopping_bag</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Retail</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square glass-card rounded-2xl flex items-center justify-center border border-outline-variant/10 group-hover:border-primary/40 group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-primary text-3xl">confirmation_number</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Events</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-full aspect-square glass-card rounded-2xl flex items-center justify-center border border-outline-variant/10 group-hover:border-primary/40 group-active:scale-95 transition-all">
+<span class="material-symbols-outlined text-primary text-3xl">auto_fix_high</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Services</span>
+</button>
+</div>
+</section>
+<!-- Active Results: Live Near You -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-2xl font-bold tracking-tight">Live Near You</h2>
+<span class="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold text-primary tracking-widest uppercase border border-primary/20">Active Now</span>
+</div>
+<div class="space-y-6">
+<!-- Trader Card 1 -->
+<div class="glass-card rounded-[2rem] overflow-hidden border border-outline-variant/10 shadow-[0_8px_32px_0_rgba(0,240,255,0.05)]">
+<div class="relative h-48 w-full">
+<img class="w-full h-full object-cover" data-alt="Modern high-end urban restaurant interior with neon cyan accent lighting and atmospheric dark mood" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtlQ_gQCaRTyF8pSRVoHOpPvRPm0DJrdCJvXRSuh2vbwNySp8NlUhYrBmbLXY5MnabIglqhwj21LehelOSAaz3OVTulLJ5MwrCBejfByEhTy0jHoc44RkPy9Ev_atQDDul_qhslZ1xtJS-ig-egk9MNU3fk3jT5Z1eBaOs2o92PIJ7Zpa5UETOYfnyDwhWWQV8fvcLDH0Fa_Mili17tznO_QKuqTRmNvraLI-zwIMIUMPjddNROkLSznkn9TF0_cArebNn0NXlwy4"/>
+<div class="absolute top-4 left-4 px-3 py-1 bg-[#ff716c] text-on-error font-bold text-[10px] uppercase tracking-widest rounded-full flex items-center gap-1.5 shadow-lg">
+<span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Live
+                        </div>
+<div class="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 glass-card rounded-full border border-white/10">
+<span class="material-symbols-outlined text-primary text-sm">near_me</span>
+<span class="text-[10px] font-bold text-white tracking-widest">400M AWAY</span>
+</div>
+</div>
+<div class="p-6 space-y-3">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Echo Kitchen</h3>
+<p class="text-on-surface-variant text-sm font-medium">Experimental Fusion • $ $ $</p>
+</div>
+<button class="text-primary">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="bg-surface-container-low/50 p-4 rounded-2xl border border-outline-variant/10">
+<p class="text-sm text-on-surface italic leading-relaxed">
+                                "Just dropped a secret menu item for the next 2 hours. Mention 'Pulse' for a complimentary nitrogen dessert."
+                            </p>
+</div>
+</div>
+</div>
+<!-- Trader Card 2 -->
+<div class="glass-card rounded-[2rem] overflow-hidden border border-outline-variant/10 shadow-[0_8px_32px_0_rgba(0,240,255,0.05)]">
+<div class="relative h-48 w-full">
+<img class="w-full h-full object-cover" data-alt="Cyberpunk style tech boutique store interior with glowing shelves and sleek futuristic industrial design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt5kbGG3lLysmIO3wpXHqXEuloIJuPDgoGoFmZqcJMX0dA4LHqboKEiI5sQlfRW9kOtLN633-QQL7TU-1zuF31_omX3XZ3JTwjC4uwXtqFQDzu_MFOiefFHf3DevUE9Xdm1h5Xvqs92IFc0lKIKtgZLWXBt-yKqluZsySZnc3pcS-DS3fGZHq6-L9Bb2P-bEjHR1rqBWPd0jaUZhZB491S5M2MitlhLMkCJ-LYhzArDZD9iWxQmRd8KXYzaMTe1A-C_mHeYcxaMRo"/>
+<div class="absolute top-4 left-4 px-3 py-1 bg-[#ff716c] text-on-error font-bold text-[10px] uppercase tracking-widest rounded-full flex items-center gap-1.5 shadow-lg">
+<span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Live
+                        </div>
+<div class="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 glass-card rounded-full border border-white/10">
+<span class="material-symbols-outlined text-primary text-sm">near_me</span>
+<span class="text-[10px] font-bold text-white tracking-widest">1.2KM AWAY</span>
+</div>
+</div>
+<div class="p-6 space-y-3">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold text-on-surface">Neon Vault</h3>
+<p class="text-on-surface-variant text-sm font-medium">Curated Tech &amp; Apparel</p>
+</div>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+</div>
+<div class="bg-surface-container-low/50 p-4 rounded-2xl border border-outline-variant/10">
+<p class="text-sm text-on-surface italic leading-relaxed">
+                                "The Limited V2 Walkers just landed. 5 pairs left in the vault. We're open until 3 AM tonight."
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Intel -->
+<section class="pb-10">
+<h2 class="font-headline text-lg font-bold tracking-tight mb-4 flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined">history</span>
+                Recent Intel
+            </h2>
+<div class="space-y-1">
+<div class="flex items-center justify-between py-4 group cursor-pointer hover:px-2 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-sm">location_on</span>
+</div>
+<div>
+<p class="text-sm font-bold">The Obsidian Club</p>
+<p class="text-xs text-on-surface-variant">Visited 2 days ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">chevron_right</span>
+</div>
+<div class="flex items-center justify-between py-4 group cursor-pointer hover:px-2 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-sm">search</span>
+</div>
+<div>
+<p class="text-sm font-bold">Late Night Matcha</p>
+<p class="text-xs text-on-surface-variant">Searched yesterday</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">chevron_right</span>
+</div>
+<div class="flex items-center justify-between py-4 group cursor-pointer hover:px-2 transition-all">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full glass-card flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-sm">bolt</span>
+</div>
+<div>
+<p class="text-sm font-bold">Underground Arcade</p>
+<p class="text-xs text-on-surface-variant">Visited 3 days ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50 bg-[#262627]/40 backdrop-blur-3xl rounded-full border border-[#484849]/15 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex justify-around items-center py-3 px-4">
+<a class="flex flex-col items-center justify-center text-[#8ff5ff] drop-shadow-[0_0_8px_rgba(143,245,255,0.6)] group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-300">explore</span>
+<span class="font-['Inter'] text-[10px] font-medium uppercase tracking-widest mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-300">near_me</span>
+<span class="font-['Inter'] text-[10px] font-medium uppercase tracking-widest mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-300">favorite</span>
+<span class="font-['Inter'] text-[10px] font-medium uppercase tracking-widest mt-1">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-white transition-all group" href="#">
+<span class="material-symbols-outlined group-active:scale-90 duration-300">person</span>
+<span class="font-['Inter'] text-[10px] font-medium uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

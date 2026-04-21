@@ -13,22 +13,19 @@ interface UsePostsOptions {
 }
 
 export function usePosts(options: UsePostsOptions = {}) {
-    const [posts, setPosts] = useState<PostWithBusiness[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    // Start with mock data immediately — no loading flash
+    const [posts, setPosts] = useState<PostWithBusiness[]>(() => getMockPosts(options.limit));
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        // If mock mode explicitly requested, nothing to do — already loaded
+        if (options.useMockData) return;
+
         async function fetchPosts() {
             try {
                 setIsLoading(true);
                 setError(null);
-
-                // Use mock data if explicitly requested or as fallback
-                if (options.useMockData) {
-                    setPosts(getMockPosts(options.limit));
-                    setIsLoading(false);
-                    return;
-                }
 
                 const supabase = getSupabaseClient();
                 let query = supabase
@@ -39,12 +36,10 @@ export function usePosts(options: UsePostsOptions = {}) {
                     `)
                     .order('created_at', { ascending: false });
 
-                // Filter by business ID if provided
                 if (options.businessId) {
                     query = query.eq('business_id', options.businessId);
                 }
 
-                // Filter by map bounds if provided
                 if (options.bounds) {
                     query = query
                         .gte('latitude', options.bounds.south)
@@ -53,7 +48,6 @@ export function usePosts(options: UsePostsOptions = {}) {
                         .lte('longitude', options.bounds.east);
                 }
 
-                // Apply limit
                 if (options.limit) {
                     query = query.limit(options.limit);
                 }
@@ -62,24 +56,29 @@ export function usePosts(options: UsePostsOptions = {}) {
 
                 if (fetchError) throw fetchError;
 
-                // Use mock data if no real data found
-                if (!data || data.length === 0) {
-                    setPosts(getMockPosts(options.limit));
-                } else {
+                // Only replace mock data if we got real posts back
+                if (data && data.length > 0) {
                     setPosts(data);
                 }
+                // If empty, mock data is still shown (already set as initial state)
             } catch (err) {
-                // Fallback to mock data on error
-                console.warn('Using mock data due to error:', err);
-                setPosts(getMockPosts(options.limit));
-                setError(null); // Clear error since we have mock data
+                // Network failed — mock data stays in place, no error flash to user
+                console.warn('Could not fetch real posts, showing mock data:', err);
             } finally {
                 setIsLoading(false);
             }
         }
 
         fetchPosts();
-    }, [options.bounds?.north, options.bounds?.south, options.bounds?.east, options.bounds?.west, options.businessId, options.limit, options.useMockData]);
+    }, [
+        options.bounds?.north,
+        options.bounds?.south,
+        options.bounds?.east,
+        options.bounds?.west,
+        options.businessId,
+        options.limit,
+        options.useMockData,
+    ]);
 
     return { posts, isLoading, error };
 }

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse - Alerts Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-container": "#005359",
+                    "on-surface": "#ffffff",
+                    "surface-dim": "#0e0e0f",
+                    "surface-container-highest": "#262627",
+                    "on-secondary-container": "#fff5fc",
+                    "on-secondary-fixed": "#580079",
+                    "surface-bright": "#2c2c2d",
+                    "error-dim": "#d7383b",
+                    "primary-dim": "#00deec",
+                    "secondary-dim": "#bb00fd",
+                    "secondary-fixed-dim": "#eaaeff",
+                    "on-secondary": "#390050",
+                    "surface-container-low": "#131314",
+                    "on-error": "#490006",
+                    "outline": "#767576",
+                    "inverse-on-surface": "#565556",
+                    "surface-container-lowest": "#000000",
+                    "error": "#ff716c",
+                    "outline-variant": "#484849",
+                    "primary": "#8ff5ff",
+                    "on-tertiary-fixed": "#39000d",
+                    "surface-variant": "#262627",
+                    "primary-container": "#00eefc",
+                    "on-tertiary-container": "#000000",
+                    "secondary-fixed": "#f0c1ff",
+                    "on-secondary-fixed-variant": "#8300b3",
+                    "inverse-primary": "#006a71",
+                    "on-tertiary": "#490013",
+                    "on-primary": "#005d63",
+                    "error-container": "#9f0519",
+                    "surface-container-high": "#201f21",
+                    "tertiary-fixed-dim": "#ff788b",
+                    "on-primary-fixed-variant": "#005e64",
+                    "on-tertiary-fixed-variant": "#780025",
+                    "secondary": "#d674ff",
+                    "tertiary-container": "#fd3b66",
+                    "primary-fixed": "#00eefc",
+                    "surface-tint": "#8ff5ff",
+                    "inverse-surface": "#fcf8f9",
+                    "surface": "#0e0e0f",
+                    "tertiary-dim": "#ff6e84",
+                    "tertiary": "#ff6e84",
+                    "on-primary-fixed": "#003f43",
+                    "secondary-container": "#9800d0",
+                    "primary-fixed-dim": "#00deec",
+                    "tertiary-fixed": "#ff909d",
+                    "on-surface-variant": "#adaaab",
+                    "surface-container": "#1a191b",
+                    "on-error-container": "#ffa8a3",
+                    "background": "#0e0e0f",
+                    "on-background": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Space Grotesk"
+                    ],
+                    "body": [
+                            "Inter"
+                    ],
+                    "label": [
+                            "Inter"
+                    ]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0f;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4, h5, h6, .font-headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0f; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262627; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484849; 
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col pb-32 pt-24 selection:bg-primary-container/30 selection:text-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-zinc-950/40 backdrop-blur-xl bg-gradient-to-b from-zinc-900 to-transparent shadow-none hidden md:flex">
+<button class="text-cyan-400 hover:text-cyan-300 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-xl font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(0,240,255,0.4)] font-['Space_Grotesk'] tracking-widest uppercase">NAVIGATOR</h1>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/15 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</header>
+<!-- Mobile Header Fallback (Since TopAppBar is hidden md:flex based on standard app logic, providing a mobile header) -->
+<header class="md:hidden fixed top-0 w-full z-40 px-6 py-4 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center">
+<h1 class="font-headline font-bold text-lg tracking-widest text-primary drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</header>
+<main class="flex-grow max-w-5xl mx-auto w-full px-4 md:px-8 space-y-12">
+<!-- Page Title Section -->
+<section class="mt-8 mb-12 relative z-10">
+<h2 class="font-headline text-display-lg md:text-5xl font-bold text-on-surface mb-2 tracking-tight">Intel Settings</h2>
+<p class="font-body text-on-surface-variant text-lg max-w-2xl">Configure your proximity alerts and category feeds to curate your midnight navigation.</p>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+<!-- Left Column: Primary Controls -->
+<div class="lg:col-span-7 space-y-8">
+<!-- Proximity Alerts Slider (Glassmorphic Card) -->
+<section class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="font-headline text-xl font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="radar">radar</span>
+                                Proximity Alerts
+                            </h3>
+<p class="text-sm text-on-surface-variant mt-1">Adjust distance for nearby drop notifications.</p>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-full border border-outline-variant/15">
+<span class="text-primary font-bold font-headline">2.5 km</span>
+</div>
+</div>
+<div class="relative pt-6 pb-2">
+<!-- Custom Range Slider Track -->
+<div class="h-2 bg-surface-container-highest rounded-full w-full relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-primary to-primary-container shadow-[0_0_15px_rgba(0,238,252,0.4)]"></div>
+</div>
+<!-- Thumb -->
+<div class="absolute top-4 left-1/2 -ml-3 w-6 h-6 bg-surface border-2 border-primary rounded-full shadow-[0_0_10px_rgba(143,245,255,0.6)] cursor-pointer hover:scale-110 transition-transform"></div>
+<div class="flex justify-between text-xs text-on-surface-variant mt-4 font-medium uppercase tracking-wider">
+<span>500m</span>
+<span>5km</span>
+</div>
+</div>
+</section>
+<!-- Category Following (Bento Grid Style) -->
+<section class="space-y-4">
+<h3 class="font-headline text-xl font-semibold text-on-surface flex items-center gap-2 px-2">
+<span class="material-symbols-outlined text-secondary text-xl" data-icon="category">category</span>
+                        Category Frequencies
+                    </h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<!-- Toggle Card 1 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer border border-primary/30 shadow-[0_0_20px_rgba(143,245,255,0.1)] transition-all hover:bg-surface-container/80">
+<span class="material-symbols-outlined text-primary text-3xl mb-1" data-icon="restaurant">restaurant</span>
+<span class="font-headline text-sm font-medium text-on-surface">Food</span>
+<!-- Custom Toggle Switch Active -->
+<div class="w-10 h-5 bg-primary/20 rounded-full relative mt-2 border border-primary/50">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(143,245,255,0.8)]"></div>
+</div>
+</div>
+<!-- Toggle Card 2 -->
+<div class="bg-surface-container/30 backdrop-blur-[30px] rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer border border-outline-variant/15 transition-all hover:bg-surface-container/50">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl mb-1" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-headline text-sm font-medium text-on-surface-variant">Retail</span>
+<!-- Custom Toggle Switch Inactive -->
+<div class="w-10 h-5 bg-surface-container-highest rounded-full relative mt-2 border border-outline-variant/30">
+<div class="absolute left-0.5 top-0.5 w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+<!-- Toggle Card 3 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer border border-secondary/30 shadow-[0_0_20px_rgba(214,116,255,0.1)] transition-all hover:bg-surface-container/80">
+<span class="material-symbols-outlined text-secondary text-3xl mb-1" data-icon="music_note">music_note</span>
+<span class="font-headline text-sm font-medium text-on-surface">Music</span>
+<!-- Custom Toggle Switch Active -->
+<div class="w-10 h-5 bg-secondary/20 rounded-full relative mt-2 border border-secondary/50">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-secondary rounded-full shadow-[0_0_8px_rgba(214,116,255,0.8)]"></div>
+</div>
+</div>
+<!-- Toggle Card 4 -->
+<div class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer border border-tertiary/30 shadow-[0_0_20px_rgba(255,110,132,0.1)] transition-all hover:bg-surface-container/80">
+<span class="material-symbols-outlined text-tertiary text-3xl mb-1" data-icon="local_fire_department">local_fire_department</span>
+<span class="font-headline text-sm font-medium text-on-surface">Secret Drops</span>
+<!-- Custom Toggle Switch Active -->
+<div class="w-10 h-5 bg-tertiary/20 rounded-full relative mt-2 border border-tertiary/50">
+<div class="absolute right-0.5 top-0.5 w-4 h-4 bg-tertiary rounded-full shadow-[0_0_8px_rgba(255,110,132,0.8)]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quiet Hours Scheduler -->
+<section class="bg-surface-container-low rounded-xl p-1 relative overflow-hidden">
+<div class="bg-surface-container/40 backdrop-blur-xl rounded-lg p-6">
+<div class="flex items-start justify-between mb-6">
+<div>
+<h3 class="font-headline text-xl font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-xl" data-icon="schedule">schedule</span>
+                                    Quiet Hours
+                                </h3>
+<p class="text-sm text-on-surface-variant mt-1">Mute non-priority pulses during specific times.</p>
+</div>
+<!-- Custom Toggle Switch Inactive -->
+<div class="w-12 h-6 bg-surface-container-highest rounded-full relative border border-outline-variant/30 cursor-pointer">
+<div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-4 opacity-50 pointer-events-none">
+<div class="flex-1 bg-surface-container-highest rounded-md px-4 py-3 border border-outline-variant/15 flex justify-between items-center">
+<span class="text-sm text-on-surface-variant uppercase tracking-wider font-semibold">Start</span>
+<span class="text-on-surface font-headline font-bold">23:00</span>
+</div>
+<span class="material-symbols-outlined text-outline">arrow_forward</span>
+<div class="flex-1 bg-surface-container-highest rounded-md px-4 py-3 border border-outline-variant/15 flex justify-between items-center">
+<span class="text-sm text-on-surface-variant uppercase tracking-wider font-semibold">End</span>
+<span class="text-on-surface font-headline font-bold">07:00</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Priority Pulse -->
+<div class="lg:col-span-5">
+<section class="bg-surface-container/30 backdrop-blur-[40px] rounded-xl border border-outline-variant/10 h-full flex flex-col">
+<div class="p-6 border-b border-outline-variant/10">
+<h3 class="font-headline text-xl font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="star">star</span>
+                            Priority Pulse
+                        </h3>
+<p class="text-sm text-on-surface-variant mt-1">Followed Traders bypassing Quiet Hours.</p>
+</div>
+<div class="p-4 flex-grow space-y-2">
+<!-- List Item 1 -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-container transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md overflow-hidden bg-surface-container-highest border border-outline-variant/20 relative">
+<!-- Using placeholder styled div instead of img to avoid empty src or unwanted alt text rendering if image fails -->
+<div class="w-full h-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="storefront">storefront</span>
+</div>
+<div class="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_#8ff5ff] m-1"></div>
+</div>
+<div>
+<h4 class="font-headline font-medium text-sm text-on-surface">Neon Noodle Bar</h4>
+<p class="text-xs text-on-surface-variant">Food • Always active</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="notifications_off">notifications_off</span>
+</button>
+</div>
+<!-- List Item 2 -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-container transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md overflow-hidden bg-surface-container-highest border border-outline-variant/20 relative">
+<div class="w-full h-full bg-gradient-to-br from-secondary/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="music_note">music_note</span>
+</div>
+</div>
+<div>
+<h4 class="font-headline font-medium text-sm text-on-surface">Vinyl Vault</h4>
+<p class="text-xs text-on-surface-variant">Music • Drops only</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="notifications_off">notifications_off</span>
+</button>
+</div>
+<!-- List Item 3 -->
+<div class="flex items-center justify-between p-3 rounded-md hover:bg-surface-container transition-colors group cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md overflow-hidden bg-surface-container-highest border border-outline-variant/20 relative">
+<div class="w-full h-full bg-gradient-to-br from-tertiary/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="local_fire_department">local_fire_department</span>
+</div>
+<div class="absolute bottom-0 right-0 w-2 h-2 bg-tertiary rounded-full shadow-[0_0_5px_#ff6e84] m-1"></div>
+</div>
+<div>
+<h4 class="font-headline font-medium text-sm text-on-surface">Midnight Threads</h4>
+<p class="text-xs text-on-surface-variant">Retail • Flash sales</p>
+</div>
+</div>
+<button class="text-outline hover:text-error transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="notifications_off">notifications_off</span>
+</button>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/10">
+<button class="w-full py-3 bg-surface-bright/30 border border-outline-variant/15 text-sm font-medium text-on-surface rounded-md hover:bg-surface-bright/50 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                            Add Trader to Pulse
+                        </button>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only per platform rules, visible block on md:hidden) -->
+<nav class="fixed bottom-6 w-full z-50 flex justify-around items-center px-4 md:hidden">
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full px-2 py-3 bg-zinc-900/60 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,240,255,0.08)] flex justify-around items-center">
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out font-['Space_Grotesk'] text-[10px] font-medium gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Analytics</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out font-['Space_Grotesk'] text-[10px] font-medium gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span>Discovery</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-zinc-500 hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out font-['Space_Grotesk'] text-[10px] font-medium gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span>Wallet</span>
+</a>
+<!-- Active: Alerts -->
+<a class="flex flex-col items-center justify-center text-cyan-400 relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-cyan-400 after:rounded-full after:shadow-[0_0_10px_#00f0ff] hover:text-cyan-200 transition-all active:scale-90 duration-300 ease-out font-['Space_Grotesk'] text-[10px] font-medium gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="notifications" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span>Alerts</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -93,12 +93,8 @@ export default function SignupPage() {
                 }).eq('id', data.user.id);
             }
 
-            // Redirect based on role
-            if (role === 'trader') {
-                router.push(ROUTES.MENU);
-            } else {
-                router.push(ROUTES.MAP);
-            }
+            // Redirect to feed after signup — middleware handles the rest
+            router.push(ROUTES.FEED);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign up');
         } finally {
@@ -114,7 +110,7 @@ export default function SignupPage() {
                     variant="ghost"
                     size="sm"
                     className="gap-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => step === 'details' ? setStep('role') : router.push(ROUTES.MAP)}
+                    onClick={() => step === 'details' ? setStep('role') : router.push(ROUTES.LOGIN)}
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back

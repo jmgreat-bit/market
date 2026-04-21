@@ -8,6 +8,7 @@ import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 interface AuthState {
     user: User | null;
     profile: Profile | null;
+    // undefined means "we don't know yet" (prevents flicker before first check)
     isLoading: boolean;
     isAuthenticated: boolean;
 }
@@ -34,12 +35,13 @@ export function useUser() {
     useEffect(() => {
         const supabase = getSupabaseClient();
 
-        // Get initial session
-        supabase.auth.getSession().then(async ({ data: { session } }: { data: { session: Session | null } }) => {
-            if (session?.user) {
-                const profile = await fetchProfile(session.user.id);
+        // Use getUser() (server-verified) not getSession() (client-only, unverified)
+        supabase.auth.getUser().then(async ({ data }: { data: { user: User | null } }) => {
+            const user = data.user;
+            if (user) {
+                const profile = await fetchProfile(user.id);
                 setState({
-                    user: session.user,
+                    user,
                     profile,
                     isLoading: false,
                     isAuthenticated: true,
@@ -61,18 +63,21 @@ export function useUser() {
             });
         });
 
-        // Listen for auth changes
+        // Keep session fresh — listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_event: AuthChangeEvent, session: Session | null) => {
+            async (event: AuthChangeEvent, session: Session | null) => {
                 if (session?.user) {
-                    const profile = await fetchProfile(session.user.id);
-                    setState({
-                        user: session.user,
-                        profile,
-                        isLoading: false,
-                        isAuthenticated: true,
-                    });
-                } else {
+                    // Only re-fetch profile on actual sign-in / token refresh events
+                    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                        const profile = await fetchProfile(session.user.id);
+                        setState({
+                            user: session.user,
+                            profile,
+                            isLoading: false,
+                            isAuthenticated: true,
+                        });
+                    }
+                } else if (event === 'SIGNED_OUT') {
                     setState({
                         user: null,
                         profile: null,

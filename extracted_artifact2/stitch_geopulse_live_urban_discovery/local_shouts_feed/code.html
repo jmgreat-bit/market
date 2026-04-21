@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Midnight Navigator - Local Feed</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-dim": "#bb00fd",
+                        "on-surface": "#ffffff",
+                        "tertiary-fixed": "#ff909d",
+                        "on-tertiary-fixed": "#39000d",
+                        "primary-dim": "#00deec",
+                        "on-surface-variant": "#adaaab",
+                        "error-container": "#9f0519",
+                        "primary": "#8ff5ff",
+                        "outline": "#767576",
+                        "surface-container-low": "#131314",
+                        "surface-bright": "#2c2c2d",
+                        "tertiary-dim": "#ff6e84",
+                        "surface-container-highest": "#262627",
+                        "error-dim": "#d7383b",
+                        "on-tertiary-container": "#000000",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "surface": "#0e0e0f",
+                        "on-primary": "#005d63",
+                        "on-tertiary": "#490013",
+                        "secondary-fixed": "#f0c1ff",
+                        "primary-fixed-dim": "#00deec",
+                        "primary-container": "#00eefc",
+                        "on-secondary-fixed": "#580079",
+                        "surface-container": "#1a191b",
+                        "surface-tint": "#8ff5ff",
+                        "on-error-container": "#ffa8a3",
+                        "tertiary-container": "#fd3b66",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "on-primary-fixed": "#003f43",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "inverse-primary": "#006a71",
+                        "inverse-surface": "#fcf8f9",
+                        "secondary-container": "#9800d0",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "outline-variant": "#484849",
+                        "surface-container-high": "#201f21",
+                        "surface-container-lowest": "#000000",
+                        "on-secondary": "#390050",
+                        "surface-dim": "#0e0e0f",
+                        "on-error": "#490006",
+                        "on-background": "#ffffff",
+                        "primary-fixed": "#00eefc",
+                        "background": "#0e0e0f",
+                        "error": "#ff716c",
+                        "on-primary-container": "#005359",
+                        "surface-variant": "#262627",
+                        "tertiary": "#ff6e84",
+                        "on-primary-fixed-variant": "#005e64",
+                        "secondary": "#d674ff",
+                        "on-secondary-container": "#fff5fc",
+                        "inverse-on-surface": "#565556"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.surface'); color: theme('colors.on-surface'); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body antialiased min-h-screen flex">
+<!-- Navigation Drawer (Desktop) -->
+<aside class="hidden md:flex flex-col fixed inset-y-0 left-0 z-[60] w-80 h-full rounded-r-3xl bg-[#0e0e0f] shadow-2xl shadow-black tonal-shift via bg-[#131314]">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-4 mb-10">
+<img alt="User Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-primary" data-alt="Portrait of a young man with dark hair in a cyberpunk setting with neon blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlSK54z_odWG6_URJiuKgS5syfQCrmxbJwxcXO9mmLV1RJY7fkrIUXpv2fZHdDlCECl03T-vvFMIlcj2LPYGLCzmJgQIj6u-rGMAIRQPxDWEtcVt-gfiR55q8_DUb5Aaw-wMcy-QL4WVpfchR02WRxdC2modPZaif1bSnflnW5SN5MCEdPJBvm7UrqltXo2KEyi1BCTVL1CidfGTlJWgQX7jxbxBu2fkSUbk56qfEv7s_cUNlmY6_EQQFOX7Fe9v5Y3zJ0flXF5m4"/>
+<div class="flex flex-col">
+<span class="text-[#8ff5ff] font-bold text-xl font-headline tracking-tighter">Midnight Navigator</span>
+<span class="text-xs text-on-surface-variant">Level 4 Explorer</span>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg bg-gradient-to-r from-[#8ff5ff]/10 to-transparent text-[#8ff5ff] font-bold border-l-4 border-[#8ff5ff] hover:bg-[#1a191b] transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rss_feed</span>
+<span class="font-headline text-base">Explorer Feed</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#adaaab] hover:bg-[#1a191b] transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">sensors</span>
+<span class="font-headline text-base">Nearby Pulse</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#adaaab] hover:bg-[#1a191b] transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-headline text-base">Saved Hubs</span>
+</a>
+</nav>
+<nav class="mt-auto space-y-2">
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#adaaab] hover:bg-[#1a191b] transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-headline text-base">Settings</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#adaaab] hover:bg-[#1a191b] transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-headline text-base">Privacy</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full md:pl-80 flex flex-col min-h-screen bg-surface relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-6 py-4 docked full-width top-0 bg-[#0e0e0f]/80 backdrop-blur-lg no-line-rule tonal-transition bg-[#131314] flat no-shadows z-40 sticky">
+<button class="md:hidden p-2 text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+<div class="md:hidden text-2xl font-black text-[#8ff5ff] tracking-tighter font-headline font-bold tracking-tight">GeoPulse</div>
+<div class="hidden md:block flex-1"></div> <!-- Spacer for desktop -->
+<button class="p-2 text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-2xl">search</span>
+</button>
+</header>
+<!-- Feed Content -->
+<div class="flex-1 p-6 md:p-10 max-w-3xl mx-auto w-full pb-32 md:pb-10">
+<h1 class="text-4xl md:text-5xl font-headline font-bold text-on-surface mb-8 tracking-tight">Live Pulse</h1>
+<div class="space-y-8">
+<!-- Shout Card 1 -->
+<article class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 relative flex flex-col gap-4 shadow-[0_0_32px_rgba(143,245,255,0.08)]">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="Portrait of a woman with neon pink lighting in a dark urban environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtP1LA75YxMzFAUuKpf8fs1ryFw5iXrR4DsV-sRSZy3tNigNRkYn3Q-hHeABM5KaZhuZ5DNhhpgpxj3lsx9APgg6EzzpUGMgtbQsr86woWs9c_US8OFy85hc2aHbukoDWxilUXBYATa9hqZlNArJJYdsn-sz1yHYJ2WF4x9LuxL0ZOTSnoS0OgfRMhaRX4QphRM_2UrOj42TnYK6i2USu6PGnbiiug5PhrxCbemwax9nMTQO0GHc4GJlmcFHGppXx6-I17Fp234hU"/>
+<div>
+<h3 class="font-headline font-semibold text-on-surface">Neon Raves</h3>
+<p class="text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                    Downtown Sector
+                                </p>
+</div>
+</div>
+<div class="flex items-center gap-1 text-primary font-mono text-xs font-bold px-2 py-1 bg-surface-container-low rounded-md">
+<span class="material-symbols-outlined text-[14px]">timer</span>
+                            Expires in 2h
+                        </div>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">Secret pop-up gallery just opened under the old viaduct. Insane holographic installations. Get here before it gets shut down.</p>
+<!-- Rich Media Carousel -->
+<div class="flex gap-4 overflow-x-auto snap-x pb-2 hide-scrollbar">
+<div class="snap-center shrink-0 w-64 h-40 rounded-md overflow-hidden relative">
+<img alt="Gallery 1" class="w-full h-full object-cover" data-alt="Dark concrete tunnel illuminated by bright neon holographic art installations in vibrant pinks and blues" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJuayuzMRLJ7D_kFHRdFP_SUVoloR235aaXep6vyXCVuk3MXENfXkQxJhid8cJI2lpsxzvI52iQ3pIFypG1zznAdUgV-c3Mz92wn_U6lznVlooE6r8WpjP39JM1A6Ic-lwckqmQI5ouNli4JbHOVtNnKNPiEcyfLvWVRlyABdvtouhK3dwSP4wKW_2Mi5FPnP89n7uB7eDG7kqS25S6vv0GOPeoNqGKokVbtvGZl-i-APD_-ZdvmWgYSdzDjxjYJ5vUR6SxwZ2fRc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+<div class="snap-center shrink-0 w-64 h-40 rounded-md overflow-hidden relative">
+<img alt="Gallery 2" class="w-full h-full object-cover" data-alt="Close up of a glowing blue holographic projection in a dark industrial space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtwOs2r706mCiZJqNd-_zxWNsBmXz8Z26G8WP8p2NQpPHBDNqgItBvx4m6lIFgQluUxtfjRouuwsy-TKbOlMYbV0J13L2TrD05G9uDKy2iYdvZaBS3CpWXhm7x3iIVWP-yxfjAQS5zsvmj8YJVQy4ReKPwCr_B2g1R2dbCWNt2qAyHrbnUwWTb7C-fBj2CI1A6a6q0tUNqaTehNMhKbQSKAjE-SUSahU0SyHI8PYE1ZH70m0a2dN5UvQN-NStuUv8x2jxrGY5dB18"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-outline-variant/15">
+<div class="flex gap-4">
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span> 24
+                            </button>
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span> 8
+                            </button>
+</div>
+<button class="text-primary hover:text-primary-container transition-colors text-sm font-medium flex items-center gap-1">
+                            Join Hub <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Shout Card 2 (Link Preview) -->
+<article class="bg-surface-container/50 backdrop-blur-[30px] rounded-xl p-6 relative flex flex-col gap-4 shadow-[0_0_32px_rgba(214,116,255,0.08)]">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img alt="Avatar" class="w-10 h-10 rounded-full object-cover border border-outline-variant" data-alt="Portrait of a man with stubble in a moody low light setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6Ussixwb0lIrH3fz7mBSFrd3z8PoTJgkyPscBSiUaKa3PLIKGrKH17BMunlXIuYxGm-Pkgi6DbcJT4T4JHmsTxcfRPc4hmIqyPvbXjt6wzZY5h9Lnrs01XNNB8Dt-MkskWvhcq7gvybN7VK_DgjFkvLrjO9ltKJ-q0-HA1ozLuvmkNbfZ8AvguKIO6nLveooN9BpFwQmI1Feg7Y8czPEcc5B24ElxcGilb45b3oUUCNava-wW53lHbdJIuC9BIT5hyf9Jzuhydiw"/>
+<div>
+<h3 class="font-headline font-semibold text-on-surface">Cipher Protocol</h3>
+<p class="text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                    Tech District
+                                </p>
+</div>
+</div>
+<div class="flex items-center gap-1 text-secondary font-mono text-xs font-bold px-2 py-1 bg-surface-container-low rounded-md">
+<span class="material-symbols-outlined text-[14px]">timer</span>
+                            Expires in 45m
+                        </div>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">The midnight noodle stall is back. Check the coordinates on this map drop.</p>
+<!-- Link Preview -->
+<a class="block bg-surface-container-low rounded-md border border-outline-variant/15 overflow-hidden hover:border-primary/50 transition-colors group" href="#">
+<div class="h-24 w-full bg-surface-container relative">
+<img alt="Map Preview" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="Dark street food stall illuminated by warm yellow light at night with steam rising from cooking pots" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcI9X-ci54WYlzqeSznDayJ6H3BNX22k0M90tVFxKyb4Jv8Pb-hGGGt0Q8ixbeKGaFRfYyQ4uQYr4sJnrjMxyUMMFF2Fjpn67Nmja7fvg3f2FojNOf5IFQ2dudsTXO-xiLdWKgkpx_kqnQkd8lTSlrB8k8OSnWjARD1uY5P4xrceiQzCxY0wHQT_YyMiTHSbveMiNMsIzdl4AX5yc357k4h5zBbRLCABVPN8EDuVCkmESETP8-Jd9BGTPk9wXNg5EPuL8Y3dFYw7E"/>
+</div>
+<div class="p-3">
+<h4 class="font-headline font-medium text-sm text-on-surface mb-1">Midnight Ramen Coordinates</h4>
+<p class="text-xs text-on-surface-variant truncate">secure.geopulse.io/drop/x7y9z</p>
+</div>
+</a>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-outline-variant/15">
+<div class="flex gap-4">
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-secondary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span> 112
+                            </button>
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-secondary transition-colors text-sm">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span> 34
+                            </button>
+</div>
+<button class="text-secondary hover:text-secondary-fixed transition-colors text-sm font-medium flex items-center gap-1">
+                            Navigate <span class="material-symbols-outlined text-[18px]">navigation</span>
+</button>
+</div>
+</article>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe bg-[#262627]/50 backdrop-blur-2xl no-line-rule border-none shadow-[0_0_32px_rgba(0,240,255,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#8ff5ff] drop-shadow-[0_0_8px_rgba(143,245,255,0.6)] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Space_Grotesk'] text-xs font-medium mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

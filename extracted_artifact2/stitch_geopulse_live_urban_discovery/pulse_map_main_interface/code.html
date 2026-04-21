@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse - The Pulse Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-dim": "#bb00fd",
+                      "on-surface": "#ffffff",
+                      "tertiary-fixed": "#ff909d",
+                      "on-tertiary-fixed": "#39000d",
+                      "primary-dim": "#00deec",
+                      "on-surface-variant": "#adaaab",
+                      "error-container": "#9f0519",
+                      "primary": "#8ff5ff",
+                      "outline": "#767576",
+                      "surface-container-low": "#131314",
+                      "surface-bright": "#2c2c2d",
+                      "tertiary-dim": "#ff6e84",
+                      "surface-container-highest": "#262627",
+                      "error-dim": "#d7383b",
+                      "on-tertiary-container": "#000000",
+                      "on-secondary-fixed-variant": "#8300b3",
+                      "surface": "#0e0e0f",
+                      "on-primary": "#005d63",
+                      "on-tertiary": "#490013",
+                      "secondary-fixed": "#f0c1ff",
+                      "primary-fixed-dim": "#00deec",
+                      "primary-container": "#00eefc",
+                      "on-secondary-fixed": "#580079",
+                      "surface-container": "#1a191b",
+                      "surface-tint": "#8ff5ff",
+                      "on-error-container": "#ffa8a3",
+                      "tertiary-container": "#fd3b66",
+                      "on-tertiary-fixed-variant": "#780025",
+                      "on-primary-fixed": "#003f43",
+                      "secondary-fixed-dim": "#eaaeff",
+                      "inverse-primary": "#006a71",
+                      "inverse-surface": "#fcf8f9",
+                      "secondary-container": "#9800d0",
+                      "tertiary-fixed-dim": "#ff788b",
+                      "outline-variant": "#484849",
+                      "surface-container-high": "#201f21",
+                      "surface-container-lowest": "#000000",
+                      "on-secondary": "#390050",
+                      "surface-dim": "#0e0e0f",
+                      "on-error": "#490006",
+                      "on-background": "#ffffff",
+                      "primary-fixed": "#00eefc",
+                      "background": "#0e0e0f",
+                      "error": "#ff716c",
+                      "on-primary-container": "#005359",
+                      "surface-variant": "#262627",
+                      "tertiary": "#ff6e84",
+                      "on-primary-fixed-variant": "#005e64",
+                      "secondary": "#d674ff",
+                      "on-secondary-container": "#fff5fc",
+                      "inverse-on-surface": "#565556"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Space Grotesk"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .glass-overlay {
+            background-color: rgba(38, 38, 39, 0.4); /* surface-container-highest */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.15); /* outline-variant */
+        }
+        
+        .pulse-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #8ff5ff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 16px rgba(143, 245, 255, 0.6);
+        }
+        
+        .pulse-ring {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border: 2px solid rgba(0, 222, 236, 0.4);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+        
+        .marker-secondary {
+            background-color: #bb00fd;
+            box-shadow: 0 0 16px rgba(187, 0, 253, 0.6);
+        }
+        
+        .pulse-ring-secondary {
+            border-color: rgba(214, 116, 255, 0.4);
+        }
+
+        /* Hide scrollbar for category pills */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body overflow-hidden h-screen w-screen flex flex-col">
+<!-- Top Navigation (Web) -->
+<header class="hidden md:flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50 bg-[#0e0e0f]/80 backdrop-blur-lg no-line-rule tonal-transition bg-[#131314]">
+<div class="flex items-center gap-4">
+<button class="text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 active:scale-95 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-headline font-black text-[#8ff5ff] tracking-tighter text-2xl">GeoPulse</h1>
+</div>
+<nav class="flex gap-8">
+<a class="font-headline font-bold tracking-tight text-[#8ff5ff] hover:text-[#00eefc] transition-colors duration-300" href="#">Explore</a>
+<a class="font-headline font-bold tracking-tight text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300" href="#">Map</a>
+<a class="font-headline font-bold tracking-tight text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300" href="#">Notifications</a>
+<a class="font-headline font-bold tracking-tight text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300" href="#">Profile</a>
+</nav>
+<button class="text-[#adaaab] hover:text-[#00eefc] transition-colors duration-300 active:scale-95 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+</header>
+<!-- Main Map Canvas -->
+<main class="relative flex-1 w-full h-full z-0">
+<!-- The Map Background -->
+<div class="absolute inset-0 bg-surface-container-low" data-alt="High-contrast dark mode satellite map view of an urban cityscape with glowing cyan and neon purple road networks highlighting key arteries" data-location="Tokyo, Japan" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAeTbxFcMMOGFzMKnS_WQ-XhDCIxuCwUNsngun43VLDukOH3G-QuSFDk0Zo8YJJnZt1b_PwFZT_qa4y11VdIcNIBNmdB5r0cgdgI1nA_0nbphzIlHh_YArPxjDeALfDpGy4kYUlDeWsdoo6rhK-H39GtdvWq_Yetv1Daq7MxLrXyK-DJmfWj4MhveBvjez-Zga6RxqI9iIxfdmJRlQsrP2Sy4rKxi_h8CkRe2uT_bHxveS684iIIYxSykz3zHzHFTKGr8_qZjBA2mc'); background-size: cover; background-position: center; mix-blend-mode: luminosity; opacity: 0.6;">
+<!-- Simulated Map Overlay to darken it further -->
+<div class="absolute inset-0 bg-surface/60"></div>
+</div>
+<!-- Glowing Markers -->
+<div class="absolute top-[30%] left-[45%]">
+<div class="pulse-ring"></div>
+<div class="pulse-marker"></div>
+</div>
+<div class="absolute top-[50%] left-[25%]">
+<div class="pulse-marker marker-secondary"></div>
+</div>
+<div class="absolute top-[65%] left-[60%]">
+<div class="pulse-ring pulse-ring-secondary"></div>
+<div class="pulse-marker marker-secondary"></div>
+</div>
+<div class="absolute top-[20%] left-[70%]">
+<div class="pulse-marker"></div>
+</div>
+<div class="absolute top-[40%] left-[80%]">
+<div class="pulse-ring"></div>
+<div class="pulse-marker"></div>
+</div>
+<!-- Floating Search & Filter Cluster (HUD) -->
+<div class="absolute top-20 md:top-28 left-0 right-0 px-4 md:px-12 flex flex-col items-center gap-4 z-40 pointer-events-none">
+<!-- Glass Search Bar -->
+<div class="w-full max-w-2xl glass-overlay rounded-full flex items-center px-6 py-4 shadow-[0_0_40px_rgba(143,245,255,0.05)] pointer-events-auto ghost-border">
+<span class="material-symbols-outlined text-primary mr-4" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="bg-transparent border-none w-full text-on-surface font-body placeholder:text-on-surface-variant focus:outline-none focus:ring-0" placeholder="Search the pulse..." type="text"/>
+<button class="ml-4 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">tune</span>
+</button>
+</div>
+<!-- Category Pills -->
+<div class="w-full max-w-2xl overflow-x-auto no-scrollbar pointer-events-auto">
+<div class="flex gap-3 px-2 py-2">
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed px-6 py-2 rounded-full font-label font-semibold text-sm whitespace-nowrap shadow-[0_0_24px_rgba(143,245,255,0.15)] flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+                        Food
+                    </button>
+<button class="bg-surface-bright/30 ghost-border text-on-surface px-6 py-2 rounded-full font-label text-sm whitespace-nowrap hover:bg-surface-bright/50 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings: 'FILL' 0;">shopping_bag</span>
+                        Retail
+                    </button>
+<button class="bg-surface-bright/30 ghost-border text-on-surface px-6 py-2 rounded-full font-label text-sm whitespace-nowrap hover:bg-surface-bright/50 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-tertiary" style="font-variation-settings: 'FILL' 0;">local_activity</span>
+                        Events
+                    </button>
+<button class="bg-surface-bright/30 ghost-border text-on-surface px-6 py-2 rounded-full font-label text-sm whitespace-nowrap hover:bg-surface-bright/50 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 0;">local_cafe</span>
+                        Cafes
+                    </button>
+</div>
+</div>
+</div>
+<!-- Detail Peek Sheet (Bottom) -->
+<div class="absolute bottom-0 md:bottom-6 left-0 right-0 px-0 md:px-6 z-30 pointer-events-none flex justify-center pb-24 md:pb-0">
+<div class="w-full max-w-xl glass-overlay rounded-t-xl md:rounded-xl p-6 pointer-events-auto ghost-border transform translate-y-0 transition-transform duration-500">
+<div class="w-12 h-1 bg-outline-variant rounded-full mx-auto mb-6 md:hidden"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h2 class="font-headline text-2xl font-bold text-on-surface tracking-tight mb-1">Neon Noodle Bar</h2>
+<p class="font-body text-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary inline-block shadow-[0_0_8px_rgba(143,245,255,0.8)]"></span>
+                            Trending Now • 0.2 mi
+                        </p>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full bg-surface-bright/50 ghost-border flex items-center justify-center text-on-surface hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+</button>
+</div>
+</div>
+<div class="flex gap-4 mt-6">
+<button class="flex-1 bg-gradient-to-r from-primary to-primary-container text-on-primary-fixed py-3 rounded-lg font-label font-semibold flex justify-center items-center gap-2 shadow-[0_0_24px_rgba(143,245,255,0.2)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions_walk</span>
+                        Navigate
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe bg-[#262627]/50 backdrop-blur-2xl no-line-rule border-none shadow-[0_0_32px_rgba(0,240,255,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#8ff5ff] drop-shadow-[0_0_8px_rgba(143,245,255,0.6)] active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaab] hover:text-[#8ff5ff] hover:opacity-80 transition-all active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">person</span>
+</a>
+</nav>
+</body></html>

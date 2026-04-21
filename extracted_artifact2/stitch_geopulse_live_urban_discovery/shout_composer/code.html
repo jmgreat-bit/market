@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GeoPulse 'Shout' Composer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#390050",
+                        "surface-dim": "#0e0e0f",
+                        "surface-tint": "#8ff5ff",
+                        "primary": "#8ff5ff",
+                        "surface-container-high": "#201f21",
+                        "error": "#ff716c",
+                        "background": "#0e0e0f",
+                        "primary-fixed": "#00eefc",
+                        "on-tertiary-fixed": "#39000d",
+                        "surface-container-highest": "#262627",
+                        "on-tertiary-container": "#000000",
+                        "on-surface": "#ffffff",
+                        "surface-bright": "#2c2c2d",
+                        "on-surface-variant": "#adaaab",
+                        "on-secondary-fixed": "#580079",
+                        "on-primary": "#005d63",
+                        "on-error-container": "#ffa8a3",
+                        "primary-fixed-dim": "#00deec",
+                        "surface-container": "#1a191b",
+                        "secondary": "#d674ff",
+                        "on-primary-fixed-variant": "#005e64",
+                        "secondary-container": "#9800d0",
+                        "on-secondary-fixed-variant": "#8300b3",
+                        "secondary-fixed": "#f0c1ff",
+                        "surface-container-lowest": "#000000",
+                        "error-dim": "#d7383b",
+                        "tertiary-container": "#fd3b66",
+                        "secondary-fixed-dim": "#eaaeff",
+                        "primary-dim": "#00deec",
+                        "surface-variant": "#262627",
+                        "on-primary-container": "#005359",
+                        "surface-container-low": "#131314",
+                        "inverse-on-surface": "#565556",
+                        "tertiary": "#ff6e84",
+                        "tertiary-fixed": "#ff909d",
+                        "secondary-dim": "#bb00fd",
+                        "on-primary-fixed": "#003f43",
+                        "inverse-surface": "#fcf8f9",
+                        "inverse-primary": "#006a71",
+                        "outline-variant": "#484849",
+                        "on-tertiary": "#490013",
+                        "on-error": "#490006",
+                        "on-background": "#ffffff",
+                        "outline": "#767576",
+                        "on-tertiary-fixed-variant": "#780025",
+                        "error-container": "#9f0519",
+                        "tertiary-fixed-dim": "#ff788b",
+                        "surface": "#0e0e0f",
+                        "primary-container": "#00eefc",
+                        "tertiary-dim": "#ff6e84",
+                        "on-secondary-container": "#fff5fc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Space Grotesk", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(38, 38, 39, 0.4); /* surface-container-highest with opacity */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .ghost-border {
+            border: 1px solid rgba(72, 72, 73, 0.15); /* outline-variant */
+        }
+        .ambient-shadow {
+            box-shadow: 0 8px 32px rgba(143, 245, 255, 0.08); /* primary tinted shadow */
+        }
+        .text-gradient {
+            background-image: linear-gradient(to right, #8ff5ff, #00eefc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- App Bar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 py-4 bg-zinc-950/40 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+<div class="flex items-center gap-4">
+<button class="text-[#00F0FF] hover:text-zinc-200 transition-colors flex items-center justify-center p-2 rounded-full ghost-border glass-panel">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+<h1 class="text-xl font-black tracking-[0.2em] text-[#00F0FF] drop-shadow-[0_0_8px_rgba(0,240,255,0.4)] font-headline">GEOPULSE</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-[#00F0FF] hover:text-zinc-200 transition-colors flex items-center justify-center p-2 rounded-full ghost-border glass-panel">
+<span class="material-symbols-outlined text-xl">help</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-4xl mx-auto flex flex-col gap-8">
+<!-- Header Area -->
+<div class="flex flex-col gap-2 pt-4">
+<h2 class="font-headline text-4xl md:text-5xl font-bold tracking-tight text-gradient">Compose Shout</h2>
+<p class="text-on-surface-variant text-lg">Broadcast live updates to the trading network.</p>
+</div>
+<!-- Composer Form Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Media & Text -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Media Upload Area -->
+<div class="glass-panel ghost-border rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] cursor-pointer group hover:bg-surface-container transition-colors relative overflow-hidden">
+<!-- Subtle glow effect behind icon -->
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
+<div class="flex flex-col items-center gap-4 z-10">
+<div class="w-16 h-16 rounded-full bg-surface-container-low flex items-center justify-center ghost-border group-hover:border-primary/30 transition-colors">
+<span class="material-symbols-outlined text-3xl text-primary group-hover:text-primary-fixed transition-colors">add_photo_alternate</span>
+</div>
+<div class="text-center">
+<p class="font-headline font-semibold text-xl mb-1">Upload Media</p>
+<p class="text-on-surface-variant text-sm">Drag &amp; drop high-res images or short video clips.</p>
+</div>
+</div>
+</div>
+<!-- Text Input Area -->
+<div class="glass-panel ghost-border rounded-xl p-1 focus-within:border-primary/50 transition-colors">
+<textarea class="w-full bg-transparent border-none text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 resize-none p-5 text-lg font-body" placeholder="What's the pulse? Drop intel here..." rows="4"></textarea>
+</div>
+</div>
+<!-- Right Column: Controls -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- Settings Card -->
+<div class="bg-surface-container rounded-xl p-6 flex flex-col gap-8 shadow-lg shadow-black/50">
+<!-- Expiration Slider -->
+<div class="flex flex-col gap-4">
+<div class="flex justify-between items-center">
+<label class="font-headline font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary">timer</span>
+                                Expiration Time
+                            </label>
+<span class="text-primary font-mono text-sm bg-primary/10 px-2 py-1 rounded">12h</span>
+</div>
+<div class="relative w-full h-2 bg-surface-container-low rounded-full outline-variant/20 overflow-hidden">
+<!-- Simulated slider fill -->
+<div class="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-primary to-primary-container"></div>
+<!-- Simulated slider thumb -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-on-surface rounded-full shadow-[0_0_10px_#00eefc]"></div>
+</div>
+<div class="flex justify-between text-xs text-on-surface-variant font-mono">
+<span>1h</span>
+<span>24h</span>
+</div>
+</div>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Location Tagging Toggle -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<label class="font-headline font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                                Tag Location
+                            </label>
+<p class="text-xs text-on-surface-variant">Attach current coords to Shout.</p>
+</div>
+<!-- Toggle Switch (Simulated Active) -->
+<div class="w-12 h-6 rounded-full bg-primary/20 relative cursor-pointer flex items-center p-1 border border-primary/30">
+<div class="w-4 h-4 rounded-full bg-primary absolute right-1 shadow-[0_0_8px_#8ff5ff]"></div>
+</div>
+</div>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Visibility Options -->
+<div class="flex flex-col gap-3">
+<label class="font-headline font-semibold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary">visibility</span>
+                                Visibility Network
+                            </label>
+<div class="flex gap-2">
+<button class="flex-1 py-2 rounded-lg bg-primary/10 text-primary border border-primary/30 text-sm font-medium transition-colors">Global</button>
+<button class="flex-1 py-2 rounded-lg bg-surface-container-low text-on-surface-variant ghost-border hover:bg-surface-container transition-colors text-sm font-medium">Local</button>
+</div>
+</div>
+</div>
+<!-- Broadcast Button -->
+<button class="mt-auto w-full py-5 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-lg flex items-center justify-center gap-3 relative overflow-hidden group shadow-[0_0_20px_rgba(143,245,255,0.2)] hover:shadow-[0_0_30px_rgba(143,245,255,0.4)] transition-all">
+<span class="material-symbols-outlined font-bold">campaign</span>
+                    Broadcast Shout
+                    <!-- Simulated subtle pulse overlay -->
+<div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</button>
+<p class="text-center text-xs text-on-surface-variant/60">Action costs 50 Pulse Credits.</p>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Suppressed as per rules for transactional/task-focused pages, but keeping a minimalist version if considered a core flow, opting to hide for focus) -->
+<!-- Navigation omitted due to "Task-Focused" rule in shared components logic (Composer page implies a task). -->
+</body></html>
