@@ -12,12 +12,14 @@ const PROTECTED_ROUTES = [
     '/analytics',
     '/vouchers',
     '/profile',
+    '/compose',
+    '/saved',
 ];
 
 // Routes only accessible to guests (redirect to /feed if already logged in)
 const GUEST_ONLY_ROUTES = ['/auth/login', '/auth/signup'];
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });
 
     const supabase = createServerClient(

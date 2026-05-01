@@ -1,24 +1,22 @@
 'use client';
 
 import { MapPin } from 'lucide-react';
-import { PostImage, PostVideo, PostLink } from '@/types';
+import { PostImage, PostLink } from '@/types';
 import { ImageCarousel } from './ImageCarousel';
-import { VideoPlayer } from './VideoPlayer';
 import { LinkPreview } from './LinkPreview';
 
 interface PostBodyProps {
     content: string;
     imageUrl?: string | null;
     images?: PostImage[];
-    video?: PostVideo | null;
     link?: PostLink | null;
     latitude?: number | null;
     longitude?: number | null;
 }
 
-export function PostBody({ content, imageUrl, images, video, link, latitude, longitude }: PostBodyProps) {
+export function PostBody({ content, imageUrl, images, link, latitude, longitude }: PostBodyProps) {
     const hasImages = images && images.length > 0;
-    const hasLegacyImage = imageUrl && !hasImages && !video;
+    const hasLegacyImage = imageUrl && !hasImages;
 
     return (
         <div className="flex flex-col">
@@ -30,9 +28,9 @@ export function PostBody({ content, imageUrl, images, video, link, latitude, lon
             </div>
 
             {/* Media Block Layer */}
-            <div className="relative w-full rounded-2xl overflow-hidden px-2 pb-2">
+            <div className="relative w-full rounded-xl overflow-hidden px-2 pb-2">
                 {hasLegacyImage && (
-                    <div className="relative aspect-video bg-surface-container-lowest rounded-xl overflow-hidden border border-border">
+                    <div className="relative aspect-video bg-surface-container-lowest rounded-lg overflow-hidden border border-border">
                         <img
                             src={imageUrl!}
                             alt="Post image"
@@ -42,14 +40,8 @@ export function PostBody({ content, imageUrl, images, video, link, latitude, lon
                 )}
 
                 {hasImages && (
-                    <div className="rounded-xl overflow-hidden border border-border">
+                    <div className="rounded-lg overflow-hidden border border-border">
                         <ImageCarousel images={images!} />
-                    </div>
-                )}
-
-                {video && (
-                    <div className="rounded-xl overflow-hidden border border-border">
-                        <VideoPlayer video={video} />
                     </div>
                 )}
 
@@ -63,7 +55,7 @@ export function PostBody({ content, imageUrl, images, video, link, latitude, lon
             {/* Location Tag */}
             {latitude && longitude && (
                 <div className="px-2 pb-1">
-                    <button className="w-full px-3 py-2.5 flex items-center gap-2 rounded-xl text-[13px] font-medium text-muted-foreground bg-surface-container-low/50 border border-white/5 hover:bg-surface-container/80 transition-all hover:text-primary active:scale-[0.98]">
+                    <button className="w-full px-3 py-2.5 flex items-center gap-2 rounded-lg text-[13px] font-medium text-muted-foreground bg-surface-container-low/50 border border-white/5 hover:bg-surface-container/80 transition-all hover:text-primary active:scale-[0.98]">
                         <MapPin className="w-4 h-4" />
                         <span>View on map</span>
                     </button>

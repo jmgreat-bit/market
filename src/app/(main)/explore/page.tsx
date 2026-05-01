@@ -1,67 +1,60 @@
 'use client';
 
-import { Sparkles, TrendingUp, Zap, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sparkles, TrendingUp, Zap, MapPin, Loader2 } from 'lucide-react';
 import { FeedList } from '@/components/features/feed/FeedList';
-
-// Using mock data for explore page to show the concept
-const trendingPosts = [
-    {
-        id: '101',
-        business_id: 'b1',
-        content: '🔥 Midnight Secret Drop! First 50 people showing this pulse get 50% off our Neo-Neon hoodies. Starts at 11PM sharp!',
-        business: {
-            id: 'b1',
-            profile_id: 'p1',
-            business_name: 'Cyber Threads',
-            category: 'Retail',
-            latitude: 40.7128,
-            longitude: -74.006,
-            is_premium: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            bio: null,
-            address: null,
-            phone: null
-        },
-        likes_count: 342,
-        comments_count: 89,
-        is_liked: true,
-        image_url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1200',
-        latitude: null,
-        longitude: null,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 4).toISOString(),
-        created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    },
-    {
-        id: '102',
-        business_id: 'b2',
-        content: '🎶 Guest DJ Alert! DJ Synthwave is taking over the decks tonight. VIP tables are 80% full. Secure your spot!',
-        business: {
-            id: 'b2',
-            profile_id: 'p2',
-            business_name: 'The Voltage Room',
-            category: 'Events',
-            latitude: 40.7138,
-            longitude: -74.005,
-            is_premium: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            bio: null,
-            address: null,
-            phone: null
-        },
-        likes_count: 890,
-        comments_count: 124,
-        is_liked: false,
-        image_url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=1200',
-        latitude: null,
-        longitude: null,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 6).toISOString(),
-        created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    }
-];
+import { getSupabaseClient } from '@/lib/supabase/client';
+import { PostWithBusiness } from '@/types';
 
 export default function ExplorePage() {
+    const [trendingPosts, setTrendingPosts] = useState<PostWithBusiness[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        async function fetchTrending() {
+            try {
+                setIsLoading(true);
+                const supabase = getSupabaseClient();
+                const { data, error: fetchError } = await supabase
+                    .from('posts')
+                    .select(`
+                        *,
+                        business:business_details(
+                            *,
+                            profile:profiles(avatar_url, full_name)
+                        ),
+                        likes:likes(count),
+                        comments:comments(count)
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (fetchError) throw fetchError;
+
+                // Enrich with aggregated counts and sort by engagement
+                const enriched = (data || []).map((post: any) => ({
+                    ...post,
+                    likes_count: post.likes?.[0]?.count ?? 0,
+                    comments_count: post.comments?.[0]?.count ?? 0,
+                }));
+
+                // Sort by total engagement (likes + comments) descending
+                enriched.sort((a: any, b: any) =>
+                    (b.likes_count + b.comments_count) - (a.likes_count + a.comments_count)
+                );
+
+                setTrendingPosts(enriched as unknown as PostWithBusiness[]);
+            } catch (err) {
+                console.error('Failed to fetch trending:', err);
+                setError('Failed to load trending pulses');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchTrending();
+    }, []);
+
     return (
         <div className="min-h-screen bg-background pb-32 md:pb-12 text-foreground">
             {/* Explore Header */}
@@ -95,7 +88,14 @@ export default function ExplorePage() {
 
             {/* Feed content */}
             <div className="px-6 md:px-10 max-w-3xl mx-auto w-full">
-                <FeedList posts={trendingPosts as any} isLoading={false} error={null} />
+                {isLoading ? (
+                    <div className="flex flex-col items-center py-20 gap-4">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <p className="text-muted-foreground font-medium">Fetching the latest pulses...</p>
+                    </div>
+                ) : (
+                    <FeedList posts={trendingPosts} isLoading={false} error={error} />
+                )}
             </div>
         </div>
     );

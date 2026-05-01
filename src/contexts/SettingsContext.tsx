@@ -36,20 +36,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     // Initialize from localStorage on mount
     useEffect(() => {
-        try {
-            const storedTheme = localStorage.getItem('geopulse-theme') as Theme;
-            const storedLang = localStorage.getItem('geopulse-lang') as Language;
+        const timer = setTimeout(() => {
+            try {
+                const storedTheme = localStorage.getItem('geopulse-theme') as Theme;
+                const storedLang = localStorage.getItem('geopulse-lang') as Language;
 
-            if (storedTheme && ['dark', 'light', 'midnight'].includes(storedTheme)) {
-                setThemeState(storedTheme);
+                if (storedTheme && ['dark', 'light', 'midnight'].includes(storedTheme)) {
+                    setThemeState(storedTheme);
+                }
+                if (storedLang && ['en', 'es', 'fr'].includes(storedLang)) {
+                    setLanguageState(storedLang);
+                }
+            } catch (e) {
+                console.error('Failed to load settings', e);
             }
-            if (storedLang && ['en', 'es', 'fr'].includes(storedLang)) {
-                setLanguageState(storedLang);
-            }
-        } catch (e) {
-            console.error('Failed to load settings', e);
-        }
-        setMounted(true);
+            setMounted(true);
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     // Sync theme to DOM
@@ -80,11 +83,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const setTheme = (newTheme: Theme) => setThemeState(newTheme);
     const setLanguage = (newLang: Language) => setLanguageState(newLang);
 
-    // Prevent flash of incorrect content/theme (optional, but good for UX)
-    if (!mounted) {
-        return <div className="min-h-screen bg-background" />; // Or specific loader
-    }
-
     const value = {
         theme,
         setTheme,
@@ -95,7 +93,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <SettingsContext.Provider value={value}>
-            {children}
+            <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
+                {children}
+            </div>
         </SettingsContext.Provider>
     );
 }

@@ -1,9 +1,10 @@
 'use client';
 
+import React, { useMemo, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Clock, Star } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface PostHeaderProps {
     businessName?: string;
@@ -11,19 +12,34 @@ interface PostHeaderProps {
     isPremium?: boolean;
     createdAt: string;
     expiresAt?: string | null;
+    avatarUrl?: string | null;
 }
 
-export function PostHeader({ businessName, category, isPremium, createdAt, expiresAt }: PostHeaderProps) {
-    const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
+export function PostHeader({ businessName, category, isPremium, createdAt, expiresAt, avatarUrl }: PostHeaderProps) {
+    const [mounted, setMounted] = useState(false);
     
-    const isExpiringSoon = expiresAt ? (
-        new Date(expiresAt).getTime() - Date.now() < 2 * 60 * 60 * 1000 &&
-        new Date(expiresAt).getTime() > Date.now()
-    ) : false;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const timeAgo = mounted 
+        ? formatDistanceToNow(new Date(createdAt), { addSuffix: true })
+        : '';
+    
+    const isExpiringSoon = useMemo(() => {
+        if (!expiresAt) return false;
+        // In React 19 / Compiler, we should use a stable time or handle impurity
+        const expireTime = new Date(expiresAt).getTime();
+        const now = new Date().getTime(); 
+        return expireTime - now < 2 * 60 * 60 * 1000 && expireTime > now;
+    }, [expiresAt]);
 
     return (
         <div className="p-4 pb-3 flex items-start gap-3">
             <Avatar className="w-11 h-11 ring-2 ring-primary/20 shadow-geo-glow">
+                {avatarUrl && (
+                    <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
+                )}
                 <AvatarFallback className="bg-primary text-primary-foreground font-bold font-display">
                     {businessName?.charAt(0) || 'B'}
                 </AvatarFallback>

@@ -2,6 +2,9 @@
 
 import { useUser } from '@/hooks/useUser';
 import { useSettings, Theme, Language } from '@/contexts/SettingsContext';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/constants';
 import { 
     User, 
     LogOut, 
@@ -20,12 +23,31 @@ import {
 } from 'lucide-react';
 
 export default function MenuPage() {
-    const { profile, signOut } = useUser();
+    const { profile, user, isLoading, signOut, isAuthenticated } = useUser();
     const { theme, setTheme, language, setLanguage, t } = useSettings();
+    const router = useRouter();
 
-    // Middleware handles auth protection — no need for a local spinner/redirect
+    const handleSignOut = async () => {
+        await signOut();
+        router.replace('/auth/login');
+        router.refresh();
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return null; // Middleware will redirect
+    }
 
     const isTrader = profile?.role === 'trader';
+    const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
+    const displayUsername = profile?.username || user?.email?.split('@')[0] || 'user';
 
     return (
         <div className="min-h-screen bg-surface text-foreground pb-32">
@@ -34,23 +56,38 @@ export default function MenuPage() {
                 {/* Profile Header HUD */}
                 <div className="flex items-center gap-5">
                     <div className="relative">
-                        <div className="w-20 h-20 rounded-full geo-gradient p-[2px]">
+                        <div className="w-16 h-16 rounded-full geo-gradient p-[2px]">
                             <div className="w-full h-full rounded-full bg-surface flex items-center justify-center overflow-hidden">
-                                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-headline text-3xl font-bold uppercase">
-                                    {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
-                                </div>
+                                {isLoading ? (
+                                    <div className="w-full h-full bg-secondary animate-pulse" />
+                                ) : profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-headline text-3xl font-bold uppercase">
+                                        {displayName.charAt(0)}
+                                    </div>
+                                )}
                             </div>
                         </div>
                             <div className="absolute -bottom-1 -right-1 bg-primary p-1 rounded-full border-2 border-surface shadow-lg">
                                 <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
                             </div>
                     </div>
-                    <div>
-                        <h2 className="font-headline text-2xl font-black tracking-tight">{profile?.full_name || 'User'}</h2>
-                        <p className="text-primary text-sm font-medium tracking-wide">@{profile?.username || 'explorer'}</p>
-                        <div className="flex items-center gap-2 mt-1 px-2 py-0.5 rounded-full bg-secondary border border-border/50 w-fit">
+                    <div className="flex-1">
+                        {isLoading ? (
+                            <div className="space-y-2">
+                                <div className="h-7 w-32 bg-secondary rounded animate-pulse" />
+                                <div className="h-4 w-24 bg-secondary/50 rounded animate-pulse" />
+                            </div>
+                        ) : (
+                            <>
+                                <h2 className="font-headline text-xl font-black tracking-tight line-clamp-1">{displayName}</h2>
+                                <p className="text-primary text-sm font-medium tracking-wide">@{displayUsername}</p>
+                            </>
+                        )}
+                        <div className="flex items-center gap-2 mt-2 px-2 py-0.5 rounded-full bg-secondary border border-border/50 w-fit">
                             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Pulse</span>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Online</span>
                         </div>
                     </div>
                 </div>
@@ -61,24 +98,27 @@ export default function MenuPage() {
                     <div className="grid grid-cols-2 gap-3">
                         <MenuButton 
                             icon={<Bookmark className="w-5 h-5" />} 
-                            label="Saved Pulses" 
-                            desc="Managed bookmarks" 
+                            label="Saved Posts" 
+                            desc="Managed bookmarks"
+                            href={ROUTES.SAVED}
                         />
                         <MenuButton 
                             icon={<BarChart3 className="w-5 h-5" />} 
                             label="Analytics" 
                             desc={isTrader ? "Business insights" : "Discovery stats"} 
-                            locked={!isTrader}
+                            href="/analytics"
                         />
                         <MenuButton 
                             icon={<User className="w-5 h-5" />} 
                             label="Edit Profile" 
                             desc="Update identity" 
+                            href="/profile"
                         />
-                        <MenuButton 
-                            icon={<Shield className="w-5 h-5" />} 
-                            label="Security" 
-                            desc="Auth settings" 
+                        <MenuButton
+                            icon={<Shield className="w-5 h-5" />}
+                            label="Security"
+                            desc="Coming soon"
+                            locked={true}
                         />
                     </div>
                 </div>
@@ -88,7 +128,7 @@ export default function MenuPage() {
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">System Customization</h3>
                     
                     {/* Theme Switcher */}
-                    <div className="glass-card rounded-[2rem] border border-border/50 p-6 space-y-4">
+                    <div className="glass-card rounded-xl border border-border/50 p-5 space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <Monitor className="w-4 h-4 text-primary" />
@@ -115,7 +155,7 @@ export default function MenuPage() {
                     </div>
 
                     {/* Language Hub */}
-                    <div className="glass-card rounded-[2rem] border border-border/50 p-6 space-y-4">
+                    <div className="glass-card rounded-xl border border-border/50 p-5 space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <Globe className="w-4 h-4 text-primary" />
@@ -144,17 +184,17 @@ export default function MenuPage() {
                 {/* Additional Links */}
                 <div className="space-y-2">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Information</h3>
-                    <div className="bg-card rounded-[1.5rem] border border-border/50 overflow-hidden">
+                    <div className="bg-card rounded-lg border border-border/50 overflow-hidden">
                         <InfoLink icon={<HelpCircle />} label="Help Center" />
-                        <InfoLink icon={<FileText />} label="Terms of Service" />
-                        <InfoLink icon={<Settings />} label="Privacy Policy" />
+                        <InfoLink icon={<FileText />} label="Terms of Service" href="/legal/terms" />
+                        <InfoLink icon={<Settings />} label="Privacy Policy" href="/legal/privacy" />
                     </div>
                 </div>
 
                 {/* Terminal Action */}
                 <button
-                    onClick={() => signOut()}
-                    className="w-full flex items-center gap-4 p-5 bg-destructive/10 border border-destructive/20 rounded-2xl hover:bg-destructive text-white transition-all group"
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-4 p-4 bg-destructive/10 border border-destructive/20 rounded-xl hover:bg-destructive text-white transition-all group"
                 >
                     <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center group-hover:bg-destructive-foreground/20 transition-colors">
                         <LogOut className="w-5 h-5 text-destructive group-hover:text-white" />
@@ -170,29 +210,44 @@ export default function MenuPage() {
     );
 }
 
-function MenuButton({ icon, label, desc, locked = false }: { icon: any, label: string, desc: string, locked?: boolean }) {
+function MenuButton({ icon, label, desc, locked = false, href }: { icon: any, label: string, desc: string, locked?: boolean, href?: string }) {
+    const Component = href && !locked ? Link : 'button';
     return (
-        <button 
+        <Component 
+            href={href as string}
             disabled={locked}
             className={`
-                flex flex-col items-start gap-4 p-5 rounded-[2rem] border transition-all text-left group
+                flex flex-col items-start gap-4 p-4 rounded-xl border transition-all text-left group
                 ${locked 
                     ? 'bg-secondary border-border/50 opacity-50 grayscale cursor-not-allowed' 
                     : 'glass-card border-border/50 hover:border-primary/40 active:scale-95'}
             `}
         >
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${locked ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'}`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${locked ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'}`}>
                 {icon}
             </div>
             <div>
                 <p className="font-headline font-bold text-sm text-foreground mb-0.5">{label}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{desc}</p>
             </div>
-        </button>
+        </Component>
     );
 }
 
-function InfoLink({ icon, label }: { icon: any, label: string }) {
+function InfoLink({ icon, label, href }: { icon: any, label: string, href?: string }) {
+    if (href) {
+        return (
+            <Link href={href} className="w-full flex items-center justify-between p-4 px-6 hover:bg-secondary-foreground/5 transition-colors group">
+                <div className="flex items-center gap-3">
+                    <div className="text-muted-foreground group-hover:text-primary transition-colors">
+                        {icon}
+                    </div>
+                    <span className="font-medium text-sm text-foreground">{label}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-all" />
+            </Link>
+        );
+    }
     return (
         <button className="w-full flex items-center justify-between p-4 px-6 hover:bg-secondary-foreground/5 transition-colors group">
             <div className="flex items-center gap-3">

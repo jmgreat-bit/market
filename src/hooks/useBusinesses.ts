@@ -44,17 +44,10 @@ export function useBusinesses(options: UseBusinessesOptions = {}) {
 
                 if (fetchError) throw fetchError;
 
-                // Use mock data if no real data found
-                if (!data || data.length === 0) {
-                    setBusinesses(getMockBusinesses());
-                } else {
-                    setBusinesses(data);
-                }
+                setBusinesses(data || []);
             } catch (err) {
-                // Fallback to mock data on error
-                console.warn('Using mock data due to error:', err);
-                setBusinesses(getMockBusinesses());
-                setError(null); // Clear error since we have mock data
+                console.error('[useBusinesses] Database fetch error:', err);
+                setError('Failed to load businesses');
             } finally {
                 setIsLoading(false);
             }

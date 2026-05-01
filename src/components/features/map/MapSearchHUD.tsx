@@ -1,56 +1,75 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, SlidersHorizontal, UtensilsCrossed, ShoppingBag, Ticket, Coffee } from 'lucide-react';
+import {
+    Search,
+    Utensils,
+    ShoppingBag,
+    Ticket,
+    Sparkles,
+    Filter,
+    X
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const categories = [
-    { id: 'food', label: 'Food', icon: UtensilsCrossed, active: true },
-    { id: 'retail', label: 'Retail', icon: ShoppingBag, active: false },
-    { id: 'events', label: 'Events', icon: Ticket, active: false },
-    { id: 'cafes', label: 'Cafes', icon: Coffee, active: false },
-];
+interface MapSearchHUDProps {
+    onCategoryFilter?: (category: string | null) => void;
+}
 
-export function MapSearchHUD() {
-    const [activeCategory, setActiveCategory] = useState('food');
+export function MapSearchHUD({ onCategoryFilter }: MapSearchHUDProps) {
+    const [query, setQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+    const categories = [
+        { id: 'Food', name: 'Food', icon: Utensils },
+        { id: 'Retail', name: 'Retail', icon: ShoppingBag },
+        { id: 'Events', name: 'Events', icon: Ticket },
+        { id: 'Other', name: 'Services', icon: Sparkles },
+    ];
+
+    const handleCategoryClick = (id: string) => {
+        const next = activeCategory === id ? null : id;
+        setActiveCategory(next);
+        if (onCategoryFilter) onCategoryFilter(next);
+    };
 
     return (
-        <div className="absolute top-safe top-6 left-0 right-0 px-4 md:px-6 lg:px-8 flex flex-col items-center gap-4 z-40 pointer-events-none w-full">
-            {/* Glass Search Bar */}
-            <div className="w-full max-w-3xl bg-[#131214]/60 backdrop-blur-[24px] rounded-xl flex items-center px-4 py-3.5 shadow-2xl pointer-events-auto border border-[#3b3a3c]/30">
-                <Search className="w-6 h-6 text-muted-foreground mr-3 flex-shrink-0" />
-                <input
-                    className="bg-transparent border-none w-full text-foreground font-sans placeholder:text-muted-foreground text-base focus:outline-none focus:ring-0"
-                    placeholder="Search the pulse..."
-                    type="text"
-                />
-                <button className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:bg-[#2c2c2d]/50 hover:text-foreground transition-colors flex-shrink-0">
-                    <SlidersHorizontal className="w-5 h-5" />
-                </button>
-            </div>
+        <div className="absolute top-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6">
+            <div className="max-w-md mx-auto space-y-4 pointer-events-auto">
+                {/* Search Bar HUD */}
+                <div className="glass-card rounded-full border border-border/50 flex items-center px-4 py-2.5 shadow-2xl backdrop-blur-3xl">
+                    <Search className="w-5 h-5 text-primary mr-3" />
+                    <input
+                        type="text"
+                        placeholder="Search current area..."
+                        className="bg-transparent border-none focus:outline-none text-sm w-full placeholder:text-muted-foreground font-medium"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <div className="w-px h-4 bg-border/50 mx-2" />
+                    <button className="p-1 text-muted-foreground hover:text-primary transition-colors">
+                        <Filter className="w-4 h-4" />
+                    </button>
+                </div>
 
-            {/* Category Pills */}
-            <div className="w-full max-w-3xl overflow-x-auto scrollbar-hide pointer-events-auto">
-                <div className="flex justify-start md:justify-center gap-3 py-1">
-                    {categories.map((cat) => {
-                        const Icon = cat.icon;
-                        const isActive = activeCategory === cat.id;
-                        return (
-                            <button
-                                key={cat.id}
-                                onClick={() => setActiveCategory(cat.id)}
-                                className={cn(
-                                    "px-5 py-2.5 rounded-full font-display font-bold text-[15px] whitespace-nowrap flex items-center gap-2 transition-all active:scale-95 duration-200 border",
-                                    isActive
-                                        ? "bg-gradient-to-r from-primary to-accent text-[#003f43] border-transparent shadow-[0_0_24px_rgba(143,245,255,0.15)]"
-                                        : "bg-[#1a191b]/50 border-white/5 text-foreground hover:bg-[#2c2c2d]/50 hover:border-white/10"
-                                )}
-                            >
-                                <Icon className={cn("w-4 h-4", !isActive && "text-primary")} strokeWidth={isActive ? 2.5 : 2} />
-                                {cat.label}
-                            </button>
-                        );
-                    })}
+                {/* Quick Filters */}
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.id}
+                            onClick={() => handleCategoryClick(cat.id)}
+                            className={cn(
+                                "flex items-center gap-2 px-4 py-2 rounded-full border transition-all whitespace-nowrap backdrop-blur-xl shadow-lg",
+                                activeCategory === cat.id
+                                    ? "bg-primary border-primary text-primary-foreground font-bold"
+                                    : "glass-card border-border/40 text-foreground hover:border-primary/40"
+                            )}
+                        >
+                            <cat.icon className={cn("w-3.5 h-3.5", activeCategory === cat.id ? "text-primary-foreground" : "text-primary")} />
+                            <span className="text-[11px] uppercase tracking-wider">{cat.name}</span>
+                            {activeCategory === cat.id && <X className="w-3 h-3 ml-1" />}
+                        </button>
+                    ))}
                 </div>
             </div>
         </div>

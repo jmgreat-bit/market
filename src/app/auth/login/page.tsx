@@ -65,7 +65,7 @@ function LoginForm() {
             </div>
 
             {/* Form */}
-            <Card className="p-6 bg-[#1a191b]/50 backdrop-blur-[30px] border border-[rgba(72,72,73,0.15)] rounded-xl">
+            <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
                         <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
@@ -83,7 +83,7 @@ function LoginForm() {
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                 required
                             />
                         </div>
@@ -100,7 +100,7 @@ function LoginForm() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="pl-10 pr-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                className="pl-10 pr-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                 required
                             />
                             <button

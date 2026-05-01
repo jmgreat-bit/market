@@ -39,7 +39,7 @@ export function FeedList({ posts, isLoading, error }: FeedListProps) {
         return (
             <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
-                <p className="text-sm text-muted-foreground">Loading shouts...</p>
+                <p className="text-sm text-muted-foreground">Loading posts...</p>
             </div>
         );
     }
@@ -61,9 +61,9 @@ export function FeedList({ posts, isLoading, error }: FeedListProps) {
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4">
                     <span className="text-3xl">📢</span>
                 </div>
-                <h3 className="font-semibold text-foreground mb-1">No Shouts Yet</h3>
-                <p className="text-sm text-muted-foreground text-center max-w-xs">
-                    Businesses in your area haven&apos;t posted any shouts yet. Check back soon!
+                <h3 className="font-semibold text-foreground mb-1">No Posts Yet</h3>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    Businesses in your area haven&apos;t created any posts yet. Check back soon!
                 </p>
             </div>
         );

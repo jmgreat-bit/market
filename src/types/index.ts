@@ -8,8 +8,11 @@ export interface Profile {
   username: string | null;
   phone: string | null;
   full_name: string | null;
+  headline: string | null;
+  bio: string | null;
   avatar_url: string | null;
   role: UserRole;
+  is_premium: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -24,6 +27,9 @@ export interface BusinessDetails {
   longitude: number;
   address: string | null;
   phone: string | null;
+  website_url: string | null;
+  twitter_url: string | null;
+  instagram_url: string | null;
   is_premium: boolean;
   created_at: string;
   updated_at: string;
@@ -58,6 +64,7 @@ export interface Comment {
   user_name: string;
   user_avatar?: string;
   content: string;
+  image_url?: string | null;
   created_at: string;
 }
 

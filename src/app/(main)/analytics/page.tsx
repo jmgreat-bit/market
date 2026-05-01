@@ -1,253 +1,300 @@
 'use client';
 
-import { 
-    Menu, 
-    Store, 
-    Megaphone, 
-    ShieldCheck, 
-    Users, 
-    HelpCircle, 
-    Eye, 
-    TrendingUp, 
-    TrendingDown,
-    Activity, 
-    Footprints, 
-    ArrowRight 
+import { useEffect, useState } from 'react';
+import {
+    Eye,
+    TrendingUp,
+    Activity,
+    Footprints,
+    ArrowRight,
+    Zap,
+    Lock
 } from 'lucide-react';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useUser } from '@/hooks/useUser';
+import { getSupabaseClient } from '@/lib/supabase/client';
+import { Post } from '@/types';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/constants';
+
+function timeRemaining(expiresAt: string | null): string {
+    if (!expiresAt) return 'No expiry';
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return 'Expired';
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    if (h > 0) return `${h}h ${m}m remaining`;
+    return `${m}m remaining`;
+}
 
 export default function AnalyticsDashboardPage() {
     const { metrics, isLoading } = useAnalytics();
+    const { profile, isLoading: authLoading } = useUser();
+    const [traderPosts, setTraderPosts] = useState<Post[]>([]);
+    const [postsLoading, setPostsLoading] = useState(false);
+
+    const isTrader = profile?.role === 'trader';
+
+    useEffect(() => {
+        if (!isTrader || !profile?.id) return;
+
+        async function fetchTraderPosts() {
+            setPostsLoading(true);
+            try {
+                const supabase = getSupabaseClient();
+
+                // First get the business linked to this trader
+                const { data: biz } = await supabase
+                    .from('business_details')
+                    .select('id')
+                    .eq('profile_id', profile!.id)
+                    .single();
+
+                if (!biz) return;
+
+                const { data } = await supabase
+                    .from('posts')
+                    .select(`
+                        *,
+                        likes:likes(count),
+                        comments:comments(count)
+                    `)
+                    .eq('business_id', biz.id)
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+
+                if (data) {
+                    const enriched = data.map((post: any) => ({
+                        ...post,
+                        likes_count: post.likes?.[0]?.count ?? 0,
+                        comments_count: post.comments?.[0]?.count ?? 0,
+                    }));
+                    setTraderPosts(enriched as Post[]);
+                }
+            } catch (err) {
+                console.warn('Failed to fetch trader posts:', err);
+            } finally {
+                setPostsLoading(false);
+            }
+        }
+
+        fetchTraderPosts();
+    }, [isTrader, profile?.id]);
+
+    // Non-trader access denied
+    if (!authLoading && !isTrader) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
+                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+                    <Lock className="w-10 h-10 text-primary" />
+                </div>
+                <h1 className="font-display text-2xl font-bold text-foreground mb-2">Trader Analytics</h1>
+                <p className="text-muted-foreground max-w-xs mb-6">
+                    Analytics dashboards are available to verified trader accounts only.
+                </p>
+                <Link
+                    href={ROUTES.FEED}
+                    className="bg-primary text-primary-foreground font-display font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                >
+                    Return to Feed
+                </Link>
+            </div>
+        );
+    }
+
+    const displayName = profile?.full_name || 'Navigator';
 
     return (
-        <div className="font-sans min-h-screen flex flex-col antialiased relative selection:bg-primary/30 selection:text-primary pb-24 md:pb-0 md:pl-72 bg-background text-foreground">
-            {/* ... Mobile TopAppBar and Desktop Sidebar remain standard UI ... */}
-            <header className="fixed top-0 w-full z-40 flex justify-between items-center px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/10 md:hidden">
-                <button className="text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200 p-2">
-                    <Menu className="w-6 h-6" />
-                </button>
-                <h1 className="font-display tracking-widest uppercase text-xl font-bold text-primary">NAVIGATOR</h1>
-                <div className="w-10 h-10 rounded-full bg-secondary overflow-hidden ring-1 ring-border/30 text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200">
-                    <img 
-                        alt="Trader Profile" 
-                        className="w-full h-full object-cover" 
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuA28uL-vbQbN3B2T7Mzwb40EqiIVmZ07hWsZOlbwK17vm5Bh9h7Wkai5zSKjx34SSq-51FvY-BQHVg6DuAM1_GHyWyrueliy1G25jp5owgqNXEt6yqf7Rr8yqjbhhlxDr9DTSK-QIvLvSCJwALRqH5oArfQXaR4berxIDWnd2Bz53uLsNFjLQpXuphhj7cHmGZiitwmdKqt24gKrWV2iBgRhF5YHEQFkpLygIiDgr08iM24dPSKOfYK9kbInjVAgY4T2DF1siCX94I" 
-                    />
-                </div>
-            </header>
-
-            {/* Desktop Side NavigationDrawer */}
-            <aside className="hidden md:flex flex-col bg-card rounded-r-3xl h-full shadow-2xl divide-y divide-border/10 max-w-[300px] w-full fixed left-0 top-0 z-[60] overflow-y-auto border-r border-border/10">
-                <div className="p-6 flex items-center gap-4">
-                    <img 
-                        alt="Merchant Logo" 
-                        className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/50" 
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-YtJkrXSyskoqCHbFMaoEkkkyoiR7vBmIp5uUuDYsF9JQQ7-aHHXRbp2wfpu51vkAnO62LyN-CzFY3UT-r5gVEEg3U1i6rWompI5EED8LIOJwv22qoHyxwc22DDqZ80V2EvtWCzpfemyxa4jrZldRCoXhXcvyRdbY6gQjVxQZKmWz1y5L0qniglHuTwGeDKa_dqqu767-2xgU2DtGVV56nzhom_cRA53S_Rb65mlDzwxd1VadPgTMib4iVLGdEXRsecafNOYDpLM" 
-                    />
-                    <div>
-                        <h2 className="font-display font-bold text-lg text-foreground">Apex Trading Co.</h2>
-                        <p className="font-sans text-sm text-primary">Premium Tier Explorer</p>
-                        <p className="font-sans text-xs text-muted-foreground mt-1">ID: 99283-X</p>
-                    </div>
-                </div>
-                <nav className="flex-1 py-4 flex flex-col font-display">
-                    <a className="flex items-center gap-4 px-6 py-4 bg-primary/10 text-primary font-bold border-l-4 border-primary transition-transform duration-300" href="#">
-                        <Store className="w-6 h-6" />
-                        Business Profile
-                    </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
-                        <Megaphone className="w-6 h-6" />
-                        Ad Manager
-                    </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
-                        <ShieldCheck className="w-6 h-6" />
-                        Security
-                    </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
-                        <Users className="w-6 h-6" />
-                        Team Access
-                    </a>
-                    <a className="flex items-center gap-4 px-6 py-4 text-muted-foreground hover:bg-secondary transition-colors duration-300" href="#">
-                        <HelpCircle className="w-6 h-6" />
-                        Support
-                    </a>
-                </nav>
-            </aside>
-
+        <div className="font-sans min-h-screen flex flex-col antialiased relative selection:bg-primary/30 selection:text-primary pb-32 md:pb-12 bg-background text-foreground">
             {/* Main Content Canvas */}
-            <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-7xl mx-auto w-full z-10">
-                <header className="mb-12 flex justify-between items-end">
-                    <div>
-                        <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-2 tracking-tight">Performance Pulse</h1>
-                        <p className="font-sans text-muted-foreground max-w-2xl text-lg">Real-time engagement metrics and conversion tracking for your active GeoPulse campaigns.</p>
-                    </div>
+            <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-5xl mx-auto w-full z-10">
+                {/* Page Header */}
+                <header className="mb-10">
+                    <p className="font-sans text-muted-foreground text-base mb-8 max-w-2xl">
+                        Real-time engagement metrics and conversion tracking for your active GeoPulse campaigns.
+                    </p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mb-12">
-                    {/* Main Chart Card */}
-                    <section className="lg:col-span-2 bg-card rounded-xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-border/40 shadow-sm">
-                        <div className="flex justify-between items-start mb-8 relative z-10">
-                            <div>
-                                <div className="flex items-center gap-4">
-                                    <h2 className="font-display text-xl font-bold text-foreground">Real-time Reach</h2>
-                                    {isLoading && <span className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>}
-                                </div>
-                                <p className="font-sans text-sm text-muted-foreground mt-1">Unique views across all active zones (Last 24h)</p>
+                {/* Real-time Reach Chart */}
+                <section className="bg-card rounded-2xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-border/30 mb-8">
+                    <div className="flex justify-between items-start mb-8 relative z-10">
+                        <div>
+                            <div className="flex items-center gap-4">
+                                <h2 className="font-display text-xl font-bold text-foreground">Real-time Reach</h2>
+                                {isLoading && <span className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>}
                             </div>
-                            <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full border border-border/20">
-                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                <span className="font-sans text-xs font-medium text-primary tracking-wider uppercase">Live</span>
+                            <p className="font-sans text-sm text-muted-foreground mt-1">Unique views across all active zones (Last 24h)</p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full border border-border/20">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            <span className="font-sans text-xs font-medium text-primary tracking-wider uppercase">Live</span>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 min-h-[200px] md:min-h-[280px] flex items-end relative z-10 w-full pt-4">
+                        {/* Ambient glow */}
+                        <div className="absolute inset-0 flex items-end opacity-20 pointer-events-none">
+                            <div className="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-xl"></div>
+                        </div>
+                        <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 300">
+                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="75" y2="75"></line>
+                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="150" y2="150"></line>
+                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="225" y2="225"></line>
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
+                                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60 L1000,300 L0,300 Z" fill="url(#chartGradient)"></path>
+                            <path className="blur-md" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.2" stroke="var(--primary)" strokeWidth="12"></path>
+                            <path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" stroke="var(--foreground)" strokeWidth="2.5" strokeLinecap="round"></path>
+                            <circle cx="300" cy="180" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
+                            <circle cx="600" cy="120" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
+                            <circle cx="900" cy="100" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
+                            <circle className="animate-pulse" cx="1000" cy="60" fill="var(--primary)" r="7"></circle>
+                        </svg>
+                    </div>
+                </section>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    {/* Total Views */}
+                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
+                            <Eye className="w-5 h-5" />
+                            <h3 className="font-display text-sm font-medium">Total Views</h3>
+                        </div>
+                        <div>
+                            {isLoading ? (
+                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
+                            ) : (
+                                <div className="font-display text-4xl font-bold text-foreground mb-1">
+                                    {metrics
+                                        ? metrics.total_views >= 1000
+                                            ? `${(metrics.total_views / 1000).toFixed(1)}K`
+                                            : metrics.total_views.toString()
+                                        : '—'}
+                                </div>
+                            )}
+                            <div className="font-sans text-sm text-primary flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>{metrics ? `${metrics.views_last_week} this week` : 'No data yet'}</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex-1 min-h-[240px] flex items-end relative z-10 w-full pt-8">
-                            {/* Faux Neon Line Chart */}
-                            <div className="absolute inset-0 flex items-end opacity-20 pointer-events-none">
-                                <div className="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-xl"></div>
-                            </div>
-                            <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 300">
-                                {/* Grid lines */}
-                                <line opacity="0.3" stroke="#484849" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="75" y2="75"></line>
-                                <line opacity="0.3" stroke="#484849" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="150" y2="150"></line>
-                                <line opacity="0.3" stroke="#484849" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="225" y2="225"></line>
-                                
-                                {/* Glow Layer */}
-                                <path className="blur-md" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.15" stroke="#8ff5ff" strokeWidth="16"></path>
-                                <path className="blur-sm" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.3" stroke="#00eefc" strokeWidth="8"></path>
-                                
-                                {/* Core Line */}
-                                <path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" stroke="#ffffff" strokeWidth="3"></path>
-                                
-                                {/* Data Points */}
-                                <circle cx="300" cy="180" fill="#0e0e0f" r="6" stroke="#8ff5ff" strokeWidth="3"></circle>
-                                <circle cx="600" cy="120" fill="#0e0e0f" r="6" stroke="#8ff5ff" strokeWidth="3"></circle>
-                                <circle cx="900" cy="100" fill="#0e0e0f" r="6" stroke="#8ff5ff" strokeWidth="3"></circle>
-                                
-                                {/* Active Point */}
-                                <circle className="animate-pulse shadow-[0_0_15px_#8ff5ff]" cx="1000" cy="60" fill="#8ff5ff" r="8"></circle>
-                            </svg>
+                    {/* Shout Engagement */}
+                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-accent/5 rounded-full blur-2xl pointer-events-none"></div>
+                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
+                            <Activity className="w-5 h-5" />
+                            <h3 className="font-display text-sm font-medium">Post Engagement</h3>
                         </div>
-                    </section>
-
-                    {/* Key Stats Column */}
-                    <div className="flex flex-col gap-6 lg:gap-8">
-                        {/* Stat Card 1 */}
-                        <div className="bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 border border-[rgba(72,72,73,0.15)] flex-1 flex flex-col justify-between shadow-[0_10px_30px_-15px_rgba(214,116,255,0.05)]">
-                            <div className="flex items-center gap-3 text-muted-foreground mb-4">
-                                <Eye className="w-5 h-5" />
-                                <h3 className="font-display text-sm font-medium">Total Views</h3>
-                            </div>
-                            <div>
-                                {isLoading ? (
-                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
-                                ) : (
-                                    <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                        {metrics ? metrics.total_views.toLocaleString() : '0'}
-                                    </div>
-                                )}
-                                <div className="font-sans text-sm text-primary flex items-center gap-1">
-                                    <TrendingUp className="w-4 h-4" />
-                                    <span>Real-time tracking active</span>
+                        <div>
+                            {isLoading ? (
+                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
+                            ) : (
+                                <div className="font-display text-4xl font-bold text-foreground mb-1">
+                                    {metrics ? `${metrics.engagement_rate}%` : '—'}
                                 </div>
+                            )}
+                            <div className="font-sans text-sm text-primary flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4" />
+                                <span>{metrics ? `${metrics.total_engagements} engagements` : 'No data yet'}</span>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Stat Card 2 */}
-                        <div className="bg-card rounded-xl p-6 border border-border/40 flex-1 flex flex-col justify-between shadow-sm relative overflow-hidden">
-                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-                            <div className="flex items-center gap-3 text-muted-foreground mb-4 relative z-10">
-                                <Activity className="w-5 h-5" />
-                                <h3 className="font-display text-sm font-medium">Shout Engagement</h3>
-                            </div>
-                            <div className="relative z-10">
-                                {isLoading ? (
-                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
-                                ) : (
-                                    <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                        {metrics ? `${metrics.engagement_rate}%` : '0%'}
-                                    </div>
-                                )}
-                                <div className="font-sans text-sm text-primary flex items-center gap-1">
-                                    <TrendingUp className="w-4 h-4" />
-                                    <span>{metrics ? metrics.total_engagements.toLocaleString() : '0'} total interactions</span>
-                                </div>
-                            </div>
+                    {/* Store Navigations */}
+                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
+                            <Footprints className="w-5 h-5" />
+                            <h3 className="font-display text-sm font-medium">Store Navigations</h3>
                         </div>
-
-                        {/* Stat Card 3 */}
-                        <div className="bg-card rounded-xl p-6 border border-border/40 flex-1 flex flex-col justify-between shadow-sm">
-                            <div className="flex items-center gap-3 text-muted-foreground mb-4">
-                                <Footprints className="w-5 h-5" />
-                                <h3 className="font-display text-sm font-medium">Store Navigations</h3>
-                            </div>
-                            <div>
-                                {isLoading ? (
-                                    <div className="h-10 bg-secondary rounded animate-pulse w-24 mb-1"></div>
-                                ) : (
-                                    <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                        {metrics ? metrics.total_navigations.toLocaleString() : '0'}
-                                    </div>
-                                )}
-                                <div className="font-sans text-sm text-primary flex items-center gap-1">
-                                    <TrendingUp className="w-4 h-4" />
-                                    <span className="text-muted-foreground">Clicks to navigate</span>
+                        <div>
+                            {isLoading ? (
+                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
+                            ) : (
+                                <div className="font-display text-4xl font-bold text-foreground mb-1">
+                                    {metrics ? metrics.total_navigations.toLocaleString() : '—'}
                                 </div>
+                            )}
+                            <div className="font-sans text-sm text-muted-foreground flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4 text-primary" />
+                                <span>from map interactions</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Active Shouts Section */}
-                <section className="bg-card border border-border/40 rounded-xl p-6 lg:p-8 relative z-10 shadow-sm">
+                {/* Active Shouts Section — real posts */}
+                <section className="bg-card border border-border/30 rounded-2xl p-6 lg:p-8 relative z-10">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="font-display text-xl font-bold text-foreground">Active Shouts</h2>
-                        <button className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-                            View All <ArrowRight className="w-5 h-5" />
-                        </button>
+                        <h2 className="font-display text-xl font-bold text-foreground">Active Posts</h2>
+                        <Link
+                            href={ROUTES.COMPOSE}
+                            className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                        >
+                            New Post <ArrowRight className="w-4 h-4" />
+                        </Link>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Shout Item 1 */}
-                        <div className="bg-secondary rounded-md p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group">
-                            <div className="w-12 h-12 rounded-md overflow-hidden shrink-0">
-                                <img 
-                                    alt="Promo Thumbnail" 
-                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDoAkudaoSR0sYu21rcnPpbUMso4ZAeXT24d5B79FJu3V11_epTXC_8HiKTiZjE63ZmrF8PyTZA2bhtEAbkcppErs61mvqTti9xUlvCCYKb525QUxlCotPpWYtYjRkuW_d1rrz7eRMKAnkAXBJ88hN9g46PCnQd6yER6qQHily5gHkZy9Jzs4EIXnodhqR2WtUKq4zwPvFeEN0zNaQ5CQfx-XiJKxn697r6UtTxDRcJZdI8-6_QnNjLoJSkJ8llP63nAVq1QbmzCg" 
-                                />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="font-display text-sm font-bold text-foreground truncate">Midnight Happy Hour Special</h4>
-                                <p className="font-sans text-xs text-muted-foreground truncate">Downtown District • 2h remaining</p>
-                            </div>
-                            <div className="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
-                                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
-                                    <path d="M0,25 L20,20 L40,28 L60,15 L80,22 L100,5" fill="none" stroke="#8ff5ff" strokeWidth="2"></path>
-                                </svg>
-                            </div>
-                        </div>
 
-                        {/* Shout Item 2 */}
-                        <div className="bg-secondary rounded-md p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group">
-                            <div className="w-12 h-12 rounded-md overflow-hidden shrink-0">
-                                <img 
-                                    alt="Promo Thumbnail" 
-                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOiPifA6Qcsg62AT2MARggjcG33OrSgkbzt9ZsNVZiEqz5viZG-3tPv8yM5J9ngRb09J3GT6lXPan8P78hIMS_n32yKPvk5plQq2pZdXby6kbsT0Rh7p2g7GITxKjhb1Y3fPgx8gUaHPYiAGuQ88MnmF4KoolGhGZrY24afvgdN0m1BFnKfLPtX3yjpFobPNhcjjZK0bptxpZKMQdpeoHPJAeX4NAfAmp7r4_Z2trJBO8_QeSaxYFNnLo89UuXjiHt-Zz7R89HRf0" 
-                                />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className="font-display text-sm font-bold text-foreground truncate">Guest DJ: Sonic Pulse</h4>
-                                <p className="font-sans text-xs text-muted-foreground truncate">Warehouse Row • 4h remaining</p>
-                            </div>
-                            <div className="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
-                                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
-                                    <path d="M0,20 L20,25 L40,15 L60,10 L80,18 L100,2" fill="none" stroke="#d674ff" strokeWidth="2"></path>
-                                </svg>
-                            </div>
+                    {postsLoading ? (
+                        <div className="space-y-3">
+                            {[1, 2].map(i => (
+                                <div key={i} className="h-16 bg-secondary/50 rounded-xl animate-pulse" />
+                            ))}
                         </div>
-                    </div>
+                    ) : traderPosts.length === 0 ? (
+                        <div className="text-center py-10">
+                            <Zap className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-30" />
+                            <p className="text-muted-foreground text-sm">No posts yet. Create your first one!</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {traderPosts.map((post, i) => (
+                                <div
+                                    key={post.id}
+                                    className="bg-secondary/50 rounded-xl p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group"
+                                >
+                                    <div className={`w-12 h-12 rounded-xl overflow-hidden shrink-0 flex items-center justify-center ${i % 2 === 0 ? 'bg-primary/10' : 'bg-accent/10'}`}>
+                                        {post.image_url ? (
+                                            <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Zap className={`w-6 h-6 ${i % 2 === 0 ? 'text-primary' : 'text-accent'}`} />
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-display text-sm font-bold text-foreground truncate">
+                                            {post.content.substring(0, 50)}{post.content.length > 50 ? '…' : ''}
+                                        </h4>
+                                        <p className="font-sans text-xs text-muted-foreground">
+                                            {post.likes_count ?? 0} likes • {post.comments_count ?? 0} comments • {timeRemaining(post.expires_at)}
+                                        </p>
+                                    </div>
+                                    <div className="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
+                                            <path d="M0,25 L20,20 L40,28 L60,15 L80,22 L100,5" fill="none" stroke={i % 2 === 0 ? 'var(--primary)' : 'var(--accent)'} strokeWidth="2"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
+
+                {/* Analytics Badge */}
+                <div className="mt-8 flex justify-center">
+                    <div className="flex flex-col items-center gap-2 py-4">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Activity className="w-6 h-6 text-primary" />
+                        </div>
+                        <span className="text-primary text-xs font-display font-bold tracking-widest uppercase">Analytics</span>
+                    </div>
+                </div>
             </main>
         </div>
     );

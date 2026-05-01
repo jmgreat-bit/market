@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Timer, QrCode } from 'lucide-react';
+import { Timer, QrCode } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -9,24 +9,8 @@ export default function VouchersIntelPage() {
 
     return (
         <div className="bg-surface text-foreground font-sans min-h-screen selection:bg-primary/30 selection:text-primary">
-            {/* TopAppBar Blueprint Execution */}
-            <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/10">
-                <button className="text-primary hover:text-primary/80 transition-colors active:scale-95 duration-200 p-2 -ml-2 rounded-full focus:outline-none focus:ring-1 focus:ring-primary/50 flex items-center justify-center">
-                    <Menu className="w-6 h-6" />
-                </button>
-                <h1 className="font-display tracking-widest uppercase text-xl font-bold text-primary drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
-                <div className="relative active:scale-95 duration-200">
-                    <img 
-                        alt="Trader Profile" 
-                        className="w-10 h-10 rounded-full border-[0.5px] border-[rgba(72,72,73,0.3)] object-cover" 
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIWPJkzOnCF0840YUU2B6aVDw7Zs1Ux5T5m0SF17iBG2OMbatqWr3v70ohDLKCgwPNBiylJ8ehbkmGCYG34wPe045wRNxPe8MI6vMggpOd0t1q5CTeVyyuPmQGFMI4vcfLW99xb0_qVAlCoK6y49HwHYGiMRo5BG1RVo21nLpWvIjUbqecCmwZrsJ1isDEVgfUGhTwX0zGMQJx8s_YxFiaBkz8GEss6veA7EWJ7ETwkUK9-jIaVhTBkwmgJ8NN8DzkrlY_Dom-5Bg" 
-                    />
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-full border-2 border-surface"></div>
-                </div>
-            </header>
-
             {/* Main Content Canvas */}
-            <main className="pt-28 pb-32 px-6 max-w-4xl mx-auto flex flex-col gap-8">
+            <main className="pt-8 pb-32 px-6 max-w-4xl mx-auto flex flex-col gap-8">
                 {/* Header & Tabs */}
                 <div className="flex flex-col gap-6">
                     <h2 className="font-display text-4xl font-bold text-foreground leading-tight tracking-tight">

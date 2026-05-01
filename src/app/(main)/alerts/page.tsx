@@ -26,14 +26,7 @@ export default function AlertsHubPage() {
     const [dropsActive, setDropsActive] = useState(true);
 
     return (
-        <div className="bg-surface text-foreground min-h-screen flex flex-col pb-32 pt-24 selection:bg-primary-container/30 selection:text-primary">
-            {/* Mobile Header */}
-            <header className="md:hidden fixed top-0 w-full z-40 px-6 py-4 bg-[#0e0e0f]/80 backdrop-blur-xl border-b border-[rgba(72,72,73,0.1)] flex justify-between items-center">
-                <h1 className="font-display font-bold text-lg tracking-widest text-primary drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]">NAVIGATOR</h1>
-                <button className="text-muted-foreground">
-                    <Settings className="w-6 h-6" />
-                </button>
-            </header>
+        <div className="bg-surface text-foreground min-h-screen flex flex-col pb-32 pt-6 selection:bg-primary-container/30 selection:text-primary">
 
             <main className="flex-grow max-w-5xl mx-auto w-full px-4 md:px-8 space-y-12">
                 {/* Page Title Section */}

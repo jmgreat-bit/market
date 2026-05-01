@@ -69,7 +69,10 @@ export function useGeolocation() {
     }, []);
 
     useEffect(() => {
-        requestLocation();
+        const timer = setTimeout(() => {
+            requestLocation();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [requestLocation]);
 
     return {

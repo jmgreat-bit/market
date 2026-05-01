@@ -2,14 +2,16 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Map, Newspaper, Settings, Search, Compass } from 'lucide-react';
+import { Map, Newspaper, Settings, Search, Compass, Bell, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useUser } from '@/hooks/useUser';
 
-export function DesktopHeader() {
+export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: boolean }) {
     const pathname = usePathname();
     const { t } = useSettings();
+    const { profile } = useUser();
 
     const tabs = [
         { href: ROUTES.FEED, label: t.nav.feed, icon: Newspaper },
@@ -37,7 +39,7 @@ export function DesktopHeader() {
                             key={tab.href}
                             href={tab.href}
                             className={cn(
-                                'font-display font-bold tracking-tight transition-colors duration-300',
+                                'font-display font-bold tracking-tight transition-colors duration-300 flex items-center gap-2',
                                 isActive
                                     ? 'text-primary'
                                     : 'text-muted-foreground hover:text-accent'
@@ -49,9 +51,28 @@ export function DesktopHeader() {
                 })}
             </div>
 
-            <Link href={ROUTES.SEARCH} className="text-muted-foreground hover:text-primary transition-colors">
-                <Search className="w-5 h-5" />
-            </Link>
+            <div className="flex items-center gap-3">
+                <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                    <Search className="w-5 h-5" />
+                </Link>
+                
+                <Link href={ROUTES.ALERTS} className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                    <Bell className="w-5 h-5" />
+                    {hasUnreadAlerts && (
+                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-destructive rounded-full border border-background" />
+                    )}
+                </Link>
+
+                {profile?.role === 'trader' && (
+                    <Link 
+                        href={ROUTES.COMPOSE} 
+                        className="ml-2 flex items-center gap-2 bg-primary text-primary-foreground font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span className="font-display">Create Post</span>
+                    </Link>
+                )}
+            </div>
         </nav>
     );
 }

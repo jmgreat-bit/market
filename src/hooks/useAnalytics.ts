@@ -14,12 +14,30 @@ export function useAnalytics() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
+    // Session-level deduplication: don't count the same post twice per page load
+    const [viewedPosts] = useState(() => new Set<string>());
+
     // Track a view on a specific post
-    // NOTE: Silenced until post_views table is created in Supabase
-    const logPostView = useCallback(async (_postId: string) => {
-        // Table not yet deployed — no-op to prevent 400 errors
-        return;
-    }, []);
+    const logPostView = useCallback(async (postId: string) => {
+        // Skip if already viewed in this session
+        if (viewedPosts.has(postId)) return;
+        viewedPosts.add(postId);
+
+        try {
+            const userId = profile?.id || null;
+            const supabase = getSupabaseClient();
+
+            await supabase
+                .from('post_views')
+                .insert({
+                    post_id: postId,
+                    viewer_id: userId,
+                });
+        } catch (err) {
+            // Silent fail — analytics should never block the UI
+            console.warn('Failed to log post view:', err);
+        }
+    }, [profile?.id, viewedPosts]);
 
     // Track navigation to a business
     const logNavigation = useCallback(async (businessId: string) => {
@@ -65,7 +83,10 @@ export function useAnalytics() {
 
     useEffect(() => {
         if (profile?.role === 'trader') {
-            fetchTraderMetrics();
+            const timer = setTimeout(() => {
+                fetchTraderMetrics();
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [profile?.id, profile?.role, fetchTraderMetrics]);
 

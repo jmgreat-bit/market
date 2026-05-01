@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { ROUTES } from '@/lib/constants';
+import { ROUTES, USERNAME_MAX_LENGTH, FULLNAME_MAX_LENGTH } from '@/lib/constants';
 import { UserRole } from '@/types';
 import { useSettings } from '@/contexts/SettingsContext';
 import {
@@ -38,9 +38,14 @@ export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [agreeToTerms, setAgreeToTerms] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!agreeToTerms) {
+            setError('You must agree to the Terms of Service and Privacy Policy');
+            return;
+        }
         setIsLoading(true);
         setError(null);
 
@@ -53,6 +58,24 @@ export default function SignupPage() {
 
         if (username.length < 3) {
             setError('Username must be at least 3 characters');
+            setIsLoading(false);
+            return;
+        }
+
+        if (username.length > USERNAME_MAX_LENGTH) {
+            setError(`Username must be less than ${USERNAME_MAX_LENGTH} characters`);
+            setIsLoading(false);
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            setError('Username can only contain letters, numbers, and underscores');
+            setIsLoading(false);
+            return;
+        }
+
+        if (fullName.length > FULLNAME_MAX_LENGTH) {
+            setError(`Full name must be less than ${FULLNAME_MAX_LENGTH} characters`);
             setIsLoading(false);
             return;
         }
@@ -71,14 +94,29 @@ export default function SignupPage() {
 
         try {
             const supabase = getSupabaseClient();
+            const normalizedUsername = username.toLowerCase().trim();
 
+            // 1. Pre-check if username already exists
+            const { data: existingUser, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('username', normalizedUsername)
+                .maybeSingle();
+
+            if (existingUser) {
+                setError('This username is already taken. Please choose another.');
+                setIsLoading(false);
+                return;
+            }
+
+            // 2. Sign up the user
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
                     data: {
                         full_name: fullName,
-                        username: username.toLowerCase().trim(),
+                        username: normalizedUsername,
                         role: role,
                     },
                 },
@@ -88,7 +126,7 @@ export default function SignupPage() {
             // Update the profile with username after signup
             if (data.user) {
                 await supabase.from('profiles').update({
-                    username: username.toLowerCase().trim(),
+                    username: normalizedUsername,
                     full_name: fullName,
                 }).eq('id', data.user.id);
             }
@@ -149,7 +187,7 @@ export default function SignupPage() {
                                 onClick={() => { setRole('client'); setStep('details'); }}
                                 className="w-full text-left"
                             >
-                                <Card className="p-6 bg-[#1a191b]/50 backdrop-blur-[30px] border border-[rgba(72,72,73,0.15)] hover:border-primary/40 transition-all group rounded-xl">
+                                <Card className="p-6 bg-card backdrop-blur-[30px] border border-border hover:border-primary/40 transition-all group rounded-xl">
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                                             <ShoppingBag className="w-7 h-7 text-primary" />
@@ -168,7 +206,7 @@ export default function SignupPage() {
                                 onClick={() => { setRole('trader'); setStep('details'); }}
                                 className="w-full text-left"
                             >
-                                <Card className="p-6 bg-[#1a191b]/50 backdrop-blur-[30px] border border-[rgba(72,72,73,0.15)] hover:border-accent/40 transition-all group rounded-xl">
+                                <Card className="p-6 bg-card backdrop-blur-[30px] border border-border hover:border-accent/40 transition-all group rounded-xl">
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                                             <Store className="w-7 h-7 text-accent" />
@@ -185,7 +223,7 @@ export default function SignupPage() {
                         </div>
                     ) : (
                         /* Details Form */
-                        <Card className="p-6 bg-[#1a191b]/50 backdrop-blur-[30px] border border-[rgba(72,72,73,0.15)] rounded-xl">
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {error && (
                                     <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
@@ -205,8 +243,9 @@ export default function SignupPage() {
                                             placeholder="John Doe"
                                             value={fullName}
                                             onChange={(e) => setFullName(e.target.value)}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                             required
+                                            maxLength={FULLNAME_MAX_LENGTH}
                                         />
                                     </div>
                                 </div>
@@ -222,9 +261,10 @@ export default function SignupPage() {
                                             placeholder="johndoe"
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase())}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                             required
                                             minLength={3}
+                                            maxLength={USERNAME_MAX_LENGTH}
                                         />
                                     </div>
                                     <p className="text-xs text-muted-foreground">Letters, numbers, and underscores only</p>
@@ -241,7 +281,7 @@ export default function SignupPage() {
                                             placeholder="you@example.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="pl-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                             required
                                         />
                                     </div>
@@ -258,7 +298,7 @@ export default function SignupPage() {
                                             placeholder="••••••••"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="pl-10 pr-10 bg-[#131314] border-[rgba(72,72,73,0.15)] text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            className="pl-10 pr-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
                                             minLength={8}
                                             required
                                         />
@@ -275,10 +315,31 @@ export default function SignupPage() {
                                     </p>
                                 </div>
 
+                                {/* Legal Consent */}
+                                <div className="flex items-start gap-3 py-2">
+                                    <div className="flex items-center h-5">
+                                        <input
+                                            id="terms"
+                                            name="terms"
+                                            type="checkbox"
+                                            checked={agreeToTerms}
+                                            onChange={(e) => setAgreeToTerms(e.target.checked)}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary bg-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="text-xs text-muted-foreground leading-snug">
+                                        By clicking &quot;Create Account&quot;, I agree to the{' '}
+                                        <Link href="/legal/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</Link>
+                                        {' '}and acknowledge the{' '}
+                                        <Link href="/legal/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</Link>.
+                                    </div>
+                                </div>
+
                                 <Button
                                     type="submit"
                                     className={`w-full font-display font-bold text-[#003f43] ${role === 'trader' ? 'bg-gradient-to-r from-accent to-primary' : 'bg-gradient-to-r from-primary to-accent'}`}
-                                    disabled={isLoading}
+                                    disabled={isLoading || !agreeToTerms}
                                 >
                                     {isLoading ? (
                                         <>

@@ -27,6 +27,7 @@ export const viewport: Viewport = {
 };
 
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import { UserProvider } from '@/contexts/UserContext';
 
 export default function RootLayout({
   children,
@@ -38,9 +39,11 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} font-sans antialiased`}
       >
-        <SettingsProvider>
-          {children}
-        </SettingsProvider>
+        <UserProvider>
+          <SettingsProvider>
+            {children}
+          </SettingsProvider>
+        </UserProvider>
       </body>
     </html>
   );

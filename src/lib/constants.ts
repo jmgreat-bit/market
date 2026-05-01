@@ -30,13 +30,24 @@ export const ROUTES = {
     SEARCH: '/search',
     FEED: '/feed',
     MENU: '/menu',
+    PROFILE: '/profile',
+    COMPOSE: '/compose',
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
     ALERTS: '/alerts',
     ANALYTICS: '/analytics',
     VOUCHERS: '/vouchers',
+    SAVED: '/saved',
 } as const;
 
 // Post/Shout settings
 export const SHOUT_MAX_LENGTH = 280;
+export const SHOUT_MIN_WORDS = 1;
 export const SHOUT_DEFAULT_EXPIRY_HOURS = 24;
+
+// Content and upload limits
+export const COMMENT_MAX_LENGTH = 280;
+export const USERNAME_MAX_LENGTH = 20;
+export const FULLNAME_MAX_LENGTH = 50;
+export const IMAGE_MIN_BYTES = 10 * 1024; // 10 KB
+export const IMAGE_MAX_BYTES = 4 * 1024 * 1024; // 4 MB

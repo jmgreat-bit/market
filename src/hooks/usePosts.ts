@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { getMockPosts } from '@/lib/mockData';
 import { PostWithBusiness, MapBounds } from '@/types';
 
 interface UsePostsOptions {
@@ -13,15 +12,11 @@ interface UsePostsOptions {
 }
 
 export function usePosts(options: UsePostsOptions = {}) {
-    // Start with mock data immediately — no loading flash
-    const [posts, setPosts] = useState<PostWithBusiness[]>(() => getMockPosts(options.limit));
-    const [isLoading, setIsLoading] = useState(false);
+    const [posts, setPosts] = useState<PostWithBusiness[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // If mock mode explicitly requested, nothing to do — already loaded
-        if (options.useMockData) return;
-
         async function fetchPosts() {
             try {
                 setIsLoading(true);
@@ -32,7 +27,12 @@ export function usePosts(options: UsePostsOptions = {}) {
                     .from('posts')
                     .select(`
                         *,
-                        business:business_details(*)
+                        business:business_details(
+                            *,
+                            profile:profiles(avatar_url, full_name)
+                        ),
+                        likes:likes(count),
+                        comments:comments(count)
                     `)
                     .order('created_at', { ascending: false });
 
@@ -56,14 +56,17 @@ export function usePosts(options: UsePostsOptions = {}) {
 
                 if (fetchError) throw fetchError;
 
-                // Only replace mock data if we got real posts back
-                if (data && data.length > 0) {
-                    setPosts(data);
-                }
-                // If empty, mock data is still shown (already set as initial state)
+                // Map the count aggregates into flat likes_count / comments_count
+                const enriched = (data || []).map((post: any) => ({
+                    ...post,
+                    likes_count: post.likes?.[0]?.count ?? 0,
+                    comments_count: post.comments?.[0]?.count ?? 0,
+                }));
+
+                setPosts(enriched);
             } catch (err) {
-                // Network failed — mock data stays in place, no error flash to user
-                console.warn('Could not fetch real posts, showing mock data:', err);
+                console.error('Failed to fetch posts:', err);
+                setError('Failed to load posts');
             } finally {
                 setIsLoading(false);
             }

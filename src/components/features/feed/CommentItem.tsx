@@ -21,21 +21,34 @@ export function CommentItem({ comment, index }: CommentItemProps) {
         >
             <Avatar className="w-8 h-8 flex-shrink-0 ring-1 ring-white/5 shadow-geo-glow group-hover:ring-primary/20 transition-all">
                 <AvatarFallback className="text-xs bg-surface-container font-medium text-foreground">
-                    {comment.user_name.charAt(0)}
+                    {(comment.user_name || 'U').charAt(0)}
                 </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0 bg-surface-container/30 px-3 py-2 rounded-xl rounded-tl-sm border border-transparent group-hover:border-white/5 transition-colors">
                 <div className="flex items-baseline justify-between gap-2 mb-1">
                     <span className="font-semibold text-[13px] font-sans text-foreground drop-shadow-sm">
-                        {comment.user_name}
+                        {comment.user_name || 'User'}
                     </span>
                     <span className="text-[11px] text-muted-foreground font-medium">
-                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                        {comment.created_at && !isNaN(new Date(comment.created_at).getTime()) 
+                            ? formatDistanceToNow(new Date(comment.created_at), { addSuffix: true }) 
+                            : 'Just now'}
                     </span>
                 </div>
-                <p className="text-[13px] text-foreground/80 font-sans leading-relaxed">
-                    {comment.content}
-                </p>
+                {comment.content && (
+                    <p className="text-[13px] text-foreground/80 font-sans leading-relaxed">
+                        {comment.content}
+                    </p>
+                )}
+                {comment.image_url && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border/20">
+                        <img 
+                            src={comment.image_url} 
+                            alt="Comment attachment" 
+                            className="max-h-48 w-auto object-cover rounded-lg"
+                        />
+                    </div>
+                )}
             </div>
         </motion.div>
     );
