@@ -125,16 +125,34 @@ CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING
 DROP POLICY IF EXISTS "Business details are viewable by everyone" ON public.business_details;
 CREATE POLICY "Business details are viewable by everyone" ON public.business_details FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Traders can insert own business" ON public.business_details;
-CREATE POLICY "Traders can insert own business" ON public.business_details FOR INSERT WITH CHECK (auth.uid() = profile_id);
+CREATE POLICY "Traders can insert own business" ON public.business_details FOR INSERT WITH CHECK (
+  auth.uid() = profile_id AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
+);
 DROP POLICY IF EXISTS "Traders can update own business" ON public.business_details;
-CREATE POLICY "Traders can update own business" ON public.business_details FOR UPDATE USING (auth.uid() = profile_id);
+CREATE POLICY "Traders can update own business" ON public.business_details FOR UPDATE USING (
+  auth.uid() = profile_id AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
+);
 
 -- Policies: Posts
 DROP POLICY IF EXISTS "Posts are viewable by everyone" ON public.posts;
 CREATE POLICY "Posts are viewable by everyone" ON public.posts FOR SELECT USING (true);
+
 DROP POLICY IF EXISTS "Traders can insert own posts" ON public.posts;
 CREATE POLICY "Traders can insert own posts" ON public.posts FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM public.business_details WHERE id = business_id AND profile_id = auth.uid())
+  AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
+);
+
+DROP POLICY IF EXISTS "Traders can update own posts" ON public.posts;
+CREATE POLICY "Traders can update own posts" ON public.posts FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM public.business_details WHERE id = business_id AND profile_id = auth.uid())
+  AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
+);
+
+DROP POLICY IF EXISTS "Traders can delete own posts" ON public.posts;
+CREATE POLICY "Traders can delete own posts" ON public.posts FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.business_details WHERE id = business_id AND profile_id = auth.uid())
+  AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
 );
 
 -- Policies: Media/Links (Viewable by everyone)
