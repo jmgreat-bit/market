@@ -119,3 +119,25 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
 }
+
+// Support ticket types
+export type TicketCategory = 'help' | 'software' | 'report';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved';
+export type ReferenceType = 'post' | 'comment' | 'user';
+
+export interface SupportTicket {
+  id: string;
+  user_id: string | null;
+  category: TicketCategory;
+  subject: string;
+  message: string;
+  reference_type: ReferenceType | null;
+  reference_id: string | null;
+  status: TicketStatus;
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+    username: string | null;
+    email: string;
+  } | null;
+}

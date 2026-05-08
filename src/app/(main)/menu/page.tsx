@@ -19,7 +19,8 @@ import {
     Monitor,
     Globe,
     CheckCircle2,
-    Shield
+    Shield,
+    MessageCircleQuestion
 } from 'lucide-react';
 
 export default function MenuPage() {
@@ -114,11 +115,17 @@ export default function MenuPage() {
                             desc="Update identity" 
                             href="/profile"
                         />
-                        <MenuButton
-                            icon={<Shield className="w-5 h-5" />}
-                            label="Security"
+                        <MenuButton 
+                            icon={<Shield className="w-5 h-5" />} 
+                            label="Security" 
                             desc="Coming soon"
                             locked={true}
+                        />
+                        <MenuButton
+                            icon={<MessageCircleQuestion className="w-5 h-5" />}
+                            label="Support"
+                            desc="Get help & report"
+                            href="/support"
                         />
                     </div>
                 </div>
@@ -185,7 +192,7 @@ export default function MenuPage() {
                 <div className="space-y-2">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Information</h3>
                     <div className="bg-card rounded-lg border border-border/50 overflow-hidden">
-                        <InfoLink icon={<HelpCircle />} label="Help Center" />
+                        <InfoLink icon={<HelpCircle />} label="Help Center" href="/support" />
                         <InfoLink icon={<FileText />} label="Terms of Service" href="/legal/terms" />
                         <InfoLink icon={<Settings />} label="Privacy Policy" href="/legal/privacy" />
                     </div>
