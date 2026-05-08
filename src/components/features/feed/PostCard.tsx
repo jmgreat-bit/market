@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostWithBusiness, Comment } from '@/types';
 import { CommentSection } from './CommentSection';
@@ -18,6 +18,7 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
     const { profile } = useUser();
+    const supabase = useMemo(() => getSupabaseClient(), []);
     const [isLiked, setIsLiked] = useState(post.is_liked ?? false);
     const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
     const [showComments, setShowComments] = useState(false);
@@ -42,7 +43,6 @@ export function PostCard({ post }: PostCardProps) {
     // Check real like status from DB on mount
     useEffect(() => {
         if (!profile?.id) return;
-        const supabase = getSupabaseClient();
         supabase
             .from('likes')
             .select('id')
@@ -52,13 +52,12 @@ export function PostCard({ post }: PostCardProps) {
             .then(({ data }: { data: { id: string } | null }) => {
                 setIsLiked(!!data);
             });
-    }, [post.id, profile?.id]);
+    }, [post.id, profile?.id, supabase]);
 
     // Fetch comments from DB when section opens
     const fetchComments = useCallback(async () => {
         if (commentsFetched) return;
         try {
-            const supabase = getSupabaseClient();
             const { data } = await supabase
                 .from('comments')
                 .select(`
@@ -82,7 +81,7 @@ export function PostCard({ post }: PostCardProps) {
         } catch (err) {
             console.warn('Failed to fetch comments:', err);
         }
-    }, [post.id, commentsFetched]);
+    }, [post.id, commentsFetched, supabase]);
 
     const handleToggleComments = () => {
         const next = !showComments;
@@ -99,7 +98,6 @@ export function PostCard({ post }: PostCardProps) {
         setLikesCount(wasLiked ? likesCount - 1 : likesCount + 1);
 
         try {
-            const supabase = getSupabaseClient();
             if (wasLiked) {
                 await supabase
                     .from('likes')
@@ -117,7 +115,7 @@ export function PostCard({ post }: PostCardProps) {
             setIsLiked(wasLiked);
             setLikesCount(wasLiked ? likesCount : likesCount - 1);
         }
-    }, [isLiked, likesCount, post.id, profile?.id]);
+    }, [isLiked, likesCount, post.id, profile?.id, supabase]);
 
     const handleCommentAdded = (newComment: Comment) => {
         setComments(prev => [...prev, newComment]);

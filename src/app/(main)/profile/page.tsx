@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, ReactNode } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -657,7 +657,7 @@ export default function ProfilePage() {
     );
 }
 
-function SecurityCard({ icon, label, href }: { icon: any, label: string, href?: string }) {
+function SecurityCard({ icon, label, href }: { icon: ReactNode, label: string, href?: string }) {
     const Component = href ? Link : 'button';
     return (
         <Component

@@ -4,7 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/map';
+    let next = searchParams.get('next') ?? '/map';
+
+    // Validate the 'next' parameter to prevent open redirect vulnerabilities
+    if (!next.startsWith('/') || next.startsWith('//')) {
+        next = '/map';
+    }
 
     if (code) {
         const supabase = await createClient();
