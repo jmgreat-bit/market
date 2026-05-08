@@ -22,15 +22,16 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { createClient } from '@/lib/supabase/client';
+import type { BusinessDetails, PostWithBusiness, Profile } from '@/types';
 
 export default function SearchPage() {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [trendingTags, setTrendingTags] = useState<{name: string, post_count: number}[]>([]);
     const [results, setResults] = useState<{
-        businesses: any[],
-        posts: any[],
-        profiles: any[]
+        businesses: BusinessDetails[],
+        posts: PostWithBusiness[],
+        profiles: Profile[]
     }>({ businesses: [], posts: [], profiles: [] });
     
     const [isSearching, setIsSearching] = useState(false);
