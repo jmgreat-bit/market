@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
-import { LatLngExpression, Map as LeafletMap } from 'leaflet';
+import { LatLngExpression } from 'leaflet';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useBusinesses } from '@/hooks/useBusinesses';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/lib/constants';
@@ -71,9 +71,11 @@ export function MapView() {
     const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
     // Filter businesses based on active category
-    const filteredBusinesses = categoryFilter 
-        ? businesses.filter(b => b.category === categoryFilter)
-        : businesses;
+    const filteredBusinesses = useMemo(() => {
+        return categoryFilter
+            ? businesses.filter(b => b.category === categoryFilter)
+            : businesses;
+    }, [businesses, categoryFilter]);
 
     // Update map center when user location is available initially
     useEffect(() => {
