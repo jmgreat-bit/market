@@ -443,11 +443,11 @@ export default function ProfilePage() {
                                 className="block w-full h-32 rounded-xl overflow-hidden border border-border/30 relative bg-secondary group"
                             >
                                 <img 
-                                    src={`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+8ff5ff(${businessInfo.longitude},${businessInfo.latitude})/${businessInfo.longitude},${businessInfo.latitude},14,0/400x160@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''}`}
+                                    src={`/api/map-preview?lat=${businessInfo.latitude}&lng=${businessInfo.longitude}`}
                                     alt="Business location"
                                     className="w-full h-full object-cover opacity-60"
                                     onError={(e) => {
-                                        // Fallback if no mapbox token
+                                        // Fallback if no mapbox token or error fetching image
                                         (e.target as HTMLImageElement).style.display = 'none';
                                     }}
                                 />
