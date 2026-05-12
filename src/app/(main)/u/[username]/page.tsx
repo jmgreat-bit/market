@@ -10,7 +10,9 @@ import {
     Twitter,
     Instagram,
     Sparkles,
-    MessageCircle
+    MessageCircle,
+    Compass,
+    Navigation
 } from 'lucide-react';
 import { FeedList } from '@/components/features/feed/FeedList';
 
@@ -38,6 +40,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     // 2. Fetch Business Details & Posts
     let businessInfo = null;
     let posts = [];
+    let directionPhotos: any[] = [];
 
     if (profile.role === 'trader') {
         const { data: biz } = await supabase
@@ -48,6 +51,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         businessInfo = biz;
 
         if (biz) {
+            // Fetch posts with poll_options, sorted by pinned first
             const { data: postData } = await supabase
                 .from('posts')
                 .select(`
@@ -57,15 +61,25 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                         profile:profiles(avatar_url, full_name)
                     ),
                     likes:likes(count),
-                    comments:comments(count)
+                    comments:comments(count),
+                    poll_options:poll_options(id, post_id, label, votes_count, created_at)
                 `)
                 .eq('business_id', biz.id)
+                .order('is_pinned', { ascending: false })
                 .order('created_at', { ascending: false });
             posts = (postData || []).map((post: any) => ({
                 ...post,
                 likes_count: post.likes?.[0]?.count ?? 0,
                 comments_count: post.comments?.[0]?.count ?? 0,
             }));
+
+            // Fetch direction photos
+            const { data: dirPhotos } = await supabase
+                .from('direction_photos')
+                .select('*')
+                .eq('business_id', biz.id)
+                .order('sort_order', { ascending: true });
+            directionPhotos = dirPhotos || [];
         }
     }
 
@@ -127,7 +141,51 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                     )}
                 </div>
 
-                {/* Business details shown at bottom of profile for Traders */}
+                {/* How to Find Us — Directions */}
+                {isTrader && businessInfo && (businessInfo.address || directionPhotos.length > 0) && (
+                    <div className="bg-card rounded-2xl border border-border/30 p-6 space-y-4 shadow-geo-glow/5">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Compass className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                                <h3 className="font-display font-bold text-lg text-foreground">How to Find Us</h3>
+                                <span className="text-xs text-muted-foreground">Step-by-step directions</span>
+                            </div>
+                        </div>
+
+                        {businessInfo.address && (
+                            <div className="bg-secondary/50 rounded-xl p-4 border border-border/20">
+                                <div className="flex items-start gap-2">
+                                    <Navigation className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                                    <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{businessInfo.address}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {directionPhotos.length > 0 && (
+                            <div className="space-y-3">
+                                {directionPhotos.map((photo: any, idx: number) => (
+                                    <div key={photo.id} className="rounded-xl overflow-hidden border border-border/20">
+                                        <div className="relative">
+                                            <img src={photo.image_url} alt={`Step ${idx + 1}`} className="w-full aspect-video object-cover" />
+                                            <div className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-[10px] font-bold text-primary uppercase tracking-widest border border-primary/20">
+                                                Step {idx + 1}
+                                            </div>
+                                        </div>
+                                        {photo.caption && (
+                                            <div className="px-4 py-2.5 bg-secondary/30">
+                                                <p className="text-xs text-foreground/70">{photo.caption}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Business details */}
                 {isTrader && businessInfo && (
                     <div className="bg-card rounded-2xl border border-border/30 p-6 space-y-4 shadow-geo-glow/5">
                         <div className="flex items-center gap-3">

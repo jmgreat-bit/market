@@ -20,7 +20,8 @@ import {
     Globe,
     CheckCircle2,
     Shield,
-    MessageCircleQuestion
+    MessageCircleQuestion,
+    Compass
 } from 'lucide-react';
 
 export default function MenuPage() {
@@ -127,6 +128,14 @@ export default function MenuPage() {
                             desc="Get help & report"
                             href="/support"
                         />
+                        {isTrader && (
+                            <MenuButton
+                                icon={<Compass className="w-5 h-5" />}
+                                label="Directions"
+                                desc="How to find you"
+                                href="/directions"
+                            />
+                        )}
                     </div>
                 </div>
 

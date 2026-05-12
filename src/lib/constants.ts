@@ -51,3 +51,17 @@ export const USERNAME_MAX_LENGTH = 20;
 export const FULLNAME_MAX_LENGTH = 50;
 export const IMAGE_MIN_BYTES = 10 * 1024; // 10 KB
 export const IMAGE_MAX_BYTES = 4 * 1024 * 1024; // 4 MB
+
+// Counter post settings
+export const COUNTER_UPDATE_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+export const COUNTER_LABEL_MAX_LENGTH = 40;
+
+// Poll settings
+export const POLL_MIN_OPTIONS = 2;
+export const POLL_MAX_OPTIONS = 5;
+export const POLL_OPTION_MAX_LENGTH = 60;
+
+// Direction photos
+export const DIRECTION_MAX_PHOTOS = 3;
+export const DIRECTION_CAPTION_MAX_LENGTH = 120;
+

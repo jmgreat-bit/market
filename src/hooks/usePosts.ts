@@ -32,8 +32,10 @@ export function usePosts(options: UsePostsOptions = {}) {
                             profile:profiles(avatar_url, full_name)
                         ),
                         likes:likes(count),
-                        comments:comments(count)
+                        comments:comments(count),
+                        poll_options:poll_options(id, post_id, label, votes_count, created_at)
                     `)
+                    .order('is_pinned', { ascending: false })
                     .order('created_at', { ascending: false });
 
                 if (options.businessId) {

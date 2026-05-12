@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { ROUTES, USERNAME_MAX_LENGTH, FULLNAME_MAX_LENGTH } from '@/lib/constants';
 import { UserRole } from '@/types';
 import { useSettings } from '@/contexts/SettingsContext';
+import dynamic from 'next/dynamic';
 import {
     Map,
     Loader2,
@@ -23,13 +24,23 @@ import {
     Store,
     AtSign,
     Eye,
-    EyeOff
+    EyeOff,
+    MapPin,
+    ChevronRight
 } from 'lucide-react';
+
+const OnboardingMap = dynamic(
+    () => import('@/components/features/map/OnboardingMap'),
+    { 
+        ssr: false,
+        loading: () => <div className="h-64 bg-secondary animate-pulse rounded-xl flex items-center justify-center text-muted-foreground">Initializing Map...</div>
+    }
+);
 
 export default function SignupPage() {
     const router = useRouter();
     const { t } = useSettings();
-    const [step, setStep] = useState<'role' | 'details'>('role');
+    const [step, setStep] = useState<'role' | 'details' | 'location'>('role');
     const [role, setRole] = useState<UserRole>('client');
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState('');
@@ -39,65 +50,53 @@ export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [agreeToTerms, setAgreeToTerms] = useState(false);
+    
+    // Location state for traders
+    const [locationLat, setLocationLat] = useState(-1.9441);
+    const [locationLng, setLocationLng] = useState(30.0619);
+    const [locationSet, setLocationSet] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleLocationSelect = (lat: number, lng: number) => {
+        setLocationLat(lat);
+        setLocationLng(lng);
+        setLocationSet(true);
+    };
+
+    const handleDetailsNext = (e: React.FormEvent) => {
         e.preventDefault();
         if (!agreeToTerms) {
             setError('You must agree to the Terms of Service and Privacy Policy');
             return;
         }
-        setIsLoading(true);
         setError(null);
 
-        // Basic validation
-        if (!username.trim()) {
-            setError('Username is required');
-            setIsLoading(false);
-            return;
-        }
+        // Validation
+        if (!username.trim()) { setError('Username is required'); return; }
+        if (username.length < 3) { setError('Username must be at least 3 characters'); return; }
+        if (username.length > USERNAME_MAX_LENGTH) { setError(`Username must be less than ${USERNAME_MAX_LENGTH} characters`); return; }
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) { setError('Username can only contain letters, numbers, and underscores'); return; }
+        if (fullName.length > FULLNAME_MAX_LENGTH) { setError(`Full name must be less than ${FULLNAME_MAX_LENGTH} characters`); return; }
+        if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
+        if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) { setError('Password must contain at least one letter and one number'); return; }
 
-        if (username.length < 3) {
-            setError('Username must be at least 3 characters');
-            setIsLoading(false);
-            return;
+        // If trader, go to location step; if explorer, submit directly
+        if (role === 'trader') {
+            setStep('location');
+        } else {
+            handleSubmit();
         }
+    };
 
-        if (username.length > USERNAME_MAX_LENGTH) {
-            setError(`Username must be less than ${USERNAME_MAX_LENGTH} characters`);
-            setIsLoading(false);
-            return;
-        }
-
-        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-            setError('Username can only contain letters, numbers, and underscores');
-            setIsLoading(false);
-            return;
-        }
-
-        if (fullName.length > FULLNAME_MAX_LENGTH) {
-            setError(`Full name must be less than ${FULLNAME_MAX_LENGTH} characters`);
-            setIsLoading(false);
-            return;
-        }
-
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters');
-            setIsLoading(false);
-            return;
-        }
-
-        if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-            setError('Password must contain at least one letter and one number');
-            setIsLoading(false);
-            return;
-        }
+    const handleSubmit = async () => {
+        setIsLoading(true);
+        setError(null);
 
         try {
             const supabase = getSupabaseClient();
             const normalizedUsername = username.toLowerCase().trim();
 
-            // 1. Pre-check if username already exists
-            const { data: existingUser, error: checkError } = await supabase
+            // Pre-check username
+            const { data: existingUser } = await supabase
                 .from('profiles')
                 .select('id')
                 .eq('username', normalizedUsername)
@@ -109,7 +108,7 @@ export default function SignupPage() {
                 return;
             }
 
-            // 2. Sign up the user
+            // Sign up
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
@@ -123,22 +122,41 @@ export default function SignupPage() {
             });
             if (signUpError) throw signUpError;
 
-            // Update the profile with username after signup
+            // Update profile
             if (data.user) {
                 await supabase.from('profiles').update({
                     username: normalizedUsername,
                     full_name: fullName,
                 }).eq('id', data.user.id);
+
+                // If trader, create business with location as their stored address
+                if (role === 'trader' && locationSet) {
+                    await supabase.from('business_details').upsert({
+                        profile_id: data.user.id,
+                        business_name: fullName + "'s Business",
+                        category: 'Other',
+                        latitude: locationLat,
+                        longitude: locationLng,
+                        address: `${locationLat.toFixed(6)}, ${locationLng.toFixed(6)}`,
+                    });
+                }
             }
 
-            // Redirect to feed after signup — middleware handles the rest
-            router.push(ROUTES.FEED);
+            // Redirect traders to setup-business to fill remaining details, explorers to feed
+            if (role === 'trader') {
+                router.push('/setup-business');
+            } else {
+                router.push(ROUTES.FEED);
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign up');
         } finally {
             setIsLoading(false);
         }
     };
+
+    const getStepIndex = () => step === 'role' ? 0 : step === 'details' ? 1 : 2;
+    const totalSteps = role === 'trader' ? 3 : 2;
 
     return (
         <div className="min-h-screen flex flex-col bg-surface">
@@ -148,7 +166,11 @@ export default function SignupPage() {
                     variant="ghost"
                     size="sm"
                     className="gap-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => step === 'details' ? setStep('role') : router.push(ROUTES.LOGIN)}
+                    onClick={() => {
+                        if (step === 'location') setStep('details');
+                        else if (step === 'details') setStep('role');
+                        else router.push(ROUTES.LOGIN);
+                    }}
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back
@@ -159,9 +181,9 @@ export default function SignupPage() {
             <div className="flex-1 flex items-center justify-center p-4">
                 <motion.div
                     key={step}
-                    initial={{ opacity: 0, x: step === 'role' ? -20 : 20 }}
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: step === 'role' ? 20 : -20 }}
+                    exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                     className="w-full max-w-sm"
                 >
@@ -171,13 +193,21 @@ export default function SignupPage() {
                             <Map className="w-8 h-8 text-[#003f43]" />
                         </div>
                         <h1 className="text-2xl font-bold text-foreground font-display">
-                            {step === 'role' ? 'Join MarketPLC' : 'Create Account'}
+                            {step === 'role' ? 'Join MarketPLC' : step === 'location' ? 'Pin Your Location' : 'Create Account'}
                         </h1>
                         <p className="text-muted-foreground text-sm text-center mt-1">
                             {step === 'role'
                                 ? 'Choose how you want to use MarketPLC'
-                                : role === 'trader' ? 'Set up your business presence' : 'Start discovering local businesses'}
+                                : step === 'location'
+                                    ? 'Drop a pin where your business is located'
+                                    : role === 'trader' ? 'Set up your business presence' : 'Start discovering local businesses'}
                         </p>
+                        {/* Progress dots */}
+                        <div className="flex gap-2 mt-4">
+                            {Array.from({ length: totalSteps }).map((_, i) => (
+                                <div key={i} className={`w-8 h-1.5 rounded-full transition-colors ${i <= getStepIndex() ? 'bg-primary' : 'bg-secondary'}`} />
+                            ))}
+                        </div>
                     </div>
 
                     {step === 'role' ? (
@@ -221,16 +251,15 @@ export default function SignupPage() {
                                 </Card>
                             </button>
                         </div>
-                    ) : (
+                    ) : step === 'details' ? (
                         /* Details Form */
                         <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleDetailsNext} className="space-y-4">
                                 {error && (
                                     <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
                                         {error}
                                     </div>
                                 )}
-
 
                                 {/* Full Name */}
                                 <div className="space-y-2">
@@ -341,16 +370,60 @@ export default function SignupPage() {
                                     className={`w-full font-display font-bold text-[#003f43] ${role === 'trader' ? 'bg-gradient-to-r from-accent to-primary' : 'bg-gradient-to-r from-primary to-accent'}`}
                                     disabled={isLoading || !agreeToTerms}
                                 >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                            Creating account...
-                                        </>
+                                    {role === 'trader' ? (
+                                        <>Next: Set Location <ChevronRight className="w-4 h-4 ml-1" /></>
+                                    ) : isLoading ? (
+                                        <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating account...</>
                                     ) : (
                                         'Create Account'
                                     )}
                                 </Button>
                             </form>
+                        </Card>
+                    ) : (
+                        /* Location Picker for Traders */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl space-y-5">
+                            {error && (
+                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                                    {error}
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Label className="text-foreground text-sm">Drop a pin on your business location</Label>
+                                <div className="h-72 w-full rounded-2xl overflow-hidden border border-border/50 relative">
+                                    <OnboardingMap 
+                                        initialCenter={[locationLat, locationLng]} 
+                                        onLocationSelect={handleLocationSelect} 
+                                    />
+                                    <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-primary border border-primary/20 flex items-center gap-2">
+                                        <MapPin className="w-3 h-3" /> TAP MAP TO SET POSITION
+                                    </div>
+                                </div>
+                            </div>
+
+                            {locationSet && (
+                                <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 px-3 py-2 rounded-lg border border-primary/20">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                                    Location set: {locationLat.toFixed(4)}, {locationLng.toFixed(4)}
+                                </div>
+                            )}
+
+                            <p className="text-xs text-muted-foreground text-center">
+                                This will be stored as your business address. You can update it later.
+                            </p>
+
+                            <Button
+                                onClick={handleSubmit}
+                                className="w-full font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary"
+                                disabled={isLoading || !locationSet}
+                            >
+                                {isLoading ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating account...</>
+                                ) : (
+                                    'Create Account & Continue Setup'
+                                )}
+                            </Button>
                         </Card>
                     )}
 

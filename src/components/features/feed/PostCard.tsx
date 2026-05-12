@@ -11,6 +11,7 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
+import { Pin, Bell, BellOff, Loader2 } from 'lucide-react';
 
 interface PostCardProps {
     post: PostWithBusiness;
@@ -28,6 +29,8 @@ export function PostCard({ post }: PostCardProps) {
     const [comments, setComments] = useState<Comment[]>(initialComments);
     const [commentsCount, setCommentsCount] = useState(post.comments_count ?? 0);
     const [commentsFetched, setCommentsFetched] = useState(false);
+    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [subLoading, setSubLoading] = useState(false);
 
     // Analytics tracking
     const cardRef = useRef<HTMLDivElement>(null);
@@ -40,7 +43,7 @@ export function PostCard({ post }: PostCardProps) {
         }
     }, [entry?.isIntersecting, post.id, logPostView]);
 
-    // Check real like status from DB on mount
+    // Check like status
     useEffect(() => {
         if (!profile?.id) return;
         supabase
@@ -54,7 +57,20 @@ export function PostCard({ post }: PostCardProps) {
             });
     }, [post.id, profile?.id, supabase]);
 
-    // Fetch comments from DB when section opens
+    // Check subscription status for pinned posts
+    useEffect(() => {
+        if (!profile?.id || !post.is_pinned) return;
+        supabase
+            .from('post_subscriptions')
+            .select('id')
+            .eq('post_id', post.id)
+            .eq('user_id', profile.id)
+            .maybeSingle()
+            .then(({ data }: { data: { id: string } | null }) => {
+                setIsSubscribed(!!data);
+            });
+    }, [post.id, post.is_pinned, profile?.id, supabase]);
+
     const fetchComments = useCallback(async () => {
         if (commentsFetched) return;
         try {
@@ -68,7 +84,6 @@ export function PostCard({ post }: PostCardProps) {
                 .order('created_at', { ascending: true });
 
             if (data) {
-                // Transform data to match Comment type expectations
                 const transformedComments = data.map((c: any) => ({
                     ...c,
                     user_name: c.user?.full_name || c.user?.username || 'User',
@@ -89,33 +104,48 @@ export function PostCard({ post }: PostCardProps) {
         if (next) fetchComments();
     };
 
-    // Wire like to DB with optimistic update
     const handleLike = useCallback(async () => {
         if (!profile?.id) return;
-
         const wasLiked = isLiked;
         setIsLiked(!wasLiked);
         setLikesCount(wasLiked ? likesCount - 1 : likesCount + 1);
 
         try {
             if (wasLiked) {
-                await supabase
-                    .from('likes')
-                    .delete()
-                    .eq('post_id', post.id)
-                    .eq('user_id', profile.id);
+                await supabase.from('likes').delete().eq('post_id', post.id).eq('user_id', profile.id);
             } else {
-                await supabase
-                    .from('likes')
-                    .insert({ post_id: post.id, user_id: profile.id });
+                await supabase.from('likes').insert({ post_id: post.id, user_id: profile.id });
             }
         } catch (err) {
             console.error('Like toggle failed:', err);
-            // Revert on error
             setIsLiked(wasLiked);
             setLikesCount(wasLiked ? likesCount : likesCount - 1);
         }
     }, [isLiked, likesCount, post.id, profile?.id, supabase]);
+
+    const handleToggleSubscription = async () => {
+        if (!profile?.id || subLoading) return;
+        setSubLoading(true);
+        try {
+            if (isSubscribed) {
+                await supabase
+                    .from('post_subscriptions')
+                    .delete()
+                    .eq('post_id', post.id)
+                    .eq('user_id', profile.id);
+                setIsSubscribed(false);
+            } else {
+                await supabase
+                    .from('post_subscriptions')
+                    .insert({ post_id: post.id, user_id: profile.id });
+                setIsSubscribed(true);
+            }
+        } catch (err) {
+            console.error('Subscription toggle failed:', err);
+        } finally {
+            setSubLoading(false);
+        }
+    };
 
     const handleCommentAdded = (newComment: Comment) => {
         setComments(prev => [...prev, newComment]);
@@ -132,6 +162,35 @@ export function PostCard({ post }: PostCardProps) {
             className="rounded-lg overflow-hidden bg-card/80 backdrop-blur-[30px] shadow-[0_0_32px_rgba(143,245,255,0.08)] border border-border/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(143,245,255,0.12)]"
         >
             <div className="flex flex-col bg-transparent">
+                {/* Pinned Badge */}
+                {post.is_pinned && (
+                    <div className="px-4 pt-3 pb-0 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-primary">
+                            <Pin className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Pinned</span>
+                        </div>
+                        {profile?.id && (
+                            <button
+                                onClick={handleToggleSubscription}
+                                disabled={subLoading}
+                                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all ${
+                                    isSubscribed
+                                        ? 'bg-primary/10 border-primary/30 text-primary'
+                                        : 'bg-secondary border-border/50 text-muted-foreground hover:border-primary/40 hover:text-primary'
+                                }`}
+                            >
+                                {subLoading ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : isSubscribed ? (
+                                    <><BellOff className="w-3 h-3" /> Following</>
+                                ) : (
+                                    <><Bell className="w-3 h-3" /> Follow</>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {/* Header */}
                 <PostHeader
                     businessName={business?.business_name}
@@ -150,6 +209,12 @@ export function PostCard({ post }: PostCardProps) {
                     link={post.link}
                     latitude={post.latitude}
                     longitude={post.longitude}
+                    postType={post.post_type || 'standard'}
+                    postId={post.id}
+                    counterValue={post.counter_value}
+                    counterLabel={post.counter_label}
+                    pollOptions={post.poll_options}
+                    businessProfileId={business?.profile_id}
                 />
 
                 {/* Actions */}

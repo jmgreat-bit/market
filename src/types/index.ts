@@ -68,16 +68,26 @@ export interface Comment {
   created_at: string;
 }
 
+export type PostType = 'standard' | 'counter' | 'poll';
+
 export interface Post {
   id: string;
   business_id: string;
   content: string;
+  // Post type system
+  post_type: PostType;
+  is_pinned: boolean;
+  // Counter post fields
+  counter_value: number | null;
+  counter_label: string | null;
   // Legacy single image
   image_url: string | null;
   // Rich media support
   images?: PostImage[];
   video?: PostVideo;
   link?: PostLink;
+  // Poll data (joined)
+  poll_options?: PollOption[];
   // Engagement
   likes_count: number;
   comments_count: number;
@@ -119,6 +129,41 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
 }
+
+// Poll types
+export interface PollOption {
+  id: string;
+  post_id: string;
+  label: string;
+  votes_count: number;
+  created_at: string;
+}
+
+export interface PollVote {
+  id: string;
+  option_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+// Direction/address photos for traders
+export interface DirectionPhoto {
+  id: string;
+  business_id: string;
+  image_url: string;
+  caption: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+// Post subscriptions (follow pinned posts)
+export interface PostSubscription {
+  id: string;
+  post_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 
 // Support ticket types
 export type TicketCategory = 'help' | 'software' | 'report';

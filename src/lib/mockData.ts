@@ -248,8 +248,16 @@ const createComments = (postId: string, count: number): Comment[] => {
 };
 
 // Mock posts (shouts) from businesses with rich media
+const MOCK_POST_DEFAULTS = {
+    post_type: 'standard' as const,
+    is_pinned: false,
+    counter_value: null,
+    counter_label: null,
+};
+
 export const MOCK_POSTS: PostWithBusiness[] = [
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post1',
         business_id: 'b1',
         content: '☕ FLASH SALE! 50% off all cold brews today only! Beat the heat with our signature Madagascar vanilla cold brew. First 20 customers get a free pastry! 🥐',
@@ -266,6 +274,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[0],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post2',
         business_id: 'b2',
         content: '🍝 Tonight\'s special: Homemade truffle risotto with wild mushrooms. Limited portions available - reserve your table now!',
@@ -289,6 +298,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[1],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post3',
         business_id: 'b3',
         content: '💪 New Year, New You! Join today and get your first month FREE plus a complimentary personal training session. Limited spots available!\n\nCheck out our new equipment in action 👇',
@@ -310,6 +320,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[2],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post4',
         business_id: 'b7',
         content: '🍣 Fresh shipment just arrived! Bluefin tuna from Tsukiji market. Our omakase tonight will be unforgettable. Only 8 seats at the bar.',
@@ -326,6 +337,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[6],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post5',
         business_id: 'b5',
         content: '🧘‍♀️ Stressed? Book any massage this week and add a complimentary aromatherapy upgrade. Your mind and body will thank you. #SelfCareSunday',
@@ -349,6 +361,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[4],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post6',
         business_id: 'b10',
         content: '🎸 TONIGHT: The Downtown Blues Band live at 9PM! No cover charge before 10PM. $5 craft cocktails during happy hour (6-8PM).\n\nSwipe to see the vibe from last week\'s show 🔥',
@@ -365,6 +378,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[9],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post7',
         business_id: 'b4',
         content: '📱 iPhone screen repair special: $49 while you wait! Also offering 15% off all accessories this weekend.',
@@ -387,6 +401,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[3],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post8',
         business_id: 'b6',
         content: '👗 Just dropped: Our new sustainable summer collection! Made with 100% organic cotton. Shop now and plant a tree with every purchase 🌳\n\nSwipe through our lookbook →',
@@ -403,6 +418,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[5],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post9',
         business_id: 'b9',
         content: '📚 Author signing event this Saturday! Local mystery writer Jane Smith will be here 2-4PM. Free coffee and cookies. RSVP recommended.',
@@ -426,6 +442,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[8],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post10',
         business_id: 'b8',
         content: '🚗 Winter tire special! Full set installation for $79 (normally $120). Includes free tire rotation. Book before the snow hits!',
@@ -441,6 +458,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[7],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post11',
         business_id: 'b1',
         content: '🎄 Holiday blend is HERE! Our limited edition Gingerbread Spice Latte is back by popular demand. Available while supplies last!',
@@ -456,6 +474,7 @@ export const MOCK_POSTS: PostWithBusiness[] = [
         business: MOCK_BUSINESSES[0],
     },
     {
+        ...MOCK_POST_DEFAULTS,
         id: 'post12',
         business_id: 'b2',
         content: '🎉 We just got featured in NY Magazine\'s Best Italian Restaurants! Come celebrate with us - free dessert with any entrée tonight!',
