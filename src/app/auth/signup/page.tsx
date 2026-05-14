@@ -381,50 +381,78 @@ export default function SignupPage() {
                             </form>
                         </Card>
                     ) : (
-                        /* Location Picker for Traders */
-                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl space-y-5">
-                            {error && (
-                                <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
-                                    {error}
-                                </div>
-                            )}
+                        /* Location Picker for Traders (Full Screen Overlay) */
+                        <div className="fixed inset-0 z-50 bg-background flex flex-col">
+                            {/* Full screen map */}
+                            <div className="flex-1 w-full relative">
+                                <OnboardingMap 
+                                    initialCenter={[locationLat, locationLng]} 
+                                    onLocationSelect={handleLocationSelect} 
+                                />
+                                
+                                {/* Floating Back Button */}
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="absolute top-6 left-6 z-[400] gap-2 shadow-lg rounded-full"
+                                    onClick={() => setStep('details')}
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Back
+                                </Button>
 
-                            <div className="space-y-2">
-                                <Label className="text-foreground text-sm">Drop a pin on your business location</Label>
-                                <div className="h-72 w-full rounded-2xl overflow-hidden border border-border/50 relative">
-                                    <OnboardingMap 
-                                        initialCenter={[locationLat, locationLng]} 
-                                        onLocationSelect={handleLocationSelect} 
-                                    />
-                                    <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-primary border border-primary/20 flex items-center gap-2">
-                                        <MapPin className="w-3 h-3" /> TAP MAP TO SET POSITION
-                                    </div>
+                                {/* Floating Header */}
+                                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] bg-background/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-border/50 text-center">
+                                    <h1 className="text-sm font-bold text-foreground font-display">Pin Your Location</h1>
+                                    <p className="text-[10px] text-muted-foreground mt-0.5">Where is your business located?</p>
+                                </div>
+
+                                {/* Floating Status Pill */}
+                                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[400] bg-primary/10 backdrop-blur-md px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-primary" /> 
+                                    <span className="text-xs font-bold text-primary uppercase tracking-widest">Tap Map or Use GPS</span>
                                 </div>
                             </div>
 
-                            {locationSet && (
-                                <div className="flex items-center gap-2 text-xs text-primary bg-primary/5 px-3 py-2 rounded-lg border border-primary/20">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                    Location set: {locationLat.toFixed(4)}, {locationLng.toFixed(4)}
+                            {/* Bottom Sheet for Action */}
+                            <div className="bg-card border-t border-border/50 p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[400]">
+                                <div className="max-w-md mx-auto space-y-4">
+                                    {error && (
+                                        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    {locationSet ? (
+                                        <div className="flex items-center gap-3 text-sm text-foreground bg-secondary/50 px-4 py-3 rounded-xl border border-border/50">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                                <MapPin className="w-4 h-4 text-primary" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">Location Selected</p>
+                                                <p className="text-xs text-muted-foreground">{locationLat.toFixed(4)}, {locationLng.toFixed(4)}</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground text-center">
+                                            Please set your location on the map to continue.
+                                        </p>
+                                    )}
+
+                                    <Button
+                                        onClick={handleSubmit}
+                                        className="w-full h-12 font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary text-lg"
+                                        disabled={isLoading || !locationSet}
+                                    >
+                                        {isLoading ? (
+                                            <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Creating account...</>
+                                        ) : (
+                                            'Create Account & Continue'
+                                        )}
+                                    </Button>
                                 </div>
-                            )}
-
-                            <p className="text-xs text-muted-foreground text-center">
-                                This will be stored as your business address. You can update it later.
-                            </p>
-
-                            <Button
-                                onClick={handleSubmit}
-                                className="w-full font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary"
-                                disabled={isLoading || !locationSet}
-                            >
-                                {isLoading ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating account...</>
-                                ) : (
-                                    'Create Account & Continue Setup'
-                                )}
-                            </Button>
-                        </Card>
+                            </div>
+                        </div>
                     )}
 
                     {/* Footer */}
