@@ -28,7 +28,9 @@ export function PostCard({ post }: PostCardProps) {
         : [];
     const [comments, setComments] = useState<Comment[]>(initialComments);
     const [commentsCount, setCommentsCount] = useState(post.comments_count ?? 0);
-    const [commentsFetched, setCommentsFetched] = useState(false);
+    const [commentsFetched, setCommentsFetched] = useState(
+        (post.comments_count ?? 0) === 0 || initialComments.length > 0
+    );
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
 
@@ -72,7 +74,7 @@ export function PostCard({ post }: PostCardProps) {
     }, [post.id, post.is_pinned, profile?.id, supabase]);
 
     const fetchComments = useCallback(async () => {
-        if (commentsFetched) return;
+        if (commentsFetched || commentsCount === 0) return;
         try {
             const { data } = await supabase
                 .from('comments')
