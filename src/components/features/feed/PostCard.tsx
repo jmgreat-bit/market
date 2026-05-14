@@ -26,7 +26,9 @@ export function PostCard({ post }: PostCardProps) {
         : [];
     const [comments, setComments] = useState<Comment[]>(initialComments);
     const [commentsCount, setCommentsCount] = useState(post.comments_count ?? 0);
-    const [commentsFetched, setCommentsFetched] = useState(false);
+    const [commentsFetched, setCommentsFetched] = useState(
+        (post.comments_count ?? 0) === 0 || initialComments.length > 0
+    );
 
     // Analytics tracking
     const cardRef = useRef<HTMLDivElement>(null);
@@ -56,7 +58,7 @@ export function PostCard({ post }: PostCardProps) {
 
     // Fetch comments from DB when section opens
     const fetchComments = useCallback(async () => {
-        if (commentsFetched) return;
+        if (commentsFetched || commentsCount === 0) return;
         try {
             const supabase = getSupabaseClient();
             const { data } = await supabase
