@@ -2,15 +2,22 @@ import { useState, useEffect, useCallback } from 'react';
 import { getSupabaseClient } from '../lib/supabase/client';
 import { useUser } from './useUser';
 
+export type TimeFilter = 'today' | 'week' | 'month' | 'all';
+
+export interface TraderMetrics {
+    total_views: number;
+    total_engagements: number;
+    total_likes: number;
+    total_comments: number;
+    engagement_rate: number;
+    total_navigations: number;
+    time_filter: TimeFilter;
+}
+
 export function useAnalytics() {
     const { profile } = useUser();
-    const [metrics, setMetrics] = useState<{
-        total_views: number;
-        views_last_week: number;
-        total_engagements: number;
-        engagement_rate: number;
-        total_navigations: number;
-    } | null>(null);
+    const [metrics, setMetrics] = useState<TraderMetrics | null>(null);
+    const [timeFilter, setTimeFilter] = useState<TimeFilter>('week');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -19,22 +26,16 @@ export function useAnalytics() {
 
     // Track a view on a specific post
     const logPostView = useCallback(async (postId: string) => {
-        // Skip if already viewed in this session
         if (viewedPosts.has(postId)) return;
         viewedPosts.add(postId);
 
         try {
             const userId = profile?.id || null;
             const supabase = getSupabaseClient();
-
             await supabase
                 .from('post_views')
-                .insert({
-                    post_id: postId,
-                    viewer_id: userId,
-                });
+                .insert({ post_id: postId, viewer_id: userId });
         } catch (err) {
-            // Silent fail — analytics should never block the UI
             console.warn('Failed to log post view:', err);
         }
     }, [profile?.id, viewedPosts]);
@@ -44,34 +45,30 @@ export function useAnalytics() {
         try {
             const userId = profile?.id || null;
             const supabase = getSupabaseClient();
-            
             await supabase
                 .from('store_navigations')
-                .insert({
-                    business_id: businessId,
-                    navigator_id: userId
-                });
+                .insert({ business_id: businessId, navigator_id: userId });
         } catch (err) {
             console.error('Failed to log navigation', err);
         }
     }, [profile?.id]);
 
     // Fetch the metrics for the trader dashboard
-    const fetchTraderMetrics = useCallback(async () => {
+    const fetchTraderMetrics = useCallback(async (filter: TimeFilter) => {
         if (profile?.role !== 'trader') return;
-        
+
         setIsLoading(true);
+        setMetrics(null);
         try {
             const supabase = getSupabaseClient();
-            // Using the RPC function we defined in SQL
             const { data, error } = await supabase.rpc('get_trader_metrics', {
-                trader_user_id: profile.id
+                trader_user_id: profile.id,
+                time_filter: filter
             });
 
             if (error) throw error;
-            
             if (data && !data.error) {
-                setMetrics(data as any);
+                setMetrics(data as TraderMetrics);
             }
         } catch (err) {
             console.error('Error fetching trader metrics:', err);
@@ -83,19 +80,18 @@ export function useAnalytics() {
 
     useEffect(() => {
         if (profile?.role === 'trader') {
-            const timer = setTimeout(() => {
-                fetchTraderMetrics();
-            }, 0);
-            return () => clearTimeout(timer);
+            fetchTraderMetrics(timeFilter);
         }
-    }, [profile?.id, profile?.role, fetchTraderMetrics]);
+    }, [profile?.id, profile?.role, timeFilter, fetchTraderMetrics]);
 
     return {
         metrics,
         isLoading,
         error,
+        timeFilter,
+        setTimeFilter,
         logPostView,
         logNavigation,
-        refreshMetrics: fetchTraderMetrics
+        refreshMetrics: () => fetchTraderMetrics(timeFilter),
     };
 }

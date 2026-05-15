@@ -2,33 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import {
-    Eye,
-    TrendingUp,
-    Activity,
-    Footprints,
-    ArrowRight,
-    Zap,
-    Lock
+    Eye, TrendingUp, Activity, Footprints,
+    ArrowRight, Zap, Lock, Heart, MessageCircle,
+    Navigation, Calendar
 } from 'lucide-react';
-import { useAnalytics } from '@/hooks/useAnalytics';
+import { useAnalytics, TimeFilter } from '@/hooks/useAnalytics';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { Post } from '@/types';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
 
-function timeRemaining(expiresAt: string | null): string {
-    if (!expiresAt) return 'No expiry';
-    const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return 'Expired';
-    const h = Math.floor(diff / 3_600_000);
-    const m = Math.floor((diff % 3_600_000) / 60_000);
-    if (h > 0) return `${h}h ${m}m remaining`;
-    return `${m}m remaining`;
-}
+const TIME_FILTERS: { id: TimeFilter; label: string }[] = [
+    { id: 'today', label: 'Today' },
+    { id: 'week',  label: '7 Days' },
+    { id: 'month', label: '30 Days' },
+    { id: 'all',   label: 'All Time' },
+];
 
 export default function AnalyticsDashboardPage() {
-    const { metrics, isLoading } = useAnalytics();
+    const { metrics, isLoading, timeFilter, setTimeFilter } = useAnalytics();
     const { profile, isLoading: authLoading } = useUser();
     const [traderPosts, setTraderPosts] = useState<Post[]>([]);
     const [postsLoading, setPostsLoading] = useState(false);
@@ -43,7 +36,6 @@ export default function AnalyticsDashboardPage() {
             try {
                 const supabase = getSupabaseClient();
 
-                // First get the business linked to this trader
                 const { data: biz } = await supabase
                     .from('business_details')
                     .select('id')
@@ -57,17 +49,19 @@ export default function AnalyticsDashboardPage() {
                     .select(`
                         *,
                         likes:likes(count),
-                        comments:comments(count)
+                        comments:comments(count),
+                        views:post_views(count)
                     `)
                     .eq('business_id', biz.id)
                     .order('created_at', { ascending: false })
-                    .limit(6);
+                    .limit(8);
 
                 if (data) {
                     const enriched = data.map((post: any) => ({
                         ...post,
                         likes_count: post.likes?.[0]?.count ?? 0,
                         comments_count: post.comments?.[0]?.count ?? 0,
+                        views_count: post.views?.[0]?.count ?? 0,
                     }));
                     setTraderPosts(enriched as Post[]);
                 }
@@ -81,7 +75,6 @@ export default function AnalyticsDashboardPage() {
         fetchTraderPosts();
     }, [isTrader, profile?.id]);
 
-    // Non-trader access denied
     if (!authLoading && !isTrader) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
@@ -102,138 +95,154 @@ export default function AnalyticsDashboardPage() {
         );
     }
 
-    const displayName = profile?.full_name || 'Navigator';
-
     return (
-        <div className="font-sans min-h-screen flex flex-col antialiased relative selection:bg-primary/30 selection:text-primary pb-32 md:pb-12 bg-background text-foreground">
-            {/* Main Content Canvas */}
-            <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-5xl mx-auto w-full z-10">
-                {/* Page Header */}
-                <header className="mb-10">
-                    <p className="font-sans text-muted-foreground text-base mb-8 max-w-2xl">
-                        Real-time engagement metrics and conversion tracking for your active GeoPulse campaigns.
+        <div className="font-sans min-h-screen flex flex-col antialiased bg-background text-foreground pb-32 md:pb-12">
+            <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-5xl mx-auto w-full">
+
+                {/* Header */}
+                <header className="mb-8">
+                    <h1 className="font-display text-3xl font-black text-foreground tracking-tight mb-1">Analytics</h1>
+                    <p className="text-muted-foreground text-sm">
+                        Track your business performance and post engagement.
                     </p>
                 </header>
 
-                {/* Real-time Reach Chart */}
-                <section className="bg-card rounded-2xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-border/30 mb-8">
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                        <div>
-                            <div className="flex items-center gap-4">
-                                <h2 className="font-display text-xl font-bold text-foreground">Real-time Reach</h2>
-                                {isLoading && <span className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>}
-                            </div>
-                            <p className="font-sans text-sm text-muted-foreground mt-1">Unique views across all active zones (Last 24h)</p>
-                        </div>
-                        <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full border border-border/20">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                            <span className="font-sans text-xs font-medium text-primary tracking-wider uppercase">Live</span>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 min-h-[200px] md:min-h-[280px] flex items-end relative z-10 w-full pt-4">
-                        {/* Ambient glow */}
-                        <div className="absolute inset-0 flex items-end opacity-20 pointer-events-none">
-                            <div className="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-xl"></div>
-                        </div>
-                        <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 300">
-                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="75" y2="75"></line>
-                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="150" y2="150"></line>
-                            <line opacity="0.15" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="225" y2="225"></line>
-                            <defs>
-                                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60 L1000,300 L0,300 Z" fill="url(#chartGradient)"></path>
-                            <path className="blur-md" d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" opacity="0.2" stroke="var(--primary)" strokeWidth="12"></path>
-                            <path d="M0,250 C100,220 200,280 300,180 C400,80 500,150 600,120 C700,90 800,40 900,100 L1000,60" fill="none" stroke="var(--foreground)" strokeWidth="2.5" strokeLinecap="round"></path>
-                            <circle cx="300" cy="180" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
-                            <circle cx="600" cy="120" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
-                            <circle cx="900" cy="100" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5"></circle>
-                            <circle className="animate-pulse" cx="1000" cy="60" fill="var(--primary)" r="7"></circle>
-                        </svg>
-                    </div>
-                </section>
+                {/* Time Filter Toggle */}
+                <div className="flex items-center gap-1 bg-secondary p-1 rounded-xl w-fit mb-8">
+                    <Calendar className="w-4 h-4 text-muted-foreground ml-2 mr-1 shrink-0" />
+                    {TIME_FILTERS.map(f => (
+                        <button
+                            key={f.id}
+                            onClick={() => setTimeFilter(f.id)}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                                timeFilter === f.id
+                                    ? 'bg-card text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
+                </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {/* Total Views */}
-                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
-                            <Eye className="w-5 h-5" />
-                            <h3 className="font-display text-sm font-medium">Total Views</h3>
+                    <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden col-span-1">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                        <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                            <Eye className="w-4 h-4" />
+                            <span className="text-xs font-medium">Views</span>
                         </div>
-                        <div>
-                            {isLoading ? (
-                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
-                            ) : (
-                                <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                    {metrics
-                                        ? metrics.total_views >= 1000
-                                            ? `${(metrics.total_views / 1000).toFixed(1)}K`
-                                            : metrics.total_views.toString()
-                                        : '—'}
-                                </div>
-                            )}
-                            <div className="font-sans text-sm text-primary flex items-center gap-1">
-                                <TrendingUp className="w-4 h-4" />
-                                <span>{metrics ? `${metrics.views_last_week} this week` : 'No data yet'}</span>
+                        {isLoading ? (
+                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-20" />
+                        ) : (
+                            <div className="font-display text-3xl font-bold text-foreground">
+                                {metrics
+                                    ? metrics.total_views >= 1000
+                                        ? `${(metrics.total_views / 1000).toFixed(1)}K`
+                                        : metrics.total_views.toString()
+                                    : '—'}
                             </div>
+                        )}
+                        <div className="text-xs text-primary mt-1 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> post views
                         </div>
                     </div>
 
-                    {/* Shout Engagement */}
-                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-accent/5 rounded-full blur-2xl pointer-events-none"></div>
-                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
-                            <Activity className="w-5 h-5" />
-                            <h3 className="font-display text-sm font-medium">Post Engagement</h3>
+                    {/* Engagement Rate */}
+                    <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden">
+                        <div className="absolute -right-4 -top-4 w-20 h-20 bg-accent/5 rounded-full blur-2xl pointer-events-none" />
+                        <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                            <Activity className="w-4 h-4" />
+                            <span className="text-xs font-medium">Engagement</span>
                         </div>
-                        <div>
-                            {isLoading ? (
-                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
-                            ) : (
-                                <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                    {metrics ? `${metrics.engagement_rate}%` : '—'}
-                                </div>
-                            )}
-                            <div className="font-sans text-sm text-primary flex items-center gap-1">
-                                <TrendingUp className="w-4 h-4" />
-                                <span>{metrics ? `${metrics.total_engagements} engagements` : 'No data yet'}</span>
+                        {isLoading ? (
+                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-20" />
+                        ) : (
+                            <div className="font-display text-3xl font-bold text-foreground">
+                                {metrics ? `${metrics.engagement_rate}%` : '—'}
                             </div>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1">
+                            {metrics ? `${metrics.total_engagements} interactions` : 'No data'}
                         </div>
+                    </div>
+
+                    {/* Likes */}
+                    <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden">
+                        <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                            <Heart className="w-4 h-4" />
+                            <span className="text-xs font-medium">Likes</span>
+                        </div>
+                        {isLoading ? (
+                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-20" />
+                        ) : (
+                            <div className="font-display text-3xl font-bold text-foreground">
+                                {metrics ? metrics.total_likes.toLocaleString() : '—'}
+                            </div>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1">across all posts</div>
                     </div>
 
                     {/* Store Navigations */}
-                    <div className="bg-card rounded-2xl p-6 border border-border/30 relative overflow-hidden">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-                        <div className="flex items-center gap-3 text-muted-foreground mb-4">
-                            <Footprints className="w-5 h-5" />
-                            <h3 className="font-display text-sm font-medium">Store Navigations</h3>
+                    <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden">
+                        <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                            <Navigation className="w-4 h-4" />
+                            <span className="text-xs font-medium">Directions</span>
                         </div>
-                        <div>
-                            {isLoading ? (
-                                <div className="h-10 bg-secondary rounded-lg animate-pulse w-24 mb-1"></div>
-                            ) : (
-                                <div className="font-display text-4xl font-bold text-foreground mb-1">
-                                    {metrics ? metrics.total_navigations.toLocaleString() : '—'}
-                                </div>
-                            )}
-                            <div className="font-sans text-sm text-muted-foreground flex items-center gap-1">
-                                <TrendingUp className="w-4 h-4 text-primary" />
-                                <span>from map interactions</span>
+                        {isLoading ? (
+                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-20" />
+                        ) : (
+                            <div className="font-display text-3xl font-bold text-foreground">
+                                {metrics ? metrics.total_navigations.toLocaleString() : '—'}
                             </div>
+                        )}
+                        <div className="text-xs text-primary mt-1 flex items-center gap-1">
+                            <Footprints className="w-3 h-3" /> store visits
                         </div>
                     </div>
                 </div>
 
-                {/* Active Shouts Section — real posts */}
-                <section className="bg-card border border-border/30 rounded-2xl p-6 lg:p-8 relative z-10">
+                {/* Reach Trend Visual */}
+                <section className="bg-card rounded-2xl p-6 lg:p-8 flex flex-col relative overflow-hidden border border-border/30 mb-8">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="font-display text-xl font-bold text-foreground">Active Posts</h2>
+                        <div>
+                            <h2 className="font-display text-lg font-bold text-foreground">Reach Overview</h2>
+                            <p className="text-xs text-muted-foreground mt-0.5">Engagement trend across your posts</p>
+                        </div>
+                        <div className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full border border-border/20">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span className="text-xs font-medium text-primary tracking-wider uppercase">Live</span>
+                        </div>
+                    </div>
+                    <div className="min-h-[180px] flex items-end relative w-full">
+                        <div className="absolute inset-0 flex items-end opacity-20 pointer-events-none">
+                            <div className="w-full h-full bg-gradient-to-t from-primary/20 to-transparent blur-xl" />
+                        </div>
+                        <svg className="w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200" style={{ height: 180 }}>
+                            <defs>
+                                <linearGradient id="chartGradient2" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
+                                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                            <line opacity="0.1" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="50" y2="50" />
+                            <line opacity="0.1" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="100" y2="100" />
+                            <line opacity="0.1" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="150" y2="150" />
+                            <path d="M0,170 C150,140 250,180 400,110 C550,40 650,100 800,70 L1000,40 L1000,200 L0,200 Z" fill="url(#chartGradient2)" />
+                            <path d="M0,170 C150,140 250,180 400,110 C550,40 650,100 800,70 L1000,40" fill="none" stroke="var(--foreground)" strokeWidth="2.5" strokeLinecap="round" />
+                            <circle cx="400" cy="110" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5" />
+                            <circle cx="800" cy="70" fill="var(--background)" r="5" stroke="var(--primary)" strokeWidth="2.5" />
+                            <circle className="animate-pulse" cx="1000" cy="40" fill="var(--primary)" r="7" />
+                        </svg>
+                    </div>
+                </section>
+
+                {/* Per-Post Breakdown */}
+                <section className="bg-card border border-border/30 rounded-2xl p-6 lg:p-8">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="font-display text-lg font-bold text-foreground">Post Performance</h2>
                         <Link
                             href={ROUTES.COMPOSE}
                             className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
@@ -244,7 +253,7 @@ export default function AnalyticsDashboardPage() {
 
                     {postsLoading ? (
                         <div className="space-y-3">
-                            {[1, 2].map(i => (
+                            {[1, 2, 3].map(i => (
                                 <div key={i} className="h-16 bg-secondary/50 rounded-xl animate-pulse" />
                             ))}
                         </div>
@@ -254,31 +263,52 @@ export default function AnalyticsDashboardPage() {
                             <p className="text-muted-foreground text-sm">No posts yet. Create your first one!</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {traderPosts.map((post, i) => (
+                        <div className="space-y-3">
+                            {traderPosts.map((post: any, i) => (
                                 <div
                                     key={post.id}
-                                    className="bg-secondary/50 rounded-xl p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/80 transition-colors cursor-pointer group"
+                                    className="bg-secondary/40 rounded-xl p-4 flex items-center gap-4 border border-border/20 hover:bg-secondary/70 transition-colors"
                                 >
-                                    <div className={`w-12 h-12 rounded-xl overflow-hidden shrink-0 flex items-center justify-center ${i % 2 === 0 ? 'bg-primary/10' : 'bg-accent/10'}`}>
+                                    {/* Post Icon */}
+                                    <div className={`w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center ${i % 2 === 0 ? 'bg-primary/10' : 'bg-accent/10'}`}>
                                         {post.image_url ? (
                                             <img src={post.image_url} alt="" className="w-full h-full object-cover" />
                                         ) : (
-                                            <Zap className={`w-6 h-6 ${i % 2 === 0 ? 'text-primary' : 'text-accent'}`} />
+                                            <Zap className={`w-5 h-5 ${i % 2 === 0 ? 'text-primary' : 'text-accent'}`} />
                                         )}
                                     </div>
+                                    {/* Content */}
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-display text-sm font-bold text-foreground truncate">
-                                            {post.content.substring(0, 50)}{post.content.length > 50 ? '…' : ''}
-                                        </h4>
-                                        <p className="font-sans text-xs text-muted-foreground">
-                                            {post.likes_count ?? 0} likes • {post.comments_count ?? 0} comments • {timeRemaining(post.expires_at)}
+                                        <p className="font-semibold text-sm text-foreground truncate">
+                                            {post.content?.substring(0, 55)}{(post.content?.length ?? 0) > 55 ? '…' : ''}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                                         </p>
                                     </div>
-                                    <div className="w-16 h-8 shrink-0 flex items-end justify-end opacity-70 group-hover:opacity-100 transition-opacity">
-                                        <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 30">
-                                            <path d="M0,25 L20,20 L40,28 L60,15 L80,22 L100,5" fill="none" stroke={i % 2 === 0 ? 'var(--primary)' : 'var(--accent)'} strokeWidth="2"></path>
-                                        </svg>
+                                    {/* Stats */}
+                                    <div className="flex items-center gap-4 shrink-0">
+                                        <div className="text-center">
+                                            <div className="flex items-center gap-1 text-muted-foreground">
+                                                <Eye className="w-3.5 h-3.5" />
+                                                <span className="text-sm font-bold text-foreground">{(post.views_count ?? 0).toLocaleString()}</span>
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground">views</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="flex items-center gap-1 text-muted-foreground">
+                                                <Heart className="w-3.5 h-3.5" />
+                                                <span className="text-sm font-bold text-foreground">{(post.likes_count ?? 0).toLocaleString()}</span>
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground">likes</p>
+                                        </div>
+                                        <div className="text-center hidden sm:block">
+                                            <div className="flex items-center gap-1 text-muted-foreground">
+                                                <MessageCircle className="w-3.5 h-3.5" />
+                                                <span className="text-sm font-bold text-foreground">{(post.comments_count ?? 0).toLocaleString()}</span>
+                                            </div>
+                                            <p className="text-[10px] text-muted-foreground">replies</p>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -286,15 +316,6 @@ export default function AnalyticsDashboardPage() {
                     )}
                 </section>
 
-                {/* Analytics Badge */}
-                <div className="mt-8 flex justify-center">
-                    <div className="flex flex-col items-center gap-2 py-4">
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Activity className="w-6 h-6 text-primary" />
-                        </div>
-                        <span className="text-primary text-xs font-display font-bold tracking-widest uppercase">Analytics</span>
-                    </div>
-                </div>
             </main>
         </div>
     );

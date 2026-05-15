@@ -152,23 +152,27 @@ USING (
 );
 
 -- ================================================
--- 6. TRADER METRICS RPC (updated if not exists)
+-- 6. TRADER METRICS RPC (supports time_filter param)
 -- ================================================
 DROP FUNCTION IF EXISTS public.get_trader_metrics(UUID);
+DROP FUNCTION IF EXISTS public.get_trader_metrics(UUID, TEXT);
 
-CREATE OR REPLACE FUNCTION public.get_trader_metrics(trader_user_id UUID)
+CREATE OR REPLACE FUNCTION public.get_trader_metrics(
+  trader_user_id UUID,
+  time_filter TEXT DEFAULT 'all'  -- 'today' | 'week' | 'month' | 'all'
+)
 RETURNS json
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
   v_bus_id UUID;
+  v_since TIMESTAMPTZ;
   v_total_views INT;
   v_total_engagements INT;
   v_likes INT;
   v_comms INT;
   v_total_navigations INT;
-  v_views_last_week INT;
   v_engagement_rate FLOAT;
 BEGIN
   SELECT id INTO v_bus_id FROM public.business_details WHERE profile_id = trader_user_id LIMIT 1;
@@ -177,19 +181,32 @@ BEGIN
     RETURN json_build_object('error', 'No business found');
   END IF;
 
+  -- Determine the start date based on time_filter
+  v_since := CASE time_filter
+    WHEN 'today' THEN DATE_TRUNC('day', NOW())
+    WHEN 'week'  THEN NOW() - INTERVAL '7 days'
+    WHEN 'month' THEN NOW() - INTERVAL '30 days'
+    ELSE          '1970-01-01'::TIMESTAMPTZ
+  END;
+
   SELECT COUNT(*) INTO v_total_views
   FROM public.post_views pv
   JOIN public.posts p ON pv.post_id = p.id
-  WHERE p.business_id = v_bus_id;
-
-  SELECT COUNT(*) INTO v_views_last_week
-  FROM public.post_views pv
-  JOIN public.posts p ON pv.post_id = p.id
   WHERE p.business_id = v_bus_id
-  AND pv.created_at >= NOW() - INTERVAL '7 days';
+    AND pv.created_at >= v_since;
 
-  SELECT COUNT(*) INTO v_likes FROM public.likes l JOIN public.posts p ON l.post_id = p.id WHERE p.business_id = v_bus_id;
-  SELECT COUNT(*) INTO v_comms FROM public.comments c JOIN public.posts p ON c.post_id = p.id WHERE p.business_id = v_bus_id;
+  SELECT COUNT(*) INTO v_likes
+  FROM public.likes l
+  JOIN public.posts p ON l.post_id = p.id
+  WHERE p.business_id = v_bus_id
+    AND l.created_at >= v_since;
+
+  SELECT COUNT(*) INTO v_comms
+  FROM public.comments c
+  JOIN public.posts p ON c.post_id = p.id
+  WHERE p.business_id = v_bus_id
+    AND c.created_at >= v_since;
+
   v_total_engagements := v_likes + v_comms;
 
   IF v_total_views > 0 THEN
@@ -200,14 +217,17 @@ BEGIN
 
   SELECT COUNT(*) INTO v_total_navigations
   FROM public.store_navigations
-  WHERE business_id = v_bus_id;
+  WHERE business_id = v_bus_id
+    AND created_at >= v_since;
 
   RETURN json_build_object(
-    'total_views', v_total_views,
-    'views_last_week', v_views_last_week,
-    'total_engagements', v_total_engagements,
-    'engagement_rate', ROUND(v_engagement_rate::numeric, 1),
-    'total_navigations', v_total_navigations
+    'total_views',        v_total_views,
+    'total_engagements',  v_total_engagements,
+    'total_likes',        v_likes,
+    'total_comments',     v_comms,
+    'engagement_rate',    ROUND(v_engagement_rate::numeric, 1),
+    'total_navigations',  v_total_navigations,
+    'time_filter',        time_filter
   );
 END;
 $$;
