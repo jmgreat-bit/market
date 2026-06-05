@@ -21,7 +21,8 @@ import {
     CheckCircle2,
     Shield,
     MessageCircleQuestion,
-    Compass
+    Compass,
+    Crown
 } from 'lucide-react';
 
 export default function MenuPage() {
@@ -93,6 +94,23 @@ export default function MenuPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Premium Upgrade CTA */}
+                <Link
+                    href="/premium"
+                    className="block w-full p-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-shadow">
+                            <Crown className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-headline font-bold text-sm text-foreground">Upgrade to Premium</p>
+                            <p className="text-[10px] text-amber-500 uppercase tracking-widest font-bold">Unlock pro features</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </Link>
 
                 {/* Main Hub Section */}
                 <div className="space-y-3">

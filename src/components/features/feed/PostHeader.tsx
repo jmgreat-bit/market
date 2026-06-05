@@ -3,19 +3,21 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, Star } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import TraderBadge from '@/components/ui/TraderBadge';
 
 interface PostHeaderProps {
     businessName?: string;
     category?: string;
     isPremium?: boolean;
+    traderTier?: 'free' | 'pro' | 'national';
     createdAt: string;
     expiresAt?: string | null;
     avatarUrl?: string | null;
 }
 
-export function PostHeader({ businessName, category, isPremium, createdAt, expiresAt, avatarUrl }: PostHeaderProps) {
+export function PostHeader({ businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl }: PostHeaderProps) {
     const [mounted, setMounted] = useState(false);
     
     useEffect(() => {
@@ -50,9 +52,11 @@ export function PostHeader({ businessName, category, isPremium, createdAt, expir
                     <h3 className="text-base font-bold text-foreground font-display truncate tracking-wide">
                         {businessName || 'Business'}
                     </h3>
-                    {isPremium && (
-                        <Star className="w-3.5 h-3.5 text-primary fill-primary flex-shrink-0" />
-                    )}
+                    {(traderTier && traderTier !== 'free') ? (
+                        <TraderBadge tier={traderTier} />
+                    ) : isPremium ? (
+                        <TraderBadge tier="pro" />
+                    ) : null}
                 </div>
                 <div className="flex items-center gap-2 text-[13px] text-muted-foreground mt-0.5 font-sans">
                     {category && (

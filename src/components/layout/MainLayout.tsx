@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { TabNavigation } from './TabNavigation';
 import { PageTransition } from './PageTransition';
 import Link from 'next/link';
-import { Bell, Plus } from 'lucide-react';
+import { Bell, Plus, Sparkles } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
@@ -59,6 +59,12 @@ export function MainLayout({ children }: MainLayoutProps) {
                                 <Plus className="w-5 h-5" />
                             </Link>
                         )}
+                        <Link
+                            href="/ai"
+                            className="relative w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500/20 to-amber-500/20 text-violet-400 hover:from-violet-500/30 hover:to-amber-500/30 hover:text-violet-300 transition-all"
+                        >
+                            <Sparkles className="w-5 h-5" />
+                        </Link>
                         <Link
                             href={ROUTES.ALERTS}
                             className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"

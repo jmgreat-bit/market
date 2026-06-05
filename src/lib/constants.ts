@@ -38,6 +38,7 @@ export const ROUTES = {
     ANALYTICS: '/analytics',
     VOUCHERS: '/vouchers',
     SAVED: '/saved',
+    PREMIUM: '/premium',
 } as const;
 
 // Post/Shout settings

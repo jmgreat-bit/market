@@ -2,6 +2,8 @@
 
 export type UserRole = 'client' | 'trader';
 
+export type TraderTier = 'free' | 'pro' | 'national';
+
 export interface Profile {
   id: string;
   email: string;
@@ -13,6 +15,8 @@ export interface Profile {
   avatar_url: string | null;
   role: UserRole;
   is_premium: boolean;
+  trader_tier: TraderTier;
+  tier_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -185,4 +189,49 @@ export interface SupportTicket {
     username: string | null;
     email: string;
   } | null;
+}
+
+// Ad system
+export interface Ad {
+  id: string;
+  business_id: string;
+  post_id: string;
+  placements: string[];
+  radius_km: number;
+  center_lat: number;
+  center_lng: number;
+  is_nationwide: boolean;
+  starts_at: string;
+  ends_at: string;
+  daily_rate: number;
+  total_cost: number;
+  status: 'pending' | 'active' | 'expired' | 'cancelled';
+  impressions: number;
+  clicks: number;
+  created_at: string;
+}
+
+// AI credits
+export type AiPackage = 'starter' | 'standard' | 'power';
+
+export interface AiCredit {
+  id: string;
+  user_id: string;
+  total_credits: number;
+  used_credits: number;
+  purchased_at: string;
+  package: AiPackage;
+}
+
+// Trader subscription
+export interface TraderSubscription {
+  id: string;
+  profile_id: string;
+  tier: 'pro' | 'national';
+  amount_rwf: number;
+  starts_at: string;
+  expires_at: string;
+  payment_method: 'pending' | 'momo' | 'airtel' | 'card' | 'manual';
+  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+  created_at: string;
 }

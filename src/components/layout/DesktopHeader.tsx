@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Map, Newspaper, Settings, Search, Compass, Bell, Plus } from 'lucide-react';
+import { Map, Newspaper, Settings, Search, Compass, Bell, Plus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -54,6 +54,10 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
             <div className="flex items-center gap-3">
                 <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
                     <Search className="w-5 h-5" />
+                </Link>
+
+                <Link href="/ai" className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500/10 to-amber-500/10 text-violet-400 hover:from-violet-500/20 hover:to-amber-500/20 hover:text-violet-300 transition-all">
+                    <Sparkles className="w-5 h-5" />
                 </Link>
                 
                 <Link href={ROUTES.ALERTS} className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
