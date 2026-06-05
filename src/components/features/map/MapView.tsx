@@ -52,6 +52,27 @@ function MapBoundsTracker({ onBoundsChanged }: { onBoundsChanged: (bounds: MapBo
     return null;
 }
 
+// Custom zoom buttons using map instance
+function CustomZoomControl() {
+    const map = useMap();
+    return (
+        <div className="absolute right-4 bottom-20 md:bottom-4 z-[1000] flex flex-col gap-2 pointer-events-none">
+            <button 
+                onClick={(e) => { e.stopPropagation(); map.zoomIn(); }} 
+                className="w-10 h-10 rounded-xl bg-card/90 backdrop-blur-md shadow-lg border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary hover:text-primary transition-colors font-medium text-lg pointer-events-auto"
+            >
+                +
+            </button>
+            <button 
+                onClick={(e) => { e.stopPropagation(); map.zoomOut(); }} 
+                className="w-10 h-10 rounded-xl bg-card/90 backdrop-blur-md shadow-lg border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary hover:text-primary transition-colors font-medium text-lg pointer-events-auto"
+            >
+                −
+            </button>
+        </div>
+    );
+}
+
 interface ActiveRoute {
     coordinates: [number, number][];
     distance: number;
@@ -89,7 +110,7 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
     // Filter businesses based on active category
     const filteredBusinesses = useMemo(() => {
         return categoryFilter
-            ? businesses.filter(b => b.category === categoryFilter)
+            ? businesses.filter(b => b.category?.toLowerCase() === categoryFilter.toLowerCase())
             : businesses;
     }, [businesses, categoryFilter]);
 
@@ -262,17 +283,9 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
                         lineCap="round"
                     />
                 )}
-            </MapContainer>
 
-            {/* Floating zoom controls */}
-            <div className="absolute right-4 bottom-20 md:bottom-4 z-20 flex flex-col gap-2">
-                <button className="w-10 h-10 rounded-xl bg-card/90 backdrop-blur-md shadow-lg border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary hover:text-primary transition-colors font-medium text-lg">
-                    +
-                </button>
-                <button className="w-10 h-10 rounded-xl bg-card/90 backdrop-blur-md shadow-lg border border-border/50 flex items-center justify-center text-foreground hover:bg-secondary hover:text-primary transition-colors font-medium text-lg">
-                    −
-                </button>
-            </div>
+                <CustomZoomControl />
+            </MapContainer>
 
             {/* Glassmorphic Search HUD */}
             <MapSearchHUD onCategoryFilter={setCategoryFilter} />
