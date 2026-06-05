@@ -39,6 +39,8 @@ export const ROUTES = {
     VOUCHERS: '/vouchers',
     SAVED: '/saved',
     PREMIUM: '/premium',
+    ADS_CREATE: '/ads/create',
+    AI: '/ai',
 } as const;
 
 // Post/Shout settings

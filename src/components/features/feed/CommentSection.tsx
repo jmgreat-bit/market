@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, ChevronDown, ChevronUp, Image as ImageIcon, X } from 'lucide-react';
 import { CommentItem } from './CommentItem';
+import { SponsoredCommentCard } from './SponsoredCommentCard';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
+import { useAds } from '@/hooks/useAds';
 import { IMAGE_MIN_BYTES, IMAGE_MAX_BYTES, COMMENT_MAX_LENGTH } from '@/lib/constants';
 
 interface CommentSectionProps {
@@ -20,6 +22,7 @@ interface CommentSectionProps {
 
 export function CommentSection({ comments, commentsCount, postId, onCommentAdded }: CommentSectionProps) {
     const { profile } = useUser();
+    const { ads: commentAds } = useAds('comments');
     const [isExpanded, setIsExpanded] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [isFocused, setIsFocused] = useState(false);
@@ -137,9 +140,19 @@ export function CommentSection({ comments, commentsCount, postId, onCommentAdded
             {/* Comments List */}
             <div className="px-4 py-4 space-y-1">
                 <AnimatePresence>
-                    {displayComments.map((comment, index) => (
-                        <CommentItem key={comment.id} comment={comment} index={index} />
-                    ))}
+                    {displayComments.map((comment, index) => {
+                        const items = [
+                            <CommentItem key={comment.id} comment={comment} index={index} />
+                        ];
+                        // Insert a sponsored card after every 3 comments
+                        if ((index + 1) % 3 === 0 && commentAds.length > 0) {
+                            const adIdx = Math.floor(index / 3) % commentAds.length;
+                            items.push(
+                                <SponsoredCommentCard key={`comment-ad-${commentAds[adIdx].id}-${index}`} ad={commentAds[adIdx]} />
+                            );
+                        }
+                        return items;
+                    })}
                 </AnimatePresence>
 
                 {/* Show More/Less Button */}

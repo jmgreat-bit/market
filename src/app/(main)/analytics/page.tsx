@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
     Eye, TrendingUp, Activity, Footprints,
     ArrowRight, Zap, Lock, Heart, MessageCircle,
-    Navigation, Calendar
+    Navigation, Calendar, BarChart3, Crown
 } from 'lucide-react';
 import { useAnalytics, TimeFilter } from '@/hooks/useAnalytics';
 import { useUser } from '@/hooks/useUser';
@@ -27,9 +28,11 @@ export default function AnalyticsDashboardPage() {
     const [postsLoading, setPostsLoading] = useState(false);
 
     const isTrader = profile?.role === 'trader';
+    const traderTier = profile?.trader_tier;
+    const hasPaidTier = traderTier === 'pro' || traderTier === 'national';
 
     useEffect(() => {
-        if (!isTrader || !profile?.id) return;
+        if (!isTrader || !profile?.id || !hasPaidTier) return;
 
         async function fetchTraderPosts() {
             setPostsLoading(true);
@@ -73,28 +76,96 @@ export default function AnalyticsDashboardPage() {
         }
 
         fetchTraderPosts();
-    }, [isTrader, profile?.id]);
+    }, [isTrader, profile?.id, hasPaidTier]);
 
+    // ── Non-trader gate ────────────────────────────────
     if (!authLoading && !isTrader) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
-                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                    <Lock className="w-10 h-10 text-primary" />
-                </div>
-                <h1 className="font-display text-2xl font-bold text-foreground mb-2">Trader Analytics</h1>
-                <p className="text-muted-foreground max-w-xs mb-6">
-                    Analytics dashboards are available to verified trader accounts only.
-                </p>
-                <Link
-                    href={ROUTES.FEED}
-                    className="bg-primary text-primary-foreground font-display font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center"
                 >
-                    Return to Feed
-                </Link>
+                    <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+                        <Lock className="w-10 h-10 text-primary" />
+                    </div>
+                    <h1 className="font-display text-2xl font-bold text-foreground mb-2">Trader Analytics</h1>
+                    <p className="text-muted-foreground max-w-xs mb-6">
+                        Analytics dashboards are available to verified trader accounts only.
+                    </p>
+                    <Link
+                        href={ROUTES.FEED}
+                        className="bg-primary text-primary-foreground font-display font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity"
+                    >
+                        Return to Feed
+                    </Link>
+                </motion.div>
             </div>
         );
     }
 
+    // ── Free tier / undefined tier upgrade gate ────────
+    if (!authLoading && isTrader && !hasPaidTier) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    className="glass-card rounded-2xl border border-border/50 p-8 sm:p-10 max-w-md w-full flex flex-col items-center"
+                >
+                    {/* Icon */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.15 }}
+                        className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-6"
+                    >
+                        <BarChart3 className="w-10 h-10 text-primary" />
+                    </motion.div>
+
+                    {/* Heading */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.25 }}
+                        className="font-display text-2xl sm:text-3xl font-black text-foreground tracking-tight mb-3"
+                    >
+                        Unlock Analytics
+                    </motion.h1>
+
+                    {/* Subtext */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.35 }}
+                        className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-8"
+                    >
+                        Upgrade to Pro or National to access your full analytics dashboard — track views, engagement, navigation requests, and more.
+                    </motion.p>
+
+                    {/* CTA Button */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.45 }}
+                    >
+                        <Link
+                            href={ROUTES.PREMIUM}
+                            className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-display font-bold px-8 py-3.5 rounded-full hover:opacity-90 transition-opacity text-sm"
+                        >
+                            <Crown className="w-4 h-4" />
+                            Upgrade Now
+                        </Link>
+                    </motion.div>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // ── Full analytics dashboard (Pro / National) ─────
     return (
         <div className="font-sans min-h-screen flex flex-col antialiased bg-background text-foreground pb-32 md:pb-12">
             <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-5xl mx-auto w-full">

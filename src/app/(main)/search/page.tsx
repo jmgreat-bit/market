@@ -16,12 +16,14 @@ import {
     Loader2,
     Heart,
     User,
-    Store
+    Store,
+    Megaphone
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { createClient } from '@/lib/supabase/client';
+import { useAds } from '@/hooks/useAds';
 import type { BusinessDetails, PostWithBusiness, Profile } from '@/types';
 
 export default function SearchPage() {
@@ -39,6 +41,7 @@ export default function SearchPage() {
     const { coordinates, isLoading: geoLoading, requestLocation } = useGeolocation();
     const inputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
+    const { ads: searchAds } = useAds('search');
 
     // Fetch trending hashtags
     useEffect(() => {
@@ -199,6 +202,43 @@ export default function SearchPage() {
                             </div>
                         ) : (
                             <>
+                                {/* Promoted Listings */}
+                                {searchAds.length > 0 && (
+                                    <section>
+                                        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                                            <Megaphone className="w-4 h-4 text-amber-400" /> Promoted
+                                        </h3>
+                                        <div className="space-y-4 mb-2">
+                                            {searchAds.map(ad => (
+                                                <div key={ad.id} className="glass-card rounded-2xl overflow-hidden border border-amber-500/30 shadow-[0_0_16px_rgba(245,190,80,0.08)]">
+                                                    <div className="p-4 flex gap-4">
+                                                        <div className="w-12 h-12 rounded-xl bg-amber-500/15 flex-shrink-0 flex items-center justify-center">
+                                                            <Store className="w-6 h-6 text-amber-400" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-start">
+                                                                <h4 className="font-bold text-foreground">{ad.business?.business_name || 'Business'}</h4>
+                                                                <span className="text-[10px] font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                                                                    <Megaphone className="w-3 h-3" /> Promoted
+                                                                </span>
+                                                            </div>
+                                                            {ad.business?.category && (
+                                                                <span className="text-[10px] font-bold text-amber-400/70 uppercase">{ad.business.category}</span>
+                                                            )}
+                                                            {ad.post?.content && (
+                                                                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{ad.post.content}</p>
+                                                            )}
+                                                            {ad.post?.image_url && (
+                                                                <img src={ad.post.image_url} className="mt-2 w-full h-24 object-cover rounded-lg" alt="Promoted" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
                                 {/* People / Profiles */}
                                 {results.profiles.length > 0 && (
                                     <section>

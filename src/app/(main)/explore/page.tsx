@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Zap, MapPin, Loader2 } from 'lucide-react';
 import { FeedList } from '@/components/features/feed/FeedList';
+import { SponsoredPostCard } from '@/components/features/feed/SponsoredPostCard';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import { useAds } from '@/hooks/useAds';
 import { PostWithBusiness } from '@/types';
 
 export default function ExplorePage() {
     const [trendingPosts, setTrendingPosts] = useState<PostWithBusiness[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { ads: exploreAds } = useAds('explore');
 
     useEffect(() => {
         async function fetchTrending() {
@@ -94,7 +97,17 @@ export default function ExplorePage() {
                         <p className="text-muted-foreground font-medium">Fetching the latest pulses...</p>
                     </div>
                 ) : (
-                    <FeedList posts={trendingPosts} isLoading={false} error={error} />
+                    <>
+                        {/* Sponsored posts at the top */}
+                        {exploreAds.length > 0 && (
+                            <div className="space-y-8 mb-8">
+                                {exploreAds.slice(0, 2).map((ad) => (
+                                    <SponsoredPostCard key={`explore-ad-${ad.id}`} ad={ad} />
+                                ))}
+                            </div>
+                        )}
+                        <FeedList posts={trendingPosts} isLoading={false} error={error} />
+                    </>
                 )}
             </div>
         </div>

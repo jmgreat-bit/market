@@ -5,10 +5,49 @@ import { useNearbyPosts } from '@/hooks/useNearbyPosts';
 import { FeedList } from '@/components/features/feed/FeedList';
 import { MapPin, TrendingUp, Loader2, Radar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAds } from '@/hooks/useAds';
+import { SponsoredPostCard } from '@/components/features/feed/SponsoredPostCard';
+import { PostWithBusiness } from '@/types';
+import { PostCard } from '@/components/features/feed/PostCard';
+import type { AdWithDetails } from '@/hooks/useAds';
+
+function SponsoredFeedList({ posts, isLoading: listLoading, error: listError, ads }: { posts: PostWithBusiness[]; isLoading: boolean; error: string | null; ads: AdWithDetails[] }) {
+    if (ads.length === 0) {
+        return <FeedList posts={posts} isLoading={listLoading} error={listError} />;
+    }
+
+    // Interleave: insert a sponsored post every 5 regular posts
+    const items: React.ReactNode[] = [];
+    let adIndex = 0;
+    posts.forEach((post, i) => {
+        items.push(
+            <motion.div key={post.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
+                <PostCard post={post} />
+            </motion.div>
+        );
+        if ((i + 1) % 5 === 0 && adIndex < ads.length) {
+            items.push(
+                <SponsoredPostCard key={`ad-${ads[adIndex].id}`} ad={ads[adIndex]} />
+            );
+            adIndex++;
+        }
+    });
+
+    if (listLoading && posts.length === 0) {
+        return <FeedList posts={posts} isLoading={listLoading} error={listError} />;
+    }
+
+    if (listError || posts.length === 0) {
+        return <FeedList posts={posts} isLoading={listLoading} error={listError} />;
+    }
+
+    return <div className="space-y-8">{items}</div>;
+}
 
 export default function FeedPage() {
     const { coordinates, isLoading: locationLoading } = useGeolocation();
     const { nearbyPosts, trendingPosts, isLoading, error, hasNearby, radiusUsed } = useNearbyPosts(coordinates);
+    const { ads } = useAds('feed');
 
     return (
         <div className="min-h-screen">
@@ -51,7 +90,7 @@ export default function FeedPage() {
                             </div>
 
                             {hasNearby ? (
-                                <FeedList posts={nearbyPosts} isLoading={false} error={error} />
+                                <SponsoredFeedList posts={nearbyPosts} isLoading={false} error={error} ads={ads} />
                             ) : (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -90,7 +129,7 @@ export default function FeedPage() {
                                     </div>
                                 </div>
 
-                                <FeedList posts={trendingPosts} isLoading={false} error={null} />
+                                <SponsoredFeedList posts={trendingPosts} isLoading={false} error={null} ads={ads} />
                             </section>
                         )}
                     </>
