@@ -8,6 +8,7 @@ import { PollDisplay } from './PollDisplay';
 import { CounterControls } from './CounterControls';
 import { useUser } from '@/hooks/useUser';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface PostBodyProps {
     content: string;
@@ -30,10 +31,17 @@ export function PostBody({
     postType = 'standard', postId, counterValue, counterLabel, pollOptions, businessProfileId
 }: PostBodyProps) {
     const { profile } = useUser();
+    const router = useRouter();
     const hasImages = images && images.length > 0;
     const hasLegacyImage = imageUrl && !hasImages;
     const isOwner = profile?.id === businessProfileId;
     const [liveCounterValue, setLiveCounterValue] = useState(counterValue ?? 0);
+
+    const handleViewOnMap = () => {
+        if (latitude && longitude) {
+            router.push(`/map?lat=${latitude}&lng=${longitude}`);
+        }
+    };
 
     return (
         <div className="flex flex-col">
@@ -116,7 +124,10 @@ export function PostBody({
             {/* Location Tag */}
             {latitude && longitude && (
                 <div className="px-2 pb-1">
-                    <button className="w-full px-3 py-2.5 flex items-center gap-2 rounded-lg text-[13px] font-medium text-muted-foreground bg-surface-container-low/50 border border-white/5 hover:bg-surface-container/80 transition-all hover:text-primary active:scale-[0.98]">
+                    <button 
+                        onClick={handleViewOnMap}
+                        className="w-full px-3 py-2.5 flex items-center gap-2 rounded-lg text-[13px] font-medium text-muted-foreground bg-surface-container-low/50 border border-white/5 hover:bg-surface-container/80 transition-all hover:text-primary active:scale-[0.98]"
+                    >
                         <MapPin className="w-4 h-4" />
                         <span>View on map</span>
                     </button>

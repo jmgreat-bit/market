@@ -52,9 +52,15 @@ function MapBoundsTracker({ onBoundsChanged }: { onBoundsChanged: (bounds: MapBo
     return null;
 }
 
-export function MapView() {
+interface MapViewProps {
+    targetLat?: number;
+    targetLng?: number;
+}
+
+export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
     const { theme } = useSettings();
     const { coordinates, isLoading: locationLoading } = useGeolocation();
+    const hasTarget = targetLat !== undefined && targetLng !== undefined && !isNaN(targetLat) && !isNaN(targetLng);
     
     const [searchBounds, setSearchBounds] = useState<MapBounds | undefined>(undefined);
     const [currentBounds, setCurrentBounds] = useState<MapBounds | undefined>(undefined);
@@ -77,15 +83,22 @@ export function MapView() {
             : businesses;
     }, [businesses, categoryFilter]);
 
-    // Update map center when user location is available initially
+    // If target coordinates were passed (from "View on map" button), fly there
     useEffect(() => {
-        if (coordinates && !searchBounds) {
+        if (hasTarget) {
+            setMapCenter([targetLat!, targetLng!]);
+        }
+    }, [hasTarget, targetLat, targetLng]);
+
+    // Update map center when user location is available initially (only if no target)
+    useEffect(() => {
+        if (coordinates && !searchBounds && !hasTarget) {
             const timer = setTimeout(() => {
                 setMapCenter([coordinates.latitude, coordinates.longitude]);
             }, 0);
             return () => clearTimeout(timer);
         }
-    }, [coordinates, searchBounds]);
+    }, [coordinates, searchBounds, hasTarget]);
 
     const tileUrl = theme === 'light' 
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -158,6 +171,10 @@ export function MapView() {
             <MapContainer
                 center={mapCenter}
                 zoom={DEFAULT_MAP_ZOOM}
+                minZoom={8}
+                maxZoom={18}
+                maxBounds={[[-2.9, 28.8], [-1.0, 30.9]]}
+                maxBoundsViscosity={1.0}
                 className="w-full h-full z-10"
                 zoomControl={false}
             >

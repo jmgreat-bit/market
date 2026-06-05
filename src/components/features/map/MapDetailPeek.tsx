@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navigation, Bookmark, X } from 'lucide-react';
 import { BusinessDetails } from '@/types';
+import { getSupabaseClient } from '@/lib/supabase/client';
+import { useUser } from '@/hooks/useUser';
 
 interface MapDetailPeekProps {
     business: BusinessDetails | null;
@@ -10,7 +12,29 @@ interface MapDetailPeekProps {
 }
 
 export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
+    const { profile } = useUser();
+
     if (!business) return null;
+
+    const handleStartNavigation = async () => {
+        // Open Google Maps directions (works on mobile — opens app, on desktop — opens web)
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`;
+        window.open(url, '_blank');
+
+        // Log navigation event for trader analytics
+        if (profile?.id) {
+            try {
+                const supabase = getSupabaseClient();
+                await supabase.from('store_navigations').insert({
+                    business_id: business.id,
+                    user_id: profile.id,
+                });
+            } catch (err) {
+                // Silent fail — don't block user navigation
+                console.error('Failed to log navigation:', err);
+            }
+        }
+    };
 
     return (
         <div className="absolute bottom-0 md:bottom-6 left-0 right-0 px-0 md:px-6 z-30 pointer-events-none flex justify-center pb-24 md:pb-0">
@@ -33,9 +57,11 @@ export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
                         <h2 className="font-display text-2xl font-black text-foreground tracking-tight mb-1">
                             {business.business_name}
                         </h2>
-                        <p className="font-sans text-sm text-muted-foreground">
-                            0.2 mi • Trending Now
-                        </p>
+                        {business.address && (
+                            <p className="font-sans text-sm text-muted-foreground">
+                                {business.address}
+                            </p>
+                        )}
                     </div>
                     <div className="flex gap-2">
                         <button className="w-10 h-10 rounded-full bg-secondary border border-border/50 flex items-center justify-center text-foreground hover:text-primary transition-colors">
@@ -51,7 +77,10 @@ export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
                 </div>
 
                 <div className="flex gap-4 mt-8">
-                    <button className="flex-1 bg-primary text-primary-foreground py-4 rounded-2xl font-sans font-bold flex justify-center items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <button 
+                        onClick={handleStartNavigation}
+                        className="flex-1 bg-primary text-primary-foreground py-4 rounded-2xl font-sans font-bold flex justify-center items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
                         <Navigation className="w-5 h-5" />
                         Start Navigation
                     </button>
@@ -60,3 +89,4 @@ export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
         </div>
     );
 }
+

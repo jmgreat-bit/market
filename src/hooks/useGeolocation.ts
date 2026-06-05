@@ -30,14 +30,29 @@ export function useGeolocation() {
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                setState({
-                    coordinates: {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    },
-                    error: null,
-                    isLoading: false,
-                });
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Check if the retrieved location is inside Rwanda bounds
+                const inRwanda = lat >= -2.9 && lat <= -1.0 && lng >= 28.8 && lng <= 30.9;
+
+                if (inRwanda) {
+                    setState({
+                        coordinates: {
+                            latitude: lat,
+                            longitude: lng,
+                        },
+                        error: null,
+                        isLoading: false,
+                    });
+                } else {
+                    // Silently fall back to Kigali (coordinates null triggers default Kigali center in consuming components)
+                    setState({
+                        coordinates: null,
+                        error: null,
+                        isLoading: false,
+                    });
+                }
             },
             (error) => {
                 let errorMessage = 'Unable to retrieve your location';

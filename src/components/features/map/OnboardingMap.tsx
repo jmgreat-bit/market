@@ -26,9 +26,19 @@ function GpsLocator({ onLocationSelect, setPosition }: { onLocationSelect: (lat:
     const handleLocate = () => {
         setIsLocating(true);
         map.locate().on("locationfound", function (e) {
-            setPosition([e.latlng.lat, e.latlng.lng]);
-            onLocationSelect(e.latlng.lat, e.latlng.lng);
-            map.flyTo(e.latlng, map.getZoom());
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // Check if retrieved location is inside Rwanda bounds
+            const inRwanda = lat >= -2.9 && lat <= -1.0 && lng >= 28.8 && lng <= 30.9;
+            
+            if (inRwanda) {
+                setPosition([lat, lng]);
+                onLocationSelect(lat, lng);
+                map.flyTo(e.latlng, map.getZoom());
+            } else {
+                alert("Your current location is outside Rwanda. Please manually pin your business location on the map of Rwanda.");
+            }
             setIsLocating(false);
         }).on("locationerror", function (e) {
             alert("Could not access your location. Please check your permissions.");
@@ -67,6 +77,10 @@ export default function OnboardingMap({ initialCenter, onLocationSelect }: Onboa
         <MapContainer 
             center={initialCenter} 
             zoom={15} 
+            minZoom={8}
+            maxZoom={18}
+            maxBounds={[[-2.9, 28.8], [-1.0, 30.9]]}
+            maxBoundsViscosity={1.0}
             className="w-full h-full relative"
             zoomControl={false}
         >

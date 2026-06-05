@@ -15,7 +15,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "MarketPLC - Discover Local Businesses",
   description: "Find amazing local businesses and their latest deals on an interactive map",
-  keywords: ["local business", "deals", "map", "discovery", "nearby"],
+  keywords: ["local business", "deals", "map", "discovery", "nearby", "Rwanda", "Kigali"],
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MarketPLC",
+  },
 };
 
 export const viewport: Viewport = {
@@ -44,6 +54,19 @@ export default function RootLayout({
             {children}
           </SettingsProvider>
         </UserProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.log('SW registration failed:', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
