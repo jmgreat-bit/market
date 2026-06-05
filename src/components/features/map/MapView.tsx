@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, useMapEvents, Polyline } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useBusinesses } from '@/hooks/useBusinesses';
@@ -13,7 +13,7 @@ import { MapDetailPeek } from './MapDetailPeek';
 import { useSettings } from '@/contexts/SettingsContext';
 import { BusinessDetails, MapBounds } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, X, Navigation, Footprints } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 // Component to handle map center updates
@@ -52,6 +52,14 @@ function MapBoundsTracker({ onBoundsChanged }: { onBoundsChanged: (bounds: MapBo
     return null;
 }
 
+interface ActiveRoute {
+    coordinates: [number, number][];
+    distance: number;
+    duration: number;
+    profile: 'driving' | 'foot';
+    businessName: string;
+}
+
 interface MapViewProps {
     targetLat?: number;
     targetLng?: number;
@@ -75,6 +83,8 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
     ]);
     const [selectedBusiness, setSelectedBusiness] = useState<BusinessDetails | null>(null);
     const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+    const [activeRoute, setActiveRoute] = useState<ActiveRoute | null>(null);
+    const [isRouting, setIsRouting] = useState(false);
 
     // Filter businesses based on active category
     const filteredBusinesses = useMemo(() => {
@@ -111,6 +121,40 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
 
     const handleMapClick = () => {
         setSelectedBusiness(null);
+    };
+
+    const fetchRoute = async (targetLat: number, targetLng: number, bizName: string, profile: 'driving' | 'foot' = 'foot') => {
+        if (!coordinates) return;
+        setIsRouting(true);
+        setActiveRoute(null);
+        setSelectedBusiness(null);
+        try {
+            const userLng = coordinates.longitude;
+            const userLat = coordinates.latitude;
+            const res = await fetch(`https://router.project-osrm.org/route/v1/${profile}/${userLng},${userLat};${targetLng},${targetLat}?overview=full&geometries=geojson`);
+            const data = await res.json();
+            
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                // GeoJSON coordinates are [lng, lat], Leaflet needs [lat, lng]
+                const latLngs = route.geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]] as [number, number]);
+                
+                setActiveRoute({
+                    coordinates: latLngs,
+                    distance: route.distance, // in meters
+                    duration: route.duration, // in seconds
+                    profile,
+                    businessName: bizName
+                });
+                
+                // Fit bounds to show both points by setting map center roughly between them
+                setMapCenter([(userLat + targetLat) / 2, (userLng + targetLng) / 2]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch route:", error);
+        } finally {
+            setIsRouting(false);
+        }
     };
 
     const handleBoundsChanged = (bounds: MapBounds) => {
@@ -206,6 +250,18 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
                         onClick={handleBusinessSelect}
                     />
                 ))}
+
+                {/* Route Polyline */}
+                {activeRoute && (
+                    <Polyline 
+                        positions={activeRoute.coordinates} 
+                        color={theme === 'light' ? '#0070f3' : '#3291ff'} 
+                        weight={5} 
+                        opacity={0.8}
+                        dashArray="10, 10"
+                        lineCap="round"
+                    />
+                )}
             </MapContainer>
 
             {/* Floating zoom controls */}
@@ -221,12 +277,63 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
             {/* Glassmorphic Search HUD */}
             <MapSearchHUD onCategoryFilter={setCategoryFilter} />
 
+            {/* Route Navigation HUD */}
+            <AnimatePresence>
+                {activeRoute && (
+                    <motion.div 
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -50, opacity: 0 }}
+                        className="absolute top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md z-30"
+                    >
+                        <div className="bg-background/90 backdrop-blur-xl border border-border/50 rounded-2xl p-4 shadow-2xl">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-display font-bold text-lg">Route to {activeRoute.businessName}</h3>
+                                <button 
+                                    onClick={() => setActiveRoute(null)}
+                                    className="w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex gap-2 bg-secondary/50 p-1 rounded-xl">
+                                    <button 
+                                        onClick={() => fetchRoute(activeRoute.coordinates[activeRoute.coordinates.length - 1][0], activeRoute.coordinates[activeRoute.coordinates.length - 1][1], activeRoute.businessName, 'foot')}
+                                        disabled={isRouting}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-colors ${activeRoute.profile === 'foot' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        {isRouting && activeRoute.profile !== 'foot' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Footprints className="w-4 h-4" />} Walking
+                                    </button>
+                                    <button 
+                                        onClick={() => fetchRoute(activeRoute.coordinates[activeRoute.coordinates.length - 1][0], activeRoute.coordinates[activeRoute.coordinates.length - 1][1], activeRoute.businessName, 'driving')}
+                                        disabled={isRouting}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 transition-colors ${activeRoute.profile === 'driving' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        {isRouting && activeRoute.profile !== 'driving' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />} Driving
+                                    </button>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-bold text-primary">
+                                        {activeRoute.distance > 1000 ? (activeRoute.distance / 1000).toFixed(1) + ' km' : Math.round(activeRoute.distance) + ' m'}
+                                    </p>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        {Math.round(activeRoute.duration / 60)} min
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Detail Peek Sheet */}
             <AnimatePresence>
                 {selectedBusiness && (
                     <MapDetailPeek 
                         business={selectedBusiness} 
                         onClose={() => setSelectedBusiness(null)} 
+                        onShowRoute={coordinates ? () => fetchRoute(selectedBusiness.latitude, selectedBusiness.longitude, selectedBusiness.business_name, 'foot') : undefined}
                     />
                 )}
             </AnimatePresence>

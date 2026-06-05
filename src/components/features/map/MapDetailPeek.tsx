@@ -9,17 +9,17 @@ import { useUser } from '@/hooks/useUser';
 interface MapDetailPeekProps {
     business: BusinessDetails | null;
     onClose: () => void;
+    onShowRoute?: () => void;
 }
 
-export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
+export function MapDetailPeek({ business, onClose, onShowRoute }: MapDetailPeekProps) {
     const { profile } = useUser();
 
     if (!business) return null;
 
-    const handleStartNavigation = async () => {
-        // Open Google Maps directions (works on mobile — opens app, on desktop — opens web)
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`;
-        window.open(url, '_blank');
+    const handleShowRoute = async () => {
+        onClose();
+        if (onShowRoute) onShowRoute();
 
         // Log navigation event for trader analytics
         if (profile?.id) {
@@ -76,14 +76,16 @@ export function MapDetailPeek({ business, onClose }: MapDetailPeekProps) {
                     </div>
                 </div>
 
-                <div className="flex gap-4 mt-8">
-                    <button 
-                        onClick={handleStartNavigation}
-                        className="flex-1 bg-primary text-primary-foreground py-4 rounded-2xl font-sans font-bold flex justify-center items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                        <Navigation className="w-5 h-5" />
-                        Start Navigation
-                    </button>
+                <div className="flex gap-3 mt-8">
+                    {onShowRoute && (
+                        <button 
+                            onClick={handleShowRoute}
+                            className="flex-1 bg-primary text-primary-foreground py-4 rounded-2xl font-sans font-bold flex justify-center items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                            <Navigation className="w-5 h-5" />
+                            Show Route
+                        </button>
+                    )}
                 </div>
             </motion.div>
         </div>
