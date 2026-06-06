@@ -37,8 +37,8 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
     }, [expiresAt]);
 
     return (
-        <div className="p-4 pb-3 flex items-start gap-3">
-            <Avatar className="w-11 h-11 ring-2 ring-primary/20 shadow-geo-glow">
+        <div className="p-3 pb-2 flex items-start gap-2.5">
+            <Avatar className="w-9 h-9 ring-1 ring-primary/20 shadow-geo-glow">
                 {avatarUrl && (
                     <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
                 )}
@@ -49,7 +49,7 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <div className="flex items-center gap-1.5">
-                    <h3 className="text-base font-bold text-foreground font-display truncate tracking-wide">
+                    <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide">
                         {businessName || 'Business'}
                     </h3>
                     {(traderTier && traderTier !== 'free') ? (
@@ -58,7 +58,7 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
                         <TraderBadge tier="pro" />
                     ) : null}
                 </div>
-                <div className="flex items-center gap-2 text-[13px] text-muted-foreground mt-0.5 font-sans">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 font-sans">
                     {category && (
                         <span className="font-semibold text-primary">
                             {category}

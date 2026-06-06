@@ -46,8 +46,8 @@ export function PostBody({
     return (
         <div className="flex flex-col">
             {/* Text Content — always shown for all post types */}
-            <div className="px-4 pb-3">
-                <p className="text-[15px] font-sans text-foreground/90 leading-relaxed whitespace-pre-wrap">
+            <div className="px-3 pb-2">
+                <p className="text-[13px] font-sans text-foreground/90 leading-relaxed whitespace-pre-wrap">
                     {content}
                 </p>
             </div>
@@ -97,9 +97,9 @@ export function PostBody({
             )}
 
             {/* Media Block Layer */}
-            <div className="relative w-full rounded-xl overflow-hidden px-2 pb-2">
+            <div className="relative w-full rounded-xl overflow-hidden px-2 pb-1">
                 {hasLegacyImage && (
-                    <div className="relative aspect-video bg-surface-container-lowest rounded-lg overflow-hidden border border-border">
+                    <div className="relative max-h-[350px] bg-surface-container-lowest rounded-lg overflow-hidden border border-border">
                         <img
                             src={imageUrl!}
                             alt="Post image"
@@ -123,12 +123,12 @@ export function PostBody({
 
             {/* Location Tag */}
             {latitude && longitude && (
-                <div className="px-2 pb-1">
+                <div className="px-3 pb-1">
                     <button 
                         onClick={handleViewOnMap}
-                        className="w-full px-3 py-2.5 flex items-center gap-2 rounded-lg text-[13px] font-medium text-muted-foreground bg-surface-container-low/50 border border-white/5 hover:bg-surface-container/80 transition-all hover:text-primary active:scale-[0.98]"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all active:scale-[0.98]"
                     >
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-3 h-3" />
                         <span>View on map</span>
                     </button>
                 </div>

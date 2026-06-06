@@ -120,7 +120,7 @@ export default function SearchPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground pb-32">
-            <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-2xl px-6 h-20 flex items-center gap-4 border-b border-border/10">
+            <header className="fixed top-[3.5rem] w-full z-50 bg-background/80 backdrop-blur-2xl px-6 h-20 flex items-center gap-4 border-b border-border/10">
                 <button onClick={() => router.back()} className="text-muted-foreground hover:text-primary transition-colors">
                     <ArrowLeft className="w-6 h-6" />
                 </button>
@@ -144,7 +144,7 @@ export default function SearchPage() {
                 </div>
             </header>
 
-            <main className="pt-24 px-6 space-y-10 max-w-2xl mx-auto">
+            <main className="pt-36 px-6 space-y-10 max-w-2xl mx-auto">
                 {/* Initial View: Trending & Categories */}
                 {!query && (
                     <>
@@ -169,7 +169,7 @@ export default function SearchPage() {
                             </div>
                         </section>
 
-                        <section className="grid grid-cols-4 gap-4">
+                        <section className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
                             {[
                                 { name: 'Food', icon: Utensils },
                                 { name: 'Retail', icon: ShoppingBag },
@@ -179,12 +179,10 @@ export default function SearchPage() {
                                 <button
                                     key={cat.name}
                                     onClick={() => setQuery(cat.name)}
-                                    className="flex flex-col items-center gap-2 group"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-border/50 hover:border-primary/40 transition-all whitespace-nowrap"
                                 >
-                                    <div className="w-full aspect-square glass-card rounded-2xl flex items-center justify-center border border-border/50 group-hover:border-primary/40 transition-all">
-                                        <cat.icon className="w-7 h-7 text-primary" />
-                                    </div>
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary">
+                                    <cat.icon className="w-4 h-4 text-primary" />
+                                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary">
                                         {cat.name}
                                     </span>
                                 </button>

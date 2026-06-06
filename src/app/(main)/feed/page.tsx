@@ -3,7 +3,7 @@
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useNearbyPosts } from '@/hooks/useNearbyPosts';
 import { FeedList } from '@/components/features/feed/FeedList';
-import { MapPin, TrendingUp, Loader2, Radar } from 'lucide-react';
+import { MapPin, TrendingUp, Loader2, Radar, LocateFixed, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAds } from '@/hooks/useAds';
 import { SponsoredPostCard } from '@/components/features/feed/SponsoredPostCard';
@@ -41,23 +41,41 @@ function SponsoredFeedList({ posts, isLoading: listLoading, error: listError, ad
         return <FeedList posts={posts} isLoading={listLoading} error={listError} />;
     }
 
-    return <div className="space-y-8">{items}</div>;
+    return <div className="space-y-4">{items}</div>;
 }
 
 export default function FeedPage() {
-    const { coordinates, isLoading: locationLoading } = useGeolocation();
+    const { coordinates, isLoading: locationLoading, error: geoError, requestLocation } = useGeolocation();
     const { nearbyPosts, trendingPosts, isLoading, error, hasNearby, radiusUsed } = useNearbyPosts(coordinates);
     const { ads } = useAds('feed');
 
     return (
         <div className="min-h-screen">
-            <div className="flex-1 px-6 md:px-10 pt-20 md:pt-28 max-w-3xl mx-auto w-full pb-32 md:pb-10">
-                <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground tracking-tight mb-2">
+            <div className="flex-1 px-4 md:px-8 pt-20 md:pt-28 max-w-3xl mx-auto w-full pb-32 md:pb-10">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight mb-2">
                     Your Feed
                 </h1>
-                <p className="text-muted-foreground text-base mb-8 max-w-lg">
+                <p className="text-muted-foreground text-sm mb-6 max-w-lg">
                     Discover what&apos;s happening around you.
                 </p>
+
+                {!coordinates && !locationLoading && (
+                    <button
+                        onClick={requestLocation}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors mb-4"
+                    >
+                        <LocateFixed className="w-3.5 h-3.5" />
+                        Refresh Location
+                    </button>
+                )}
+
+                {geoError && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs mb-4">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>{geoError}</span>
+                        <button onClick={requestLocation} className="ml-auto text-primary font-bold hover:underline">Retry</button>
+                    </div>
+                )}
 
                 {/* Loading state */}
                 {(isLoading || locationLoading) && (

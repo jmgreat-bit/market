@@ -10,6 +10,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
+import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout';
 
 // ── Types ──────────────────────────────────────────────
 interface ChatMessage {
@@ -264,42 +265,24 @@ export default function AiDiscoveryPage() {
     const noCredits = credits !== null && credits <= 0;
     const isInputDisabled = noCredits || !user || authLoading;
 
+    // Credits badge element for the header
+    const creditsBadge = !creditsLoading && credits !== null ? (
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+            credits > 0
+                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                : 'bg-destructive/10 text-destructive border border-destructive/20'
+        }`}>
+            <Zap className="w-3.5 h-3.5" />
+            <span>{credits} credit{credits !== 1 ? 's' : ''} left</span>
+        </div>
+    ) : undefined;
+
     return (
-        <div className="flex flex-col h-[100dvh] bg-background text-foreground">
-
-            {/* ── Header ────────────────────────────── */}
-            <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-2xl border-b border-border/10">
-                <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-purple-400" />
-                        </div>
-                        <div>
-                            <h1 className="font-display font-bold text-base tracking-tight text-foreground">
-                                AI Discovery
-                            </h1>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                                MarketPLC
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Credits badge */}
-                    {!creditsLoading && credits !== null && (
-                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-                            credits > 0
-                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                : 'bg-destructive/10 text-destructive border border-destructive/20'
-                        }`}>
-                            <Zap className="w-3.5 h-3.5" />
-                            <span>{credits} credit{credits !== 1 ? 's' : ''} left</span>
-                        </div>
-                    )}
-                </div>
-            </header>
+        <StandalonePageLayout title="AI Discovery" rightElement={creditsBadge}>
+            <div className="flex flex-col h-[100dvh] bg-background text-foreground">
 
             {/* ── Messages area ─────────────────────── */}
-            <main className="flex-1 overflow-y-auto pt-20 pb-28 px-4">
+            <main className="flex-1 overflow-y-auto pt-4 pb-28 px-4">
                 <div className="max-w-3xl mx-auto space-y-4">
 
                     {/* Empty state */}
@@ -327,7 +310,7 @@ export default function AiDiscoveryPage() {
                                         key={suggestion}
                                         onClick={() => sendMessage(suggestion)}
                                         disabled={isInputDisabled}
-                                        className="glass-card px-4 py-2.5 rounded-full border border-purple-500/20 text-sm font-medium text-foreground/80 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                        className="glass-card px-4 py-2.5 rounded-full border border-purple-500/30 text-sm font-medium text-foreground/90 bg-purple-500/5 hover:border-purple-500/40 hover:bg-purple-500/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
                                         {suggestion}
                                     </button>
@@ -470,5 +453,6 @@ export default function AiDiscoveryPage() {
                 </div>
             </div>
         </div>
+        </StandalonePageLayout>
     );
 }

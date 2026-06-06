@@ -203,7 +203,7 @@ export default function PremiumPage() {
                             {tier.id === 'free' ? (
                                 <button
                                     disabled
-                                    className="w-full py-3 rounded-xl border border-border/50 text-sm font-bold text-muted-foreground bg-secondary/40 cursor-default"
+                                    className="w-full py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
                                 >
                                     Current Plan
                                 </button>

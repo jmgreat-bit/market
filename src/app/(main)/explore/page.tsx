@@ -61,15 +61,15 @@ export default function ExplorePage() {
     return (
         <div className="min-h-screen bg-background pb-32 md:pb-12 text-foreground">
             {/* Explore Header */}
-            <div className="relative pt-20 md:pt-28 pb-8 px-6 md:px-10 max-w-3xl mx-auto w-full z-10">
+            <div className="relative pt-20 md:pt-28 pb-8 px-4 md:px-8 max-w-3xl mx-auto w-full z-10">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50 pointer-events-none" />
-                <h1 className="text-4xl md:text-5xl font-display font-black text-foreground mb-4 tracking-tight flex items-center gap-4">
+                <h1 className="text-2xl md:text-3xl font-display font-black text-foreground mb-4 tracking-tight flex items-center gap-4">
                     Explore
                     <span className="bg-primary/20 text-primary text-sm font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-primary/30 flex items-center gap-1">
                         <Sparkles className="w-4 h-4" /> Trending
                     </span>
                 </h1>
-                <p className="text-muted-foreground text-lg mb-8 max-w-lg">
+                <p className="text-muted-foreground text-sm mb-6 max-w-lg">
                     Discover buzzing events, viral drops, and the hottest spots emerging in your city right now.
                 </p>
 
@@ -90,7 +90,7 @@ export default function ExplorePage() {
             </div>
 
             {/* Feed content */}
-            <div className="px-6 md:px-10 max-w-3xl mx-auto w-full">
+            <div className="px-4 md:px-8 max-w-3xl mx-auto w-full">
                 {isLoading ? (
                     <div className="flex flex-col items-center py-20 gap-4">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />

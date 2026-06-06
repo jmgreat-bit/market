@@ -22,9 +22,11 @@ interface OnboardingMapProps {
 function GpsLocator({ onLocationSelect, setPosition }: { onLocationSelect: (lat: number, lng: number) => void, setPosition: (pos: [number, number]) => void }) {
     const map = useMap();
     const [isLocating, setIsLocating] = useState(false);
+    const [locationError, setLocationError] = useState<string | null>(null);
 
     const handleLocate = () => {
         setIsLocating(true);
+        setLocationError(null);
         map.locate().on("locationfound", function (e) {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
@@ -37,26 +39,34 @@ function GpsLocator({ onLocationSelect, setPosition }: { onLocationSelect: (lat:
                 onLocationSelect(lat, lng);
                 map.flyTo(e.latlng, map.getZoom());
             } else {
-                alert("Your current location is outside Rwanda. Please manually pin your business location on the map of Rwanda.");
+                setLocationError("Your current location is outside Rwanda. Please manually pin your business location on the map.");
             }
             setIsLocating(false);
         }).on("locationerror", function (e) {
-            alert("Could not access your location. Please check your permissions.");
+            setLocationError("Could not access your location. Please check your permissions.");
             setIsLocating(false);
         });
     };
 
     return (
-        <button 
-            onClick={(e) => {
-                e.preventDefault();
-                handleLocate();
-            }}
-            className="absolute bottom-6 right-6 z-[400] w-12 h-12 bg-card rounded-full shadow-lg border border-border/50 flex items-center justify-center text-primary hover:bg-secondary transition-colors"
-            title="Find My Location"
-        >
-            {isLocating ? <Loader2 className="w-5 h-5 animate-spin" /> : <LocateFixed className="w-5 h-5" />}
-        </button>
+        <>
+            {locationError && (
+                <div className="absolute bottom-20 left-4 right-4 z-[400] bg-destructive/90 backdrop-blur-sm text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg flex items-start gap-2">
+                    <span className="flex-1">{locationError}</span>
+                    <button onClick={() => setLocationError(null)} className="text-white/70 hover:text-white shrink-0 mt-0.5">✕</button>
+                </div>
+            )}
+            <button 
+                onClick={(e) => {
+                    e.preventDefault();
+                    handleLocate();
+                }}
+                className="absolute bottom-6 right-6 z-[400] w-12 h-12 bg-card rounded-full shadow-lg border border-border/50 flex items-center justify-center text-primary hover:bg-secondary transition-colors"
+                title="Find My Location"
+            >
+                {isLocating ? <Loader2 className="w-5 h-5 animate-spin" /> : <LocateFixed className="w-5 h-5" />}
+            </button>
+        </>
     );
 }
 

@@ -22,7 +22,8 @@ import {
     Shield,
     MessageCircleQuestion,
     Compass,
-    Crown
+    Crown,
+    Radar
 } from 'lucide-react';
 
 export default function MenuPage() {
@@ -129,6 +130,12 @@ export default function MenuPage() {
                             href="/analytics"
                         />
                         <MenuButton 
+                            icon={<Radar className="w-5 h-5" />} 
+                            label="Intel Settings" 
+                            desc="Proximity & alerts" 
+                            href="/settings/intel"
+                        />
+                        <MenuButton 
                             icon={<User className="w-5 h-5" />} 
                             label="Edit Profile" 
                             desc="Update identity" 
@@ -178,7 +185,7 @@ export default function MenuPage() {
                                         flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-all
                                         ${theme === tValue
                                             ? 'bg-primary text-primary-foreground font-bold'
-                                            : 'bg-secondary border border-border/50 text-muted-foreground hover:bg-secondary-foreground/10'}
+                                            : 'bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10'}
                                     `}
                                 >
                                     {tValue === 'light' ? <Sun className="w-4 h-4 mb-2" /> : tValue === 'dark' ? <Moon className="w-4 h-4 mb-2" /> : <Monitor className="w-4 h-4 mb-2" />}
@@ -205,7 +212,7 @@ export default function MenuPage() {
                                         flex items-center justify-center gap-2 py-3 px-2 rounded-2xl transition-all
                                         ${language === lValue
                                             ? 'bg-primary text-primary-foreground font-bold'
-                                            : 'bg-secondary border border-border/50 text-muted-foreground hover:bg-secondary-foreground/10'}
+                                            : 'bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10'}
                                     `}
                                 >
                                     <span className="text-xs uppercase font-bold tracking-widest">{lValue}</span>

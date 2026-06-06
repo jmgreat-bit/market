@@ -120,7 +120,7 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
     }, [isSaved, profile?.id, postId]);
 
     return (
-        <div className="relative px-3 py-2 flex items-center justify-between border-t border-[rgba(72,72,73,0.15)] mt-2 pt-4">
+        <div className="relative px-3 py-1.5 flex items-center justify-between border-t border-[rgba(72,72,73,0.15)] mt-1 pt-2">
             <div className="flex items-center gap-1.5">
                 {/* Like Button */}
                 <motion.button

@@ -30,14 +30,14 @@ export function SponsoredPostCard({ ad }: SponsoredPostCardProps) {
                 </div>
 
                 {/* Header */}
-                <div className="p-4 pb-3 flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-full bg-amber-500/15 ring-2 ring-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <div className="p-3 pb-2 flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-amber-500/15 ring-2 ring-amber-500/20 flex items-center justify-center flex-shrink-0">
                         <span className="text-amber-400 font-bold font-display text-base">
                             {business?.business_name?.charAt(0) || 'B'}
                         </span>
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        <h3 className="text-base font-bold text-foreground font-display truncate tracking-wide">
+                        <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide">
                             {business?.business_name || 'Business'}
                         </h3>
                         <div className="flex items-center gap-2 text-[13px] text-muted-foreground mt-0.5 font-sans">
@@ -53,15 +53,15 @@ export function SponsoredPostCard({ ad }: SponsoredPostCardProps) {
                 </div>
 
                 {/* Content */}
-                <div className="px-4 pb-3">
-                    <p className="text-[15px] text-foreground font-sans leading-relaxed whitespace-pre-wrap break-words">
+                <div className="px-3 pb-2">
+                    <p className="text-[13px] text-foreground font-sans leading-relaxed whitespace-pre-wrap break-words">
                         {post.content}
                     </p>
                 </div>
 
                 {/* Image */}
                 {post.image_url && (
-                    <div className="px-4 pb-3">
+                    <div className="px-3 pb-2">
                         <div className="relative overflow-hidden rounded-lg">
                             <img
                                 src={post.image_url}
@@ -73,7 +73,7 @@ export function SponsoredPostCard({ ad }: SponsoredPostCardProps) {
                 )}
 
                 {/* Engagement Stats (read-only) */}
-                <div className="px-4 py-2 flex items-center gap-4 text-muted-foreground border-t border-border/20">
+                <div className="px-3 py-1.5 flex items-center gap-4 text-muted-foreground border-t border-border/20">
                     <div className="flex items-center gap-1.5 text-[13px]">
                         <Heart className="w-4 h-4" />
                         <span>{post.likes_count ?? 0}</span>
@@ -86,7 +86,7 @@ export function SponsoredPostCard({ ad }: SponsoredPostCardProps) {
 
                 {/* View Button */}
                 {business?.profile_id && (
-                    <div className="px-4 pb-4 pt-2">
+                    <div className="px-3 pb-3 pt-1">
                         <Link
                             href={`/u/${business.profile_id}`}
                             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-bold font-display hover:bg-amber-500/20 transition-all"

@@ -1,234 +1,144 @@
 'use client';
 
-import { 
-    Menu, 
-    User, 
-    Settings, 
-    Radar, 
-    UtensilsCrossed, 
-    ShoppingBag, 
-    Music, 
-    Flame, 
-    Clock, 
-    ArrowRight, 
-    Star, 
-    Store, 
-    BellOff, 
-    Plus 
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Heart, MessageCircle, Reply, UserPlus, Bell } from 'lucide-react';
+import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout';
+import { useUser } from '@/hooks/useUser';
+import { getSupabaseClient } from '@/lib/supabase/client';
+import { formatDistanceToNow } from 'date-fns';
 
-export default function AlertsHubPage() {
-    const [foodActive, setFoodActive] = useState(true);
-    const [retailActive, setRetailActive] = useState(false);
-    const [musicActive, setMusicActive] = useState(true);
-    const [dropsActive, setDropsActive] = useState(true);
+// ── Types ──────────────────────────────────────────────
+type AlertType = 'like' | 'comment' | 'reply' | 'follow' | 'system';
+
+interface Alert {
+    id: string;
+    user_id: string;
+    type: AlertType;
+    title: string;
+    body: string;
+    is_read: boolean;
+    created_at: string;
+    related_post_id: string | null;
+    from_user_id: string | null;
+}
+
+// ── Icon map ───────────────────────────────────────────
+const typeIconMap: Record<AlertType, { icon: typeof Heart; color: string; bg: string }> = {
+    like:    { icon: Heart,         color: 'text-rose-400',   bg: 'bg-rose-500/10' },
+    comment: { icon: MessageCircle, color: 'text-blue-400',   bg: 'bg-blue-500/10' },
+    reply:   { icon: Reply,         color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    follow:  { icon: UserPlus,      color: 'text-emerald-400',bg: 'bg-emerald-500/10' },
+    system:  { icon: Bell,          color: 'text-amber-400',  bg: 'bg-amber-500/10' },
+};
+
+// ── Page component ─────────────────────────────────────
+export default function NotificationsPage() {
+    const { user } = useUser();
+    const [alerts, setAlerts] = useState<Alert[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+
+        async function fetchAlerts() {
+            setLoading(true);
+            try {
+                const supabase = getSupabaseClient();
+                const { data, error } = await supabase
+                    .from('alerts')
+                    .select('*')
+                    .eq('user_id', user!.id)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) {
+                    setHasError(true);
+                } else {
+                    setAlerts(data || []);
+                }
+            } catch {
+                setHasError(true);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchAlerts();
+    }, [user]);
 
     return (
-        <div className="bg-surface text-foreground min-h-screen flex flex-col pb-32 pt-6 selection:bg-primary-container/30 selection:text-primary">
+        <StandalonePageLayout title="Notifications">
+            <div className="max-w-2xl mx-auto px-4 py-4">
 
-            <main className="flex-grow max-w-5xl mx-auto w-full px-4 md:px-8 space-y-12">
-                {/* Page Title Section */}
-                <section className="mt-8 mb-12 relative z-10">
-                    <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-2 tracking-tight">Intel Settings</h2>
-                    <p className="font-sans text-muted-foreground text-lg max-w-2xl">Configure your proximity alerts and category feeds to curate your midnight navigation.</p>
-                </section>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
-                    {/* Left Column: Primary Controls */}
-                    <div className="lg:col-span-7 space-y-8">
-                        {/* Proximity Alerts Slider (Glassmorphic Card) */}
-                        <section className="bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="font-display text-xl font-semibold text-foreground flex items-center gap-2">
-                                        <Radar className="w-5 h-5 text-primary" />
-                                        Proximity Alerts
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground mt-1">Adjust distance for nearby drop notifications.</p>
-                                </div>
-                                <div className="bg-[#262627] px-4 py-2 rounded-full border border-[rgba(72,72,73,0.15)]">
-                                    <span className="text-primary font-bold font-display">2.5 km</span>
-                                </div>
-                            </div>
-                            
-                            <div className="relative pt-6 pb-2">
-                                {/* Custom Range Slider Track */}
-                                <div className="h-2 bg-[#262627] rounded-full w-full relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 h-full w-1/2 bg-gradient-to-r from-primary to-accent shadow-[0_0_15px_rgba(0,238,252,0.4)]"></div>
-                                </div>
-                                {/* Thumb */}
-                                <div className="absolute top-4 left-1/2 -ml-3 w-6 h-6 bg-surface border-2 border-primary rounded-full shadow-[0_0_10px_rgba(143,245,255,0.6)] cursor-pointer hover:scale-110 transition-transform"></div>
-                                <div className="flex justify-between text-xs text-muted-foreground mt-4 font-medium uppercase tracking-wider">
-                                    <span>500m</span>
-                                    <span>5km</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Category Following (Bento Grid Style) */}
-                        <section className="space-y-4">
-                            <h3 className="font-display text-xl font-semibold text-foreground flex items-center gap-2 px-2">
-                                <ShoppingBag className="w-5 h-5 text-[#d674ff]" />
-                                Category Frequencies
-                            </h3>
-                            
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                {/* Toggle Card 1 */}
-                                <div onClick={() => setFoodActive(!foodActive)} className={cn("rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer shadow-[0_0_20px_rgba(143,245,255,0.1)] transition-all", foodActive ? "bg-[#1a191b]/50 border-primary/30" : "bg-[#2c2c2d]/30 border-[rgba(72,72,73,0.15)]")}>
-                                    <UtensilsCrossed className={cn("w-8 h-8 mb-1", foodActive ? "text-primary" : "text-muted-foreground")} />
-                                    <span className={cn("font-display text-sm font-medium", foodActive ? "text-foreground" : "text-muted-foreground")}>Food</span>
-                                    {/* Toggle */}
-                                    <div className={cn("w-10 h-5 rounded-full relative mt-2 border", foodActive ? "bg-primary/20 border-primary/50" : "bg-[#262627] border-[rgba(72,72,73,0.3)]")}>
-                                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full transition-all", foodActive ? "right-0.5 bg-primary shadow-[0_0_8px_rgba(143,245,255,0.8)]" : "left-0.5 bg-muted-foreground")}></div>
-                                    </div>
-                                </div>
-
-                                {/* Toggle Card 2 */}
-                                <div onClick={() => setRetailActive(!retailActive)} className={cn("rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer shadow-[0_0_20px_rgba(143,245,255,0.1)] transition-all", retailActive ? "bg-[#1a191b]/50 border-primary/30" : "bg-[#2c2c2d]/30 border-[rgba(72,72,73,0.15)]")}>
-                                    <ShoppingBag className={cn("w-8 h-8 mb-1", retailActive ? "text-primary" : "text-muted-foreground")} />
-                                    <span className={cn("font-display text-sm font-medium", retailActive ? "text-foreground" : "text-muted-foreground")}>Retail</span>
-                                    {/* Toggle */}
-                                    <div className={cn("w-10 h-5 rounded-full relative mt-2 border", retailActive ? "bg-primary/20 border-primary/50" : "bg-[#262627] border-[rgba(72,72,73,0.3)]")}>
-                                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full transition-all", retailActive ? "right-0.5 bg-primary shadow-[0_0_8px_rgba(143,245,255,0.8)]" : "left-0.5 bg-muted-foreground")}></div>
-                                    </div>
-                                </div>
-
-                                {/* Toggle Card 3 */}
-                                <div onClick={() => setMusicActive(!musicActive)} className={cn("rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer shadow-[0_0_20px_rgba(214,116,255,0.1)] transition-all", musicActive ? "bg-[#1a191b]/50 border-[#d674ff]/30" : "bg-[#2c2c2d]/30 border-[rgba(72,72,73,0.15)]")}>
-                                    <Music className={cn("w-8 h-8 mb-1", musicActive ? "text-[#d674ff]" : "text-muted-foreground")} />
-                                    <span className={cn("font-display text-sm font-medium", musicActive ? "text-foreground" : "text-muted-foreground")}>Music</span>
-                                    {/* Toggle */}
-                                    <div className={cn("w-10 h-5 rounded-full relative mt-2 border", musicActive ? "bg-[#d674ff]/20 border-[#d674ff]/50" : "bg-[#262627] border-[rgba(72,72,73,0.3)]")}>
-                                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full transition-all", musicActive ? "right-0.5 bg-[#d674ff] shadow-[0_0_8px_rgba(214,116,255,0.8)]" : "left-0.5 bg-muted-foreground")}></div>
-                                    </div>
-                                </div>
-
-                                {/* Toggle Card 4 */}
-                                <div onClick={() => setDropsActive(!dropsActive)} className={cn("rounded-xl p-4 flex flex-col items-center justify-center gap-3 relative cursor-pointer shadow-[0_0_20px_rgba(255,110,132,0.1)] transition-all", dropsActive ? "bg-[#1a191b]/50 border-[#ff6e84]/30" : "bg-[#2c2c2d]/30 border-[rgba(72,72,73,0.15)]")}>
-                                    <Flame className={cn("w-8 h-8 mb-1", dropsActive ? "text-[#ff6e84]" : "text-muted-foreground")} />
-                                    <span className={cn("font-display text-sm font-medium", dropsActive ? "text-foreground" : "text-muted-foreground")}>Secret Drops</span>
-                                    {/* Toggle */}
-                                    <div className={cn("w-10 h-5 rounded-full relative mt-2 border", dropsActive ? "bg-[#ff6e84]/20 border-[#ff6e84]/50" : "bg-[#262627] border-[rgba(72,72,73,0.3)]")}>
-                                        <div className={cn("absolute top-0.5 w-4 h-4 rounded-full transition-all", dropsActive ? "right-0.5 bg-[#ff6e84] shadow-[0_0_8px_rgba(255,110,132,0.8)]" : "left-0.5 bg-muted-foreground")}></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Quiet Hours Scheduler */}
-                        <section className="bg-[#131314] rounded-xl p-1 relative overflow-hidden">
-                            <div className="bg-[#1a191b]/40 backdrop-blur-xl rounded-lg p-6">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div>
-                                        <h3 className="font-display text-xl font-semibold text-foreground flex items-center gap-2">
-                                            <Clock className="w-5 h-5 text-muted-foreground" />
-                                            Quiet Hours
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground mt-1">Mute non-priority pulses during specific times.</p>
-                                    </div>
-                                    {/* Custom Toggle Switch Inactive */}
-                                    <div className="w-12 h-6 bg-[#262627] rounded-full relative border border-[rgba(72,72,73,0.3)] cursor-pointer">
-                                        <div className="absolute left-1 top-1 w-4 h-4 bg-muted-foreground rounded-full"></div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4 opacity-50 pointer-events-none">
-                                    <div className="flex-1 bg-[#262627] rounded-md px-4 py-3 border border-[rgba(72,72,73,0.15)] flex justify-between items-center">
-                                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Start</span>
-                                        <span className="text-foreground font-display font-bold">23:00</span>
-                                    </div>
-                                    <ArrowRight className="w-6 h-6 text-muted-foreground" />
-                                    <div className="flex-1 bg-[#262627] rounded-md px-4 py-3 border border-[rgba(72,72,73,0.15)] flex justify-between items-center">
-                                        <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">End</span>
-                                        <span className="text-foreground font-display font-bold">07:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                {/* Loading state */}
+                {loading && (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                     </div>
+                )}
 
-                    {/* Right Column: Priority Pulse */}
-                    <div className="lg:col-span-5">
-                        <section className="bg-[#1a191b]/30 backdrop-blur-[40px] rounded-xl border border-[rgba(72,72,73,0.1)] h-full flex flex-col">
-                            <div className="p-6 border-b border-[rgba(72,72,73,0.1)]">
-                                <h3 className="font-display text-xl font-semibold text-foreground flex items-center gap-2">
-                                    <Star className="w-5 h-5 text-primary fill-primary" />
-                                    Priority Pulse
-                                </h3>
-                                <p className="text-sm text-muted-foreground mt-1">Followed Traders bypassing Quiet Hours.</p>
-                            </div>
-                            
-                            <div className="p-4 flex-grow space-y-2">
-                                {/* List Item 1 */}
-                                <div className="flex items-center justify-between p-3 rounded-md hover:bg-[#1a191b] transition-colors group cursor-pointer">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-md overflow-hidden bg-[#262627] border border-[rgba(72,72,73,0.2)] relative">
-                                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-transparent flex items-center justify-center">
-                                                <Store className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_#8ff5ff] m-1"></div>
-                                        </div>
-                                        <div>
-                                            <h4 className="font-display font-medium text-sm text-foreground">Neon Noodle Bar</h4>
-                                            <p className="text-xs text-muted-foreground">Food • Always active</p>
-                                        </div>
-                                    </div>
-                                    <button className="text-[rgba(118,117,118,1)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                        <BellOff className="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                {/* List Item 2 */}
-                                <div className="flex items-center justify-between p-3 rounded-md hover:bg-[#1a191b] transition-colors group cursor-pointer">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-md overflow-hidden bg-[#262627] border border-[rgba(72,72,73,0.2)] relative">
-                                            <div className="w-full h-full bg-gradient-to-br from-[#d674ff]/20 to-transparent flex items-center justify-center">
-                                                <Music className="w-5 h-5 text-[#d674ff]" />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h4 className="font-display font-medium text-sm text-foreground">Vinyl Vault</h4>
-                                            <p className="text-xs text-muted-foreground">Music • Drops only</p>
-                                        </div>
-                                    </div>
-                                    <button className="text-[rgba(118,117,118,1)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                        <BellOff className="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                {/* List Item 3 */}
-                                <div className="flex items-center justify-between p-3 rounded-md hover:bg-[#1a191b] transition-colors group cursor-pointer">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-md overflow-hidden bg-[#262627] border border-[rgba(72,72,73,0.2)] relative">
-                                            <div className="w-full h-full bg-gradient-to-br from-[#ff6e84]/20 to-transparent flex items-center justify-center">
-                                                <Flame className="w-5 h-5 text-[#ff6e84]" />
-                                            </div>
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 bg-[#ff6e84] rounded-full shadow-[0_0_5px_#ff6e84] m-1"></div>
-                                        </div>
-                                        <div>
-                                            <h4 className="font-display font-medium text-sm text-foreground">Midnight Threads</h4>
-                                            <p className="text-xs text-muted-foreground">Retail • Flash sales</p>
-                                        </div>
-                                    </div>
-                                    <button className="text-[rgba(118,117,118,1)] hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                        <BellOff className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="p-4 border-t border-[rgba(72,72,73,0.1)]">
-                                <button className="w-full py-3 bg-[#2c2c2d]/30 border border-[rgba(72,72,73,0.15)] text-sm font-medium text-foreground rounded-md hover:bg-[#2c2c2d]/50 transition-colors flex items-center justify-center gap-2">
-                                    <Plus className="w-5 h-5" />
-                                    Add Trader to Pulse
-                                </button>
-                            </div>
-                        </section>
+                {/* Empty / error state */}
+                {!loading && (hasError || alerts.length === 0) && (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+                        <div className="w-16 h-16 rounded-2xl bg-muted-foreground/5 flex items-center justify-center mb-5">
+                            <Bell className="w-8 h-8 text-muted-foreground/40" />
+                        </div>
+                        <h2 className="font-display font-bold text-lg text-foreground mb-2">
+                            No notifications yet
+                        </h2>
+                        <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                            When someone likes or comments on your posts, you&apos;ll see it here.
+                        </p>
                     </div>
-                </div>
-            </main>
-        </div>
+                )}
+
+                {/* Notifications list */}
+                {!loading && !hasError && alerts.length > 0 && (
+                    <div className="divide-y divide-border/10">
+                        {alerts.map((alert) => {
+                            const typeConfig = typeIconMap[alert.type] || typeIconMap.system;
+                            const IconComponent = typeConfig.icon;
+
+                            return (
+                                <div
+                                    key={alert.id}
+                                    className={`flex items-start gap-3 py-3.5 px-2 rounded-lg transition-colors ${
+                                        !alert.is_read ? 'bg-primary/[0.03]' : ''
+                                    }`}
+                                >
+                                    {/* Icon */}
+                                    <div className={`w-8 h-8 rounded-full ${typeConfig.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                                        <IconComponent className={`w-4 h-4 ${typeConfig.color}`} />
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-foreground leading-snug">
+                                            {alert.title}
+                                        </p>
+                                        {alert.body && (
+                                            <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                                                {alert.body}
+                                            </p>
+                                        )}
+                                        <p className="text-xs text-muted-foreground/60 mt-1">
+                                            {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                                        </p>
+                                    </div>
+
+                                    {/* Unread indicator */}
+                                    {!alert.is_read && (
+                                        <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2 shadow-[0_0_6px_rgba(143,245,255,0.6)]" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </StandalonePageLayout>
     );
 }
