@@ -51,7 +51,7 @@ export default function FeedPage() {
 
     return (
         <div className="min-h-screen">
-            <div className="flex-1 px-4 md:px-8 pt-20 md:pt-28 max-w-3xl mx-auto w-full pb-32 md:pb-10">
+            <div className="flex-1 px-4 md:px-8 pt-16 md:pt-20 max-w-3xl mx-auto w-full pb-32 md:pb-10">
                 <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight mb-2">
                     Your Feed
                 </h1>

@@ -99,24 +99,24 @@ export default function MenuPage() {
                 {/* Premium Upgrade CTA */}
                 <Link
                     href="/premium"
-                    className="block w-full p-4 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
+                    className="block w-full p-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
                 >
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-shadow">
-                            <Crown className="w-6 h-6 text-white" />
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-shadow">
+                            <Crown className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1">
-                            <p className="font-headline font-bold text-sm text-foreground">Upgrade to Premium</p>
-                            <p className="text-[10px] text-amber-500 uppercase tracking-widest font-bold">Unlock pro features</p>
+                            <p className="font-headline font-bold text-[13px] text-foreground">Upgrade to Premium</p>
+                            <p className="text-[9px] text-amber-500 uppercase tracking-widest font-bold">Unlock pro features</p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="w-4 h-4 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </Link>
 
                 {/* Main Hub Section */}
                 <div className="space-y-3">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Navigation Hub</h3>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <MenuButton 
                             icon={<Bookmark className="w-5 h-5" />} 
                             label="Saved Posts" 
@@ -258,18 +258,18 @@ function MenuButton({ icon, label, desc, locked = false, href }: { icon: any, la
             href={href as string}
             disabled={locked}
             className={`
-                flex flex-col items-start gap-4 p-4 rounded-xl border transition-all text-left group
+                flex items-center gap-3 p-3 rounded-xl border transition-all text-left group
                 ${locked 
                     ? 'bg-secondary border-border/50 opacity-50 grayscale cursor-not-allowed' 
                     : 'glass-card border-border/50 hover:border-primary/40 active:scale-95'}
             `}
         >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${locked ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'}`}>
+            <div className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center transition-colors ${locked ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'}`}>
                 {icon}
             </div>
-            <div>
-                <p className="font-headline font-bold text-sm text-foreground mb-0.5">{label}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{desc}</p>
+            <div className="flex-1 min-w-0">
+                <p className="font-headline font-bold text-[13px] text-foreground mb-0.5 truncate">{label}</p>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-widest truncate">{desc}</p>
             </div>
         </Component>
     );

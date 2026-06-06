@@ -77,8 +77,8 @@ export function useGeolocation() {
             },
             {
                 enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000,
+                timeout: 15000, // Increased to 15 seconds for mobile GPS
+                maximumAge: 300000, // Accept cached locations up to 5 minutes old
             }
         );
     }, []);

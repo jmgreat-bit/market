@@ -61,7 +61,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                         )}
                         <Link
                             href="/ai"
-                            className="relative w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500/30 to-amber-500/30 text-violet-500 hover:from-violet-500/40 hover:to-amber-500/40 hover:text-violet-400 transition-all"
+                            className="relative w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all"
                         >
                             <Sparkles className="w-5 h-5" />
                         </Link>

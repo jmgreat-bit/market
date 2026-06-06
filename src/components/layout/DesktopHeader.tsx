@@ -56,7 +56,7 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
                     <Search className="w-5 h-5" />
                 </Link>
 
-                <Link href="/ai" className="w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500/10 to-amber-500/10 text-violet-400 hover:from-violet-500/20 hover:to-amber-500/20 hover:text-violet-300 transition-all">
+                <Link href="/ai" className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all">
                     <Sparkles className="w-5 h-5" />
                 </Link>
                 
