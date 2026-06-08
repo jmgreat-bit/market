@@ -45,6 +45,11 @@ export default function ComposePage() {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+    // Duration based on tier
+    const tier = profile?.trader_tier || 'free';
+    const maxDuration = tier === 'national' ? 12 : tier === 'pro' ? 5 : 2;
+    const [durationHours, setDurationHours] = useState(2);
+
     // Counter fields
     const [counterValue, setCounterValue] = useState(0);
     const [counterLabel, setCounterLabel] = useState('');
@@ -177,6 +182,10 @@ export default function ComposePage() {
                     .eq('is_pinned', true);
             }
 
+            // Calculate expiration
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + durationHours);
+
             // Create post
             const { data: newPost, error: postError } = await supabase
                 .from('posts')
@@ -190,6 +199,7 @@ export default function ComposePage() {
                     is_pinned: isPinned,
                     counter_value: postType === 'counter' ? counterValue : null,
                     counter_label: postType === 'counter' ? counterLabel.trim() : null,
+                    expires_at: expiresAt.toISOString(),
                 })
                 .select('id')
                 .single();
@@ -432,15 +442,26 @@ export default function ComposePage() {
                         </button>
 
                         {/* Duration */}
-                        <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/30 transition-colors">
+                        <div className="p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
                                     <Clock className="w-4 h-4 text-muted-foreground" />
                                 </div>
                                 <div>
                                     <p className="font-display font-bold text-sm text-foreground">Duration</p>
-                                    <p className="text-xs text-muted-foreground">Permanent Post</p>
+                                    <p className="text-xs text-muted-foreground">How long post stays on feed</p>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max={maxDuration} 
+                                    value={durationHours} 
+                                    onChange={(e) => setDurationHours(parseInt(e.target.value))}
+                                    className="w-20 md:w-24 accent-primary"
+                                />
+                                <span className="text-sm font-bold w-12 text-right">{durationHours} hr{durationHours > 1 ? 's' : ''}</span>
                             </div>
                         </div>
 

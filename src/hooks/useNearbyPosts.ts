@@ -46,6 +46,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                 setError(null);
 
                 const supabase = getSupabaseClient();
+                const now = new Date().toISOString();
                 const { data, error: fetchError } = await supabase
                     .from('posts')
                     .select(`
@@ -58,6 +59,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                         comments:comments(count),
                         poll_options:poll_options(id, post_id, label, votes_count, created_at)
                     `)
+                    .or(`expires_at.gte.${now},expires_at.is.null`)
                     .order('is_pinned', { ascending: false })
                     .order('created_at', { ascending: false })
                     .limit(50);
