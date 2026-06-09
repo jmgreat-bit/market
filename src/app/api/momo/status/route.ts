@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServiceRoleClient } from '@/lib/supabase/service';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export async function GET(req: Request) {
     try {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Missing reference ID' }, { status: 400 });
         }
 
-        const serviceClient = getSupabaseServiceRoleClient();
+        const serviceClient = getSupabaseAdminClient();
         
         // Fetch current status from DB
         const { data: sub, error } = await serviceClient

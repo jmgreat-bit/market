@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ── Supabase admin client (server-side only) ────────────
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ── System prompt for AI context ────────────────────────
-const SYSTEM_PROMPT = `You are MarketPLC AI, a helpful assistant for finding local businesses, products, and services in Rwanda. 
-You answer based ONLY on real data from the MarketPLC platform. 
-If you don't have relevant data, say so honestly.
-Keep responses concise and helpful.`;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // ── Helper: calculate distance (km) between two points ──
 function haversineKm(
@@ -41,77 +38,141 @@ export async function POST(req: NextRequest) {
 
         if (!message || !userId) {
             return NextResponse.json(
-                { error: 'Missing required fields: message and userId' },
+                { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        // ── 1. Fetch recent posts (last 7 days) ────────
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
 
-        const { data: recentPosts } = await supabase
+        // ── 1. Phase 1: Intent & Keyword Extraction ─────────
+        const extractPrompt = `
+You are a search parameter extractor for a local marketplace.
+User request: "${message}"
+Extract the main keywords to search for in our database (e.g. products, categories, business names).
+Return a JSON object: {"keywords": ["word1", "word2"]}
+`;
+        const extractResult = await model.generateContent(extractPrompt);
+        let extractedParams = { keywords: [] as string[] };
+        try {
+            extractedParams = JSON.parse(extractResult.response.text());
+        } catch (e) {
+            console.error("Failed to parse Gemini keywords", e);
+            // fallback generic keywords
+            extractedParams.keywords = message.split(' ').filter(w => w.length > 3);
+        }
+
+        // ── 2. Phase 2: Database Pre-filtering ──────────────
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 30);
+
+        let query = supabase
             .from('posts')
             .select(`
                 id, content, image_url, latitude, longitude, created_at,
-                business:business_details(id, business_name, category, bio, address, latitude, longitude)
+                business:business_details(id, business_name, category, bio, address, phone, latitude, longitude)
             `)
             .gte('created_at', sevenDaysAgo.toISOString())
             .order('created_at', { ascending: false })
-            .limit(100);
-
-        // ── 2. Fetch businesses ─────────────────────────
-        const { data: businesses } = await supabase
-            .from('business_details')
-            .select('id, business_name, category, bio, address, phone, latitude, longitude')
             .limit(200);
 
-        // ── 3. Filter by proximity if location available ─
-        let nearbyPosts = recentPosts || [];
-        let nearbyBusinesses = businesses || [];
+        const { data: rawPosts } = await query;
+        let candidatePosts = rawPosts || [];
 
+        // Apply Proximity Filter
         if (latitude && longitude) {
-            const RADIUS_KM = 10;
-
-            nearbyPosts = nearbyPosts.filter((post) => {
+            const RADIUS_KM = 30; // Search within 30km
+            candidatePosts = candidatePosts.filter((post) => {
                 const pLat = post.latitude || (post.business as any)?.latitude;
                 const pLng = post.longitude || (post.business as any)?.longitude;
-                if (!pLat || !pLng) return true; // include posts without location
+                if (!pLat || !pLng) return true; 
                 return haversineKm(latitude, longitude, pLat, pLng) <= RADIUS_KM;
-            });
-
-            nearbyBusinesses = nearbyBusinesses.filter((biz) => {
-                if (!biz.latitude || !biz.longitude) return true;
-                return haversineKm(latitude, longitude, biz.latitude, biz.longitude) <= RADIUS_KM;
             });
         }
 
-        // ──────────────────────────────────────────────────
-        // TODO: Gemini API integration
-        // When a Gemini API key is configured, replace the fallback
-        // search below with a call like:
-        //
-        // const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        // const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-        //
-        // const contextData = JSON.stringify({
-        //     posts: nearbyPosts.slice(0, 20),
-        //     businesses: nearbyBusinesses.slice(0, 20),
-        // });
-        //
-        // const result = await model.generateContent([
-        //     SYSTEM_PROMPT,
-        //     `Context data:\n${contextData}`,
-        //     `User question: ${message}`,
-        // ]);
-        //
-        // const response = result.response.text();
-        // ──────────────────────────────────────────────────
+        // Apply Keyword Filter (in memory to avoid complex SQL ilike chains)
+        if (extractedParams.keywords && extractedParams.keywords.length > 0) {
+            candidatePosts = candidatePosts.filter((post) => {
+                const text = (post.content + ' ' + (post.business as any)?.business_name + ' ' + (post.business as any)?.category).toLowerCase();
+                return extractedParams.keywords.some(k => text.includes(k.toLowerCase()));
+            });
+        }
 
-        // ── 4. Smart fallback: keyword-based search ─────
-        const response = generateFallbackResponse(message, nearbyPosts, nearbyBusinesses);
+        // Limit candidates to save tokens
+        candidatePosts = candidatePosts.slice(0, 30);
 
-        return NextResponse.json({ response });
+        // ── 3. Phase 3: AI Synthesis ────────────────────────
+        if (candidatePosts.length === 0) {
+            return NextResponse.json({ 
+                response: JSON.stringify({
+                    text: "I couldn't find any recent posts matching your request nearby. Try expanding your search or looking for something else!",
+                    posts: []
+                }) 
+            });
+        }
+
+        const synthesisModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+        
+        const synthesisPrompt = `
+You are MarketPLC AI, a helpful local assistant in Rwanda.
+User question: "${message}"
+
+Here are the candidate posts from our database:
+${JSON.stringify(candidatePosts.map(p => ({
+    id: p.id,
+    business: (p.business as any)?.business_name,
+    content: p.content,
+    distance_km: (latitude && longitude && ((p.latitude || (p.business as any)?.latitude) != null)) ? haversineKm(latitude, longitude, (p.latitude || (p.business as any)?.latitude), (p.longitude || (p.business as any)?.longitude)).toFixed(1) : 'unknown'
+})))}
+
+Task:
+1. Review the posts and select up to 5 that best match the user's request (consider price if mentioned in the post content).
+2. Write a friendly, conversational text answer recommending them.
+3. Return exactly this JSON format:
+{
+  "text": "Your friendly conversational response...",
+  "post_ids": ["id-1", "id-2"]
+}
+`;
+
+        const synthesisResult = await synthesisModel.generateContent(synthesisPrompt);
+        let finalOutput = { text: "I found some options!", post_ids: [] as string[] };
+        try {
+            finalOutput = JSON.parse(synthesisResult.response.text());
+        } catch (e) {
+            console.error("Failed to parse final AI output", e);
+        }
+
+        // Map the selected IDs back to full post objects for the frontend
+        const selectedPosts = candidatePosts.filter(p => finalOutput.post_ids.includes(p.id));
+
+        // Note: Client expects `response` field containing a string if it's text, or JSON string
+        // We'll return it as a JSON string so frontend can JSON.parse it.
+        const responseString = JSON.stringify({
+            text: finalOutput.text,
+            posts: selectedPosts
+        });
+
+        // ── 4. Deduct Credits Securely ──────────────────────
+        const { data: creditRows } = await supabase
+            .from('ai_credits')
+            .select('id, total_credits, used_credits')
+            .eq('user_id', userId)
+            .lt('used_credits', 999999) // hack to find ones where used < total
+            .order('purchased_at', { ascending: true })
+            .limit(1);
+
+        if (creditRows && creditRows.length > 0) {
+            const row = creditRows[0];
+            if (row.used_credits < row.total_credits) {
+                await supabase
+                    .from('ai_credits')
+                    .update({ used_credits: row.used_credits + 1 })
+                    .eq('id', row.id);
+            }
+        }
+
+        return NextResponse.json({ response: responseString });
     } catch (err) {
         console.error('[AI Chat API] Error:', err);
         return NextResponse.json(
@@ -120,114 +181,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-
-// ── Fallback response generator ─────────────────────────
-function generateFallbackResponse(
-    query: string,
-    posts: any[],
-    businesses: any[]
-): string {
-    const q = query.toLowerCase();
-
-    // Extract keywords from the query
-    const keywords = q
-        .replace(/[^a-z0-9\s]/g, '')
-        .split(/\s+/)
-        .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
-
-    // Score and rank businesses by keyword relevance
-    const scoredBusinesses = businesses
-        .map((biz) => {
-            const searchText = [
-                biz.business_name,
-                biz.category,
-                biz.bio,
-                biz.address,
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-            let score = 0;
-            for (const keyword of keywords) {
-                if (searchText.includes(keyword)) score += 1;
-            }
-            // Bonus for category match
-            if (biz.category && keywords.some((k) => biz.category.toLowerCase().includes(k))) {
-                score += 2;
-            }
-            return { ...biz, score };
-        })
-        .filter((biz) => biz.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-
-    // Score and rank posts by keyword relevance
-    const scoredPosts = posts
-        .map((post) => {
-            const searchText = [
-                post.content,
-                (post.business as any)?.business_name,
-                (post.business as any)?.category,
-            ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-            let score = 0;
-            for (const keyword of keywords) {
-                if (searchText.includes(keyword)) score += 1;
-            }
-            return { ...post, score };
-        })
-        .filter((post) => post.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5);
-
-    // ── Build response ──────────────────────────────────
-    if (scoredBusinesses.length === 0 && scoredPosts.length === 0) {
-        return "I couldn't find anything matching your query right now. Try searching for restaurants, shops, or services near you.";
-    }
-
-    const parts: string[] = [];
-
-    if (scoredBusinesses.length > 0) {
-        parts.push(`I found ${scoredBusinesses.length} business${scoredBusinesses.length > 1 ? 'es' : ''} that might interest you:\n`);
-
-        scoredBusinesses.forEach((biz, i) => {
-            const details: string[] = [];
-            if (biz.category) details.push(biz.category);
-            if (biz.address) details.push(`📍 ${biz.address}`);
-            if (biz.phone) details.push(`📞 ${biz.phone}`);
-
-            parts.push(`${i + 1}. **${biz.business_name}**`);
-            if (details.length > 0) parts.push(`   ${details.join(' · ')}`);
-            if (biz.bio) parts.push(`   ${biz.bio.slice(0, 100)}${biz.bio.length > 100 ? '...' : ''}`);
-            parts.push('');
-        });
-    }
-
-    if (scoredPosts.length > 0) {
-        if (scoredBusinesses.length > 0) parts.push('---\n');
-        parts.push(`📢 Recent posts you might like:\n`);
-
-        scoredPosts.forEach((post) => {
-            const bizName = (post.business as any)?.business_name;
-            const preview = post.content.slice(0, 120) + (post.content.length > 120 ? '...' : '');
-            parts.push(`• ${bizName ? `**${bizName}**: ` : ''}${preview}`);
-        });
-    }
-
-    return parts.join('\n');
-}
-
-// ── Stop words to ignore in keyword extraction ──────────
-const STOP_WORDS = new Set([
-    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all',
-    'can', 'had', 'her', 'was', 'one', 'our', 'out', 'has',
-    'have', 'been', 'some', 'them', 'than', 'its', 'over',
-    'any', 'that', 'this', 'from', 'with', 'what', 'where',
-    'when', 'how', 'who', 'which', 'there', 'near', 'find',
-    'show', 'tell', 'give', 'know', 'looking', 'want', 'need',
-    'like', 'best', 'good', 'open', 'today', 'nearby',
-]);

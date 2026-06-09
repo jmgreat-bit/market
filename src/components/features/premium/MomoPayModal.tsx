@@ -113,9 +113,13 @@ export function MomoPayModal({ isOpen, onClose, tier, amount, onSuccess }: MomoP
                                     />
                                 </div>
                             </div>
-                            <Button onClick={handlePay} className="w-full bg-[#ffcc00] hover:bg-[#e6b800] text-black font-bold h-12 rounded-xl">
+                            <button 
+                                onClick={handlePay} 
+                                className="w-full font-bold h-12 rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+                                style={{ backgroundColor: '#ffcc00', color: '#000' }}
+                            >
                                 Pay {amount.toLocaleString()} RWF
-                            </Button>
+                            </button>
                         </div>
                     )}
 

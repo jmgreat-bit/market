@@ -11,6 +11,9 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout';
+import { AiPostCard } from '@/components/features/ai/AiPostCard';
+import { AiPostPreview } from '@/components/features/ai/AiPostPreview';
+import { PostWithBusiness } from '@/types';
 
 // ── Types ──────────────────────────────────────────────
 interface ChatMessage {
@@ -80,6 +83,7 @@ export default function AiDiscoveryPage() {
     const [credits, setCredits] = useState<number | null>(null);
     const [creditsLoading, setCreditsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedPost, setSelectedPost] = useState<PostWithBusiness | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -351,9 +355,37 @@ export default function AiDiscoveryPage() {
                                         ? 'bg-primary text-primary-foreground rounded-tr-sm'
                                         : 'glass-card border border-border/30 rounded-tl-sm'
                                 }`}>
-                                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                        {msg.content}
-                                    </p>
+                                    {(() => {
+                                        try {
+                                            const parsed = JSON.parse(msg.content);
+                                            if (parsed.text) {
+                                                return (
+                                                    <div>
+                                                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{parsed.text}</p>
+                                                        {parsed.posts && parsed.posts.length > 0 && (
+                                                            <div className="mt-3 flex flex-col gap-2">
+                                                                {parsed.posts.map((post: any) => (
+                                                                    <AiPostCard 
+                                                                        key={post.id} 
+                                                                        post={post} 
+                                                                        onClick={() => setSelectedPost(post)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+                                        } catch (e) {
+                                            // Fallback if not JSON
+                                        }
+                                        
+                                        return (
+                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                                                {msg.content}
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
                             </motion.div>
                         ))}
@@ -453,6 +485,7 @@ export default function AiDiscoveryPage() {
                 </div>
             </div>
         </div>
+        <AiPostPreview post={selectedPost} onClose={() => setSelectedPost(null)} />
         </StandalonePageLayout>
     );
 }

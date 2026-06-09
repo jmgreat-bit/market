@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServiceRoleClient } from '@/lib/supabase/service';
+import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(req: Request) {
     try {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         // payload usually looks like: { financialTransactionId: "...", status: "SUCCESSFUL" }
 
         if (payload.status === 'SUCCESSFUL') {
-            const serviceClient = getSupabaseServiceRoleClient();
+            const serviceClient = getSupabaseAdminClient();
             
             // Get the subscription record
             const { data: sub } = await serviceClient
