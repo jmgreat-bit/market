@@ -8,6 +8,7 @@ import {
     X, Check, ArrowRight
 } from 'lucide-react';
 import { TraderTier, AiPackage } from '@/types';
+import { MomoPayModal } from '@/components/features/premium/MomoPayModal';
 
 // ── Tier data ──────────────────────────────────────────
 const TIERS: {
@@ -112,10 +113,15 @@ const modalVariants = {
 // ── Page component ──────────────────────────────────────
 export default function PremiumPage() {
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState('');
+    const [selectedTier, setSelectedTier] = useState<{ id: 'pro' | 'national', price: number } | null>(null);
 
-    const handleSelect = (planName: string) => {
-        setSelectedPlan(planName);
+    const handleSelect = (tierId: string, priceStr: string) => {
+        if (tierId === 'free' || tierId.startsWith('AI')) {
+            alert("Payment integration for this item is not fully set up yet.");
+            return;
+        }
+        const price = parseInt(priceStr.replace(/,/g, ''));
+        setSelectedTier({ id: tierId as 'pro' | 'national', price });
         setModalOpen(true);
     };
 
@@ -209,7 +215,7 @@ export default function PremiumPage() {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => handleSelect(tier.name)}
+                                    onClick={() => handleSelect(tier.id, tier.price)}
                                     className="group w-full py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
                                     style={{
                                         background: tier.color,
@@ -274,51 +280,17 @@ export default function PremiumPage() {
 
             {/* ── Payment Modal ───────────────────────── */}
             <AnimatePresence>
-                {modalOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-                        onClick={() => setModalOpen(false)}
-                    >
-                        <motion.div
-                            variants={modalVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            className="glass-card rounded-2xl border border-border/50 p-8 max-w-sm w-full text-center relative"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <button
-                                onClick={() => setModalOpen(false)}
-                                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary-foreground/10 transition-colors"
-                            >
-                                <X className="w-4 h-4 text-muted-foreground" />
-                            </button>
-
-                            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                                <Crown className="w-7 h-7 text-primary" />
-                            </div>
-
-                            <h3 className="font-headline text-xl font-black tracking-tight mb-2">
-                                {selectedPlan}
-                            </h3>
-                            <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                                Payment integration coming soon — contact us on WhatsApp to activate your plan today.
-                            </p>
-
-                            <a
-                                href="https://wa.me/250780000000?text=Hi%2C%20I%20want%20to%20activate%20my%20MarketPLC%20plan"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700 transition-colors"
-                            >
-                                <MessageSquare className="w-4 h-4" />
-                                Contact on WhatsApp
-                            </a>
-                        </motion.div>
-                    </motion.div>
+                {modalOpen && selectedTier && (
+                    <MomoPayModal 
+                        isOpen={modalOpen} 
+                        onClose={() => setModalOpen(false)} 
+                        tier={selectedTier.id} 
+                        amount={selectedTier.price}
+                        onSuccess={() => {
+                            setModalOpen(false);
+                            window.location.href = '/profile';
+                        }} 
+                    />
                 )}
             </AnimatePresence>
         </div>
