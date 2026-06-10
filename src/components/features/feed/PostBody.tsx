@@ -110,7 +110,7 @@ export function PostBody({
 
                 {hasImages && (
                     <div className="rounded-lg overflow-hidden border border-border">
-                        <ImageCarousel images={images!} />
+                        <ImageCarousel images={images!} postId={postId} />
                     </div>
                 )}
 

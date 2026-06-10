@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostImage } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ImageCarouselProps {
     images: PostImage[];
+    postId?: string;
 }
 
-export function ImageCarousel({ images }: ImageCarouselProps) {
+export function ImageCarousel({ images, postId }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const router = useRouter();
 
     if (images.length === 0) return null;
 
@@ -26,16 +29,25 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
         <div className="relative aspect-video bg-secondary overflow-hidden group">
             {/* Images */}
             <AnimatePresence mode="wait">
-                <motion.img
+                <motion.div
                     key={currentIndex}
-                    src={images[currentIndex].url}
-                    alt={images[currentIndex].alt || `Image ${currentIndex + 1}`}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 cursor-pointer"
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ duration: 0.2 }}
-                />
+                    onClick={() => {
+                        if (postId) {
+                            router.push(`/post/${postId}`);
+                        }
+                    }}
+                >
+                    <img
+                        src={images[currentIndex].url}
+                        alt={images[currentIndex].alt || `Image ${currentIndex + 1}`}
+                        className="w-full h-full object-cover pointer-events-none"
+                    />
+                </motion.div>
             </AnimatePresence>
 
             {/* Navigation Arrows */}
