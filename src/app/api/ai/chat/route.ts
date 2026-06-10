@@ -29,28 +29,78 @@ function haversineKm(
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { message, userId, latitude, longitude } = body as {
+        const { message, userId, latitude, longitude, sessionId } = body as {
             message: string;
             userId: string;
             latitude?: number;
             longitude?: number;
+            sessionId: string;
         };
 
-        if (!message || !userId) {
+        if (!message || !userId || !sessionId) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+        // ── 0. Pre-flight Credit Check ──────────────────────────
+        const { data: creditCheck } = await supabase
+            .from('ai_credits')
+            .select('id, total_credits, used_credits')
+            .eq('user_id', userId)
+            .order('purchased_at', { ascending: true });
+        
+        let hasCredits = false;
+        if (creditCheck) {
+            for (const row of creditCheck) {
+                if (row.used_credits < row.total_credits) {
+                    hasCredits = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!hasCredits) {
+             return NextResponse.json({ error: 'Out of AI credits. Please purchase an AI Discovery package in the Premium menu.' }, { status: 403 });
+        }
 
-        // ── 1. Phase 1: Intent & Keyword Extraction ─────────
+        // ── 0.5 Save User Message to History ────────────────────
+        await supabase.from('ai_conversations').insert({
+            user_id: userId,
+            session_id: sessionId,
+            role: 'user',
+            content: message
+        });
+
+        // ── 0.6 Fetch Past 5 Messages for Memory Context ────────
+        const { data: pastMessages } = await supabase
+            .from('ai_conversations')
+            .select('role, content')
+            .eq('session_id', sessionId)
+            .order('created_at', { ascending: false })
+            .limit(5);
+        
+        let chatContext = '';
+        if (pastMessages && pastMessages.length > 0) {
+            // Reverse so they are chronological
+            const chronological = pastMessages.reverse();
+            chatContext = chronological.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+        }
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: "application/json" } });
+
+        // ── 1. Phase 1: Intent, Keyword Extraction & Multilingual Expansion ─────────
         const extractPrompt = `
-You are a search parameter extractor for a local marketplace.
+You are a search query expander for a local marketplace in Rwanda.
 User request: "${message}"
-Extract the main keywords to search for in our database (e.g. products, categories, business names).
-Return a JSON object: {"keywords": ["word1", "word2"]}
+
+Task:
+1. Identify the core intent of the user's request (what are they looking to buy, rent, or find?).
+2. Generate a list of search keywords for our database. 
+3. CRITICAL: You MUST expand these keywords into multiple languages (English, Kinyarwanda, French) and include common synonyms. 
+   For example, if they ask for "office", include ["office", "ibiro", "workspace", "meeting room", "gukodesha", "rent"].
+4. Return ONLY a JSON object exactly like this: {"keywords": ["word1", "word2", "word3"]}
 `;
         const extractResult = await model.generateContent(extractPrompt);
         let extractedParams = { keywords: [] as string[] };
@@ -63,8 +113,8 @@ Return a JSON object: {"keywords": ["word1", "word2"]}
         }
 
         // ── 2. Phase 2: Database Pre-filtering ──────────────
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 30);
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
         let query = supabase
             .from('posts')
@@ -72,7 +122,7 @@ Return a JSON object: {"keywords": ["word1", "word2"]}
                 id, content, image_url, latitude, longitude, created_at,
                 business:business_details(id, business_name, category, bio, address, phone, latitude, longitude)
             `)
-            .gte('created_at', sevenDaysAgo.toISOString())
+            .gte('created_at', ninetyDaysAgo.toISOString())
             .order('created_at', { ascending: false })
             .limit(200);
 
@@ -102,23 +152,14 @@ Return a JSON object: {"keywords": ["word1", "word2"]}
         candidatePosts = candidatePosts.slice(0, 30);
 
         // ── 3. Phase 3: AI Synthesis ────────────────────────
-        if (candidatePosts.length === 0) {
-            return NextResponse.json({ 
-                response: JSON.stringify({
-                    text: "I couldn't find any recent posts matching your request nearby. Try expanding your search or looking for something else!",
-                    posts: []
-                }) 
-            });
-        }
-
-        const synthesisModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', generationConfig: { responseMimeType: "application/json" } });
+        const synthesisModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: "application/json" } });
         
         const synthesisPrompt = `
-You are MarketPLC AI, a helpful local assistant in Rwanda.
-User question: "${message}"
+You are MarketPLC AI, a friendly and helpful local assistant in Rwanda.
+User request: "${message}"
 
-Here are the candidate posts from our database:
-${JSON.stringify(candidatePosts.map(p => ({
+Here are the candidate posts from our database based on the user's keywords:
+${candidatePosts.length === 0 ? "[] (No matches found for specific keywords)" : JSON.stringify(candidatePosts.map(p => ({
     id: p.id,
     business: (p.business as any)?.business_name,
     content: p.content,
@@ -126,13 +167,21 @@ ${JSON.stringify(candidatePosts.map(p => ({
 })))}
 
 Task:
-1. Review the posts and select up to 5 that best match the user's request (consider price if mentioned in the post content).
-2. Write a friendly, conversational text answer recommending them.
-3. Return exactly this JSON format:
+1. Review the "Previous Conversation Context" (if it exists) so you can remember what you and the user were talking about.
+2. If the user is just saying hello, greeting you, or chatting ("hello", "bite byawe", etc.), reply naturally and warmly in the same language. Ask how you can help them find local businesses or products today.
+3. If they are looking for something, review the candidate posts and select up to 5 that BEST match. 
+   CRITICAL RELEVANCY RULE: Do NOT select posts that are out of context or unrelated. If only 1 post matches perfectly, only return 1. If none match perfectly, return 0 posts.
+4. Write a conversational text answer. If there are no highly relevant candidate posts for a shopping query, politely say you couldn't find exact matches nearby.
+5. Return exactly this JSON format:
 {
   "text": "Your friendly conversational response...",
   "post_ids": ["id-1", "id-2"]
 }
+
+---
+Previous Conversation Context:
+${chatContext ? chatContext : 'No previous messages in this session yet.'}
+---
 `;
 
         const synthesisResult = await synthesisModel.generateContent(synthesisPrompt);
@@ -153,12 +202,21 @@ Task:
             posts: selectedPosts
         });
 
-        // ── 4. Deduct Credits Securely ──────────────────────
+        // ── 4. Save AI Response to History ──────────────────
+        await supabase.from('ai_conversations').insert({
+            user_id: userId,
+            session_id: sessionId,
+            role: 'assistant',
+            content: finalOutput.text
+        });
+
+        // ── 5. Deduct Credits Securely ──────────────────────
+        // Deduct 1 credit because we successfully answered the user's prompt
         const { data: creditRows } = await supabase
             .from('ai_credits')
             .select('id, total_credits, used_credits')
             .eq('user_id', userId)
-            .lt('used_credits', 999999) // hack to find ones where used < total
+            .lt('used_credits', 999999) 
             .order('purchased_at', { ascending: true })
             .limit(1);
 
@@ -172,7 +230,10 @@ Task:
             }
         }
 
-        return NextResponse.json({ response: responseString });
+        return new NextResponse(JSON.stringify({ response: responseString }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
     } catch (err) {
         console.error('[AI Chat API] Error:', err);
         return NextResponse.json(

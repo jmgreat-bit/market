@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 interface MomoPayModalProps {
     isOpen: boolean;
     onClose: () => void;
-    tier: 'pro' | 'national';
+    tier: string;
     amount: number;
     onSuccess: () => void;
 }

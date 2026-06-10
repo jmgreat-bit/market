@@ -38,6 +38,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ROUTES } from '@/lib/constants';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import TraderBadge from '@/components/ui/TraderBadge';
+import { FeedList } from '@/components/features/feed/FeedList';
 
 interface BusinessInfo {
     id: string;
@@ -65,6 +67,7 @@ export default function ProfilePage() {
     const [postCount, setPostCount] = useState(0);
     const [likedCount, setLikedCount] = useState(0);
     const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
+    const [myPosts, setMyPosts] = useState<any[]>([]);
     const [statsLoading, setStatsLoading] = useState(true);
 
     // Share Hub State
@@ -114,11 +117,32 @@ export default function ProfilePage() {
                 if (biz) {
                     setBusinessInfo(biz);
 
-                    const { count: pCount } = await supabase
+                    const { data: pData, count: pCount } = await supabase
                         .from('posts')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('business_id', biz.id);
+                        .select(`
+                            *,
+                            business:business_details(
+                                *,
+                                profile:profiles(avatar_url, full_name, username, trader_tier)
+                            ),
+                            likes:likes(count),
+                            comments:comments(count),
+                            poll_options:poll_options(id, post_id, label, votes_count, created_at)
+                        `, { count: 'exact' })
+                        .eq('business_id', biz.id)
+                        .order('is_pinned', { ascending: false })
+                        .order('created_at', { ascending: false });
+                    
                     setPostCount(pCount || 0);
+
+                    if (pData) {
+                        const enriched = pData.map((post: any) => ({
+                            ...post,
+                            likes_count: post.likes?.[0]?.count ?? 0,
+                            comments_count: post.comments?.[0]?.count ?? 0,
+                        }));
+                        setMyPosts(enriched);
+                    }
                 }
             } else {
                 // For explorer users: count liked posts
@@ -344,7 +368,11 @@ export default function ProfilePage() {
                     {/* Name & Role */}
                     <h2 className={`font-display text-2xl font-bold z-10 flex items-center gap-2 ${profile?.is_premium ? 'text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]' : 'text-foreground'}`}>
                         {displayName}
-                        {profile?.is_premium && <Sparkles className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]" />}
+                        {(profile?.trader_tier && profile.trader_tier !== 'free') ? (
+                            <TraderBadge tier={profile.trader_tier as any} size="lg" />
+                        ) : profile?.is_premium ? (
+                            <Sparkles className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                        ) : null}
                     </h2>
                     {profile?.headline && (
                         <p className="text-primary font-medium text-sm z-10 mt-1">{profile.headline}</p>
@@ -555,6 +583,28 @@ export default function ProfilePage() {
                         Public
                     </span>
                 </div>
+
+                {/* My Posts Section */}
+                {isTrader && (
+                    <div className="space-y-4 mt-6">
+                        <div className="flex items-center justify-between px-1 border-b border-border/30 pb-2">
+                            <h3 className="font-display text-lg font-bold text-foreground">My Broadcasts</h3>
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{postCount} Posts</span>
+                        </div>
+                        {myPosts.length > 0 ? (
+                            <FeedList posts={myPosts} isLoading={statsLoading} error={null} />
+                        ) : (
+                            <div className="text-center py-12 bg-card/50 rounded-2xl border border-dashed border-border/50">
+                                <p className="text-muted-foreground text-sm font-medium">You haven't broadcasted anything yet.</p>
+                                <Link href={ROUTES.COMPOSE}>
+                                    <Button className="mt-4 bg-primary text-primary-foreground font-display font-bold">
+                                        Create Your First Post
+                                    </Button>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Edit Profile Modal */}

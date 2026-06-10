@@ -79,37 +79,29 @@ export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
                         <p className="text-base text-foreground/90 whitespace-pre-wrap leading-relaxed">
                             {post.content}
                         </p>
-
-                        {business && (
-                            <div className="mt-8 space-y-3 pt-6 border-t border-border/50">
-                                <h4 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-                                    <Store className="w-4 h-4 text-purple-500" />
-                                    Business Details
-                                </h4>
-                                {business.bio && (
-                                    <p className="text-sm text-muted-foreground italic">"{business.bio}"</p>
-                                )}
-                                {business.address && (
-                                    <div className="flex items-start gap-2 text-sm text-foreground/80">
-                                        <MapPin className="w-4 h-4 shrink-0 text-muted-foreground mt-0.5" />
-                                        <span>{business.address}</span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="p-4 border-t border-border/50 bg-secondary/30 shrink-0">
+                    <div className="p-4 border-t border-border/50 bg-secondary/30 shrink-0 flex gap-3">
                         <button 
-                            className="w-full h-12 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                            className="flex-1 h-12 rounded-xl bg-secondary text-foreground font-bold flex items-center justify-center gap-2 hover:bg-secondary/80 transition-colors"
                             onClick={() => {
-                                // Close the preview and maybe navigate or show directions
+                                // Navigate to profile
+                                onClose();
+                            }}
+                        >
+                            <Store className="w-5 h-5" />
+                            Visit Profile
+                        </button>
+                        <button 
+                            className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                            onClick={() => {
+                                // Navigate to post or show full map
                                 onClose();
                             }}
                         >
                             <Navigation className="w-5 h-5" />
-                            Get Directions
+                            View Post
                         </button>
                     </div>
                 </motion.div>

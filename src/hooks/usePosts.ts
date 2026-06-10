@@ -29,7 +29,7 @@ export function usePosts(options: UsePostsOptions = {}) {
                         *,
                         business:business_details(
                             *,
-                            profile:profiles(avatar_url, full_name)
+                            profile:profiles(avatar_url, full_name, username, trader_tier)
                         ),
                         likes:likes(count),
                         comments:comments(count),

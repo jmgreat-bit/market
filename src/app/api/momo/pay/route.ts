@@ -24,6 +24,30 @@ export async function POST(req: Request) {
 
         // Save pending transaction to DB using admin client (bypasses RLS)
         const adminClient = getSupabaseAdminClient();
+        
+        if (tier.startsWith('ai_')) {
+            // For AI packages, we grant the credits immediately in the sandbox 
+            // since there's no pending payment table for AI credits yet.
+            const pkgName = tier.replace('ai_', '');
+            let prompts = 0;
+            if (pkgName === 'starter') prompts = 20;
+            if (pkgName === 'standard') prompts = 50;
+            if (pkgName === 'power') prompts = 100;
+
+            await adminClient.from('ai_credits').insert({
+                user_id: user.id,
+                total_credits: prompts,
+                used_credits: 0,
+                package: pkgName
+            });
+            
+            // Initiate payment with MTN sandbox
+            await momoClient.requestToPay(amount, phone, referenceId);
+            
+            // Return a special prefixed reference so status route knows it's AI
+            return NextResponse.json({ success: true, referenceId: 'ai-sandbox-' + referenceId });
+        }
+
         const { error: dbError } = await adminClient
             .from('trader_subscriptions')
             .insert({

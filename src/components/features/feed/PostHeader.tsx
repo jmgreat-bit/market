@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
+import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import TraderBadge from '@/components/ui/TraderBadge';
 
@@ -15,9 +16,10 @@ interface PostHeaderProps {
     createdAt: string;
     expiresAt?: string | null;
     avatarUrl?: string | null;
+    profileUsername?: string | null;
 }
 
-export function PostHeader({ businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl }: PostHeaderProps) {
+export function PostHeader({ businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl, profileUsername }: PostHeaderProps) {
     const [mounted, setMounted] = useState(false);
     
     useEffect(() => {
@@ -36,8 +38,8 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
         return expireTime - now < 2 * 60 * 60 * 1000 && expireTime > now;
     }, [expiresAt]);
 
-    return (
-        <div className="p-3 pb-2 flex items-start gap-2.5">
+    const innerContent = (
+        <>
             <Avatar className="w-9 h-9 ring-1 ring-primary/20 shadow-geo-glow">
                 {avatarUrl && (
                     <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
@@ -49,7 +51,7 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide">
+                    <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide hover:underline">
                         {businessName || 'Business'}
                     </h3>
                     {(traderTier && traderTier !== 'free') ? (
@@ -68,6 +70,20 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
                     <span>{timeAgo}</span>
                 </div>
             </div>
+        </>
+    );
+
+    return (
+        <div className="p-3 pb-2 flex items-start gap-2.5">
+            {profileUsername ? (
+                <Link href={`/u/${profileUsername}`} className="flex-1 flex items-start gap-2.5">
+                    {innerContent}
+                </Link>
+            ) : (
+                <div className="flex-1 flex items-start gap-2.5">
+                    {innerContent}
+                </div>
+            )}
 
             {isExpiringSoon && (
                 <motion.div

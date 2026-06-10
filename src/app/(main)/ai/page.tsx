@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Sparkles, Send, Zap, Bot, User, AlertCircle, Loader2
+    Sparkles, Send, Zap, Bot, User, AlertCircle, Loader2, History, X, Plus, MessageSquare
 } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -21,6 +21,13 @@ interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
     created_at: string;
+}
+
+interface ChatSession {
+    id: string;
+    created_at: string;
+    preview: string;
+    messages: ChatMessage[];
 }
 
 // ── Constants ──────────────────────────────────────────
@@ -84,6 +91,15 @@ export default function AiDiscoveryPage() {
     const [creditsLoading, setCreditsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedPost, setSelectedPost] = useState<PostWithBusiness | null>(null);
+    const [showHistory, setShowHistory] = useState(false);
+    const [historySessions, setHistorySessions] = useState<ChatSession[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [sessionId, setSessionId] = useState<string>('');
+
+    // Initialize session ID
+    useEffect(() => {
+        setSessionId(crypto.randomUUID());
+    }, []);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -170,22 +186,6 @@ export default function AiDiscoveryPage() {
         setMessages((prev) => [...prev, userMsg]);
 
         try {
-            // Save user message to DB
-            const { data: savedUserMsg } = await supabase
-                .from('ai_conversations')
-                .insert({
-                    user_id: user.id,
-                    role: 'user',
-                    content: messageText,
-                })
-                .select('id, role, content, created_at')
-                .single();
-
-            if (savedUserMsg) {
-                setMessages((prev) =>
-                    prev.map((m) => (m.id === userMsg.id ? savedUserMsg : m))
-                );
-            }
 
             // Call AI API
             const res = await fetch('/api/ai/chat', {
@@ -194,6 +194,7 @@ export default function AiDiscoveryPage() {
                 body: JSON.stringify({
                     message: messageText,
                     userId: user.id,
+                    sessionId: sessionId,
                     latitude: coordinates?.latitude,
                     longitude: coordinates?.longitude,
                 }),
@@ -205,18 +206,7 @@ export default function AiDiscoveryPage() {
                 throw new Error(data.error || 'Failed to get response');
             }
 
-            // Save AI response to DB
-            const { data: savedAiMsg } = await supabase
-                .from('ai_conversations')
-                .insert({
-                    user_id: user.id,
-                    role: 'assistant',
-                    content: data.response,
-                })
-                .select('id, role, content, created_at')
-                .single();
-
-            const aiMsg: ChatMessage = savedAiMsg || {
+            const aiMsg: ChatMessage = {
                 id: `ai-${Date.now()}`,
                 role: 'assistant',
                 content: data.response,
@@ -225,27 +215,8 @@ export default function AiDiscoveryPage() {
 
             setMessages((prev) => [...prev, aiMsg]);
 
-            // Decrement credits
+            // Optimistically decrement credits locally (backend handles the actual DB reduction)
             if (credits !== null) {
-                // Find a credit row with remaining capacity
-                const { data: creditRows } = await supabase
-                    .from('ai_credits')
-                    .select('id, total_credits, used_credits')
-                    .eq('user_id', user.id)
-                    .lt('used_credits', supabase.rpc ? 999999 : 999999)
-                    .order('purchased_at', { ascending: true })
-                    .limit(1);
-
-                if (creditRows && creditRows.length > 0) {
-                    const row = creditRows[0];
-                    if (row.used_credits < row.total_credits) {
-                        await supabase
-                            .from('ai_credits')
-                            .update({ used_credits: row.used_credits + 1 })
-                            .eq('id', row.id);
-                    }
-                }
-
                 setCredits((prev) => (prev !== null ? Math.max(0, prev - 1) : null));
             }
         } catch (err) {
@@ -269,20 +240,59 @@ export default function AiDiscoveryPage() {
     const noCredits = credits !== null && credits <= 0;
     const isInputDisabled = noCredits || !user || authLoading;
 
-    // Credits badge element for the header
-    const creditsBadge = !creditsLoading && credits !== null ? (
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-            credits > 0
-                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                : 'bg-destructive/10 text-destructive border border-destructive/20'
-        }`}>
-            <Zap className="w-3.5 h-3.5" />
-            <span>{credits} credit{credits !== 1 ? 's' : ''} left</span>
+    const openHistory = async () => {
+        setShowHistory(true);
+        if (!user) return;
+        setLoadingHistory(true);
+        try {
+            const res = await fetch(`/api/ai/history?userId=${user.id}`);
+            const data = await res.json();
+            if (data.sessions) setHistorySessions(data.sessions);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    const startNewChat = () => {
+        setSessionId(crypto.randomUUID());
+        setMessages([]);
+        setShowHistory(false);
+        inputRef.current?.focus();
+    };
+
+    const loadSession = (session: ChatSession) => {
+        setSessionId(session.id);
+        setMessages(session.messages);
+        setShowHistory(false);
+    };
+
+    // Credits badge and History button for the header
+    const headerElements = (
+        <div className="flex items-center gap-3">
+            <button 
+                onClick={openHistory}
+                className="w-8 h-8 rounded-full bg-secondary text-muted-foreground flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                title="View Chat History"
+            >
+                <History className="w-4 h-4" />
+            </button>
+            {!creditsLoading && credits !== null && (
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+                    credits > 0
+                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                        : 'bg-destructive/10 text-destructive border border-destructive/20'
+                }`}>
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>{credits} credit{credits !== 1 ? 's' : ''} left</span>
+                </div>
+            )}
         </div>
-    ) : undefined;
+    );
 
     return (
-        <StandalonePageLayout title="AI Discovery" rightElement={creditsBadge}>
+        <StandalonePageLayout title="AI Discovery" rightElement={headerElements}>
             <div className="flex flex-col h-[100dvh] bg-background text-foreground">
 
             {/* ── Messages area ─────────────────────── */}
@@ -486,6 +496,86 @@ export default function AiDiscoveryPage() {
             </div>
         </div>
         <AiPostPreview post={selectedPost} onClose={() => setSelectedPost(null)} />
+
+        {/* History Modal */}
+        <AnimatePresence>
+            {showHistory && (
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+                    onClick={() => setShowHistory(false)}
+                >
+                    <motion.div 
+                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                        className="w-full max-w-lg h-[80vh] bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-4 border-b border-border/50 flex justify-between items-center bg-secondary/20">
+                            <h2 className="font-display font-bold flex items-center gap-2">
+                                <History className="w-5 h-5 text-primary" />
+                                Chat History
+                            </h2>
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={startNewChat}
+                                    className="px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    New Chat
+                                </button>
+                                <button 
+                                    onClick={() => setShowHistory(false)}
+                                    className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {loadingHistory ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                                </div>
+                            ) : historySessions.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground space-y-2">
+                                    <History className="w-12 h-12 opacity-20" />
+                                    <p>No past conversations found.</p>
+                                </div>
+                            ) : (
+                                historySessions.map((session) => (
+                                    <button 
+                                        key={session.id} 
+                                        onClick={() => loadSession(session)}
+                                        className={`w-full text-left flex flex-col gap-1 p-4 rounded-2xl border transition-all ${
+                                            session.id === sessionId 
+                                                ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' 
+                                                : 'glass-card border-border/50 text-foreground hover:bg-secondary/50'
+                                        }`}
+                                    >
+                                        <div className="flex justify-between items-center w-full">
+                                            <div className="flex items-center gap-2 truncate flex-1">
+                                                <MessageSquare className="w-4 h-4 shrink-0 opacity-70" />
+                                                <span className="font-bold text-sm truncate">{session.preview}</span>
+                                            </div>
+                                            <span className="text-xs opacity-50 shrink-0 ml-4">
+                                                {new Date(session.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs opacity-60 pl-6">
+                                            {session.messages.length} message{session.messages.length !== 1 ? 's' : ''}
+                                        </p>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
         </StandalonePageLayout>
     );
 }

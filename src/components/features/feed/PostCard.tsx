@@ -11,7 +11,8 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
-import { Pin, Bell, BellOff, Loader2 } from 'lucide-react';
+import { Pin, Bell, BellOff, Loader2, Zap } from 'lucide-react';
+import { BoostModal } from './BoostModal';
 
 interface PostCardProps {
     post: PostWithBusiness;
@@ -33,6 +34,11 @@ export function PostCard({ post }: PostCardProps) {
     );
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
+    const [showBoostModal, setShowBoostModal] = useState(false);
+
+    // Boost Eligibility
+    const isOwner = profile?.id === post.business?.profile_id;
+    const isEligibleForBoost = isOwner && (profile?.trader_tier === 'pro' || profile?.trader_tier === 'national');
 
     // Analytics tracking
     const cardRef = useRef<HTMLDivElement>(null);
@@ -157,9 +163,10 @@ export function PostCard({ post }: PostCardProps) {
     const business = post.business;
 
     return (
-        <motion.div
-            ref={cardRef}
-            initial={{ opacity: 0, y: 20 }}
+        <>
+            <motion.div
+                ref={cardRef}
+                initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="rounded-lg overflow-hidden bg-card/80 backdrop-blur-[30px] shadow-[0_0_32px_rgba(143,245,255,0.08)] border border-border/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(143,245,255,0.12)]"
         >
@@ -193,15 +200,38 @@ export function PostCard({ post }: PostCardProps) {
                     </div>
                 )}
 
-                {/* Header */}
-                <PostHeader
-                    businessName={business?.business_name}
-                    category={business?.category ?? undefined}
-                    isPremium={business?.is_premium}
-                    createdAt={post.created_at}
-                    expiresAt={post.expires_at}
-                    avatarUrl={(business as any)?.profile?.avatar_url}
-                />
+                {/* Ad Badge */}
+                {(post as any).is_ad && (
+                    <div className="px-4 pt-3 pb-0 flex items-center gap-1.5 text-primary">
+                        <Zap className="w-3 h-3" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Sponsored</span>
+                    </div>
+                )}
+
+                {/* Header Container */}
+                <div className="relative">
+                    <PostHeader
+                        businessName={business?.business_name}
+                        category={business?.category ?? undefined}
+                        isPremium={business?.is_premium}
+                        traderTier={(business as any)?.profile?.trader_tier}
+                        createdAt={post.created_at}
+                        expiresAt={post.expires_at}
+                        avatarUrl={(business as any)?.profile?.avatar_url}
+                        profileUsername={(business as any)?.profile?.username}
+                    />
+                    
+                    {/* Boost Button for Owner */}
+                    {isEligibleForBoost && (
+                        <button 
+                            onClick={() => setShowBoostModal(true)}
+                            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                        >
+                            <Zap className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">Boost</span>
+                        </button>
+                    )}
+                </div>
 
                 {/* Content */}
                 <PostBody
@@ -251,5 +281,19 @@ export function PostCard({ post }: PostCardProps) {
                 </AnimatePresence>
             </div>
         </motion.div>
+
+        {/* Boost Modal */}
+        {showBoostModal && profile?.trader_tier && business && (
+            <BoostModal
+                postId={post.id}
+                businessId={business.id}
+                tier={profile.trader_tier}
+                onClose={() => setShowBoostModal(false)}
+                onSuccess={() => {
+                    // Optionally handle success visually (e.g. show a "Boosted" tag on the post)
+                }}
+            />
+        )}
+        </>
     );
 }

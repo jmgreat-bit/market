@@ -45,10 +45,10 @@ export default function ComposePage() {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    // Duration based on tier
+    // Duration based on tier (TTL rules)
     const tier = profile?.trader_tier || 'free';
-    const maxDuration = tier === 'national' ? 12 : tier === 'pro' ? 5 : 2;
-    const [durationHours, setDurationHours] = useState(2);
+    const maxDuration = tier === 'national' ? 24 : tier === 'pro' ? 3 : 1;
+    const [durationHours, setDurationHours] = useState(maxDuration);
 
     // Counter fields
     const [counterValue, setCounterValue] = useState(0);

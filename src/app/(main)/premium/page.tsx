@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Crown, BadgeCheck, Sparkles, Zap, Globe,
     BarChart3, MessageSquare, Target, Bot,
-    X, Check, ArrowRight
+    X, Check, ArrowRight, Info
 } from 'lucide-react';
 import { TraderTier, AiPackage } from '@/types';
 import { MomoPayModal } from '@/components/features/premium/MomoPayModal';
@@ -23,6 +23,7 @@ const TIERS: {
     highlight?: string;
     icon: React.ReactNode;
     features: { icon: React.ReactNode; text: string }[];
+    detailedInfo: { title: string; items: string[] }[];
 }[] = [
     {
         id: 'free',
@@ -38,6 +39,11 @@ const TIERS: {
             { icon: <Check className="w-4 h-4" />, text: 'Basic posting' },
             { icon: <Check className="w-4 h-4" />, text: 'Appear on map (1–2 km)' },
             { icon: <Check className="w-4 h-4" />, text: 'Basic profile' },
+        ],
+        detailedInfo: [
+            { title: '📍 Visibility', items: ['Posts appear within 1–2 km of your location', 'Posts expire after 1 hour on the public feed', 'Followers can always see your posts'] },
+            { title: '👤 Profile', items: ['Basic business profile with name, category, and location', 'Map pin visible to nearby users', 'No verification badge'] },
+            { title: '🚫 Limitations', items: ['No access to analytics dashboard', 'No ability to run ads or boost posts', 'No priority in feed or comments'] },
         ],
     },
     {
@@ -57,6 +63,12 @@ const TIERS: {
             { icon: <MessageSquare className="w-4 h-4 text-blue-400" />, text: 'Comments float to top' },
             { icon: <Target className="w-4 h-4 text-blue-400" />, text: 'Run local ads (up to 4 km)' },
         ],
+        detailedInfo: [
+            { title: '📍 Visibility & Reach', items: ['Posts stay on the public feed for up to 3 hours', '2× higher priority in the feed algorithm', 'Your comments float to the top of any post'] },
+            { title: '✅ Verification', items: ['Blue verified badge appears next to your name everywhere', 'Badge is shown on your profile, posts, AI results, and map'] },
+            { title: '📊 Analytics', items: ['Full analytics dashboard with post views, impressions, and engagement data', 'Track how your business is performing over time'] },
+            { title: '📢 Advertising', items: ['Run boosted ads on up to 4 km radius', 'Select placements: In-Feed, In-Comments, Explore, Search', 'Dynamic pricing: 350–500 RWF/day depending on duration', 'Bundle multiplier: up to 2× for 4 placements'] },
+        ],
     },
     {
         id: 'national',
@@ -75,6 +87,13 @@ const TIERS: {
             { icon: <Globe className="w-4 h-4 text-amber-400" />, text: 'Posts shown across all of Rwanda' },
             { icon: <Target className="w-4 h-4 text-amber-400" />, text: 'Run nationwide ads' },
             { icon: <Sparkles className="w-4 h-4 text-amber-400" />, text: 'City label on all posts' },
+        ],
+        detailedInfo: [
+            { title: '📍 Visibility & Reach', items: ['Posts stay on the public feed for up to 24 hours', 'Your organic posts appear in EVERY user\'s feed across Rwanda — no distance limit', 'City label displayed on all your posts so users know where you\'re based'] },
+            { title: '👑 Verification', items: ['Gold verified badge with crown icon appears next to your name everywhere', 'Badge is shown on your profile, posts, AI results, and map', 'Maximum trust and credibility with customers'] },
+            { title: '📊 Analytics', items: ['Full analytics dashboard with post views, impressions, and engagement data', 'Track nationwide performance metrics'] },
+            { title: '📢 Advertising', items: ['Everything Pro gets, PLUS:', 'Run boosted ads Citywide (3× multiplier) or Nationwide (10× multiplier)', 'Maximum organic + paid reach combination in Rwanda', 'Dynamic pricing: 350–500 RWF/day depending on duration'] },
+            { title: '⭐ Exclusive Perks', items: ['All Pro features included automatically', 'Priority support from the MarketPLC team', 'Early access to new features'] },
         ],
     },
 ];
@@ -113,15 +132,18 @@ const modalVariants = {
 // ── Page component ──────────────────────────────────────
 export default function PremiumPage() {
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedTier, setSelectedTier] = useState<{ id: 'pro' | 'national', price: number } | null>(null);
+    const [selectedTier, setSelectedTier] = useState<{ id: string, price: number } | null>(null);
+    const [infoTierId, setInfoTierId] = useState<TraderTier | null>(null);
+
+    const infoTier = TIERS.find(t => t.id === infoTierId);
 
     const handleSelect = (tierId: string, priceStr: string) => {
-        if (tierId === 'free' || tierId.startsWith('AI')) {
-            alert("Payment integration for this item is not fully set up yet.");
+        if (tierId === 'free') {
+            alert("Free tier is already assigned by default.");
             return;
         }
         const price = parseInt(priceStr.replace(/,/g, ''));
-        setSelectedTier({ id: tierId as 'pro' | 'national', price });
+        setSelectedTier({ id: tierId, price });
         setModalOpen(true);
     };
 
@@ -205,27 +227,38 @@ export default function PremiumPage() {
                                 ))}
                             </ul>
 
-                            {/* CTA */}
-                            {tier.id === 'free' ? (
+                            {/* CTA row */}
+                            <div className="flex gap-2">
+                                {/* Info Button */}
                                 <button
-                                    disabled
-                                    className="w-full py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
+                                    onClick={() => setInfoTierId(tier.id)}
+                                    className={`py-3 px-4 rounded-xl border ${tier.accentBorder} ${tier.accentBg} transition-colors flex items-center justify-center`}
+                                    title={`Learn more about ${tier.name}`}
                                 >
-                                    Current Plan
+                                    <Info className="w-4 h-4" style={{ color: tier.color }} />
                                 </button>
-                            ) : (
-                                <button
-                                    onClick={() => handleSelect(tier.id, tier.price)}
-                                    className="group w-full py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
-                                    style={{
-                                        background: tier.color,
-                                        color: '#000',
-                                    }}
-                                >
-                                    Subscribe
-                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                </button>
-                            )}
+
+                                {tier.id === 'free' ? (
+                                    <button
+                                        disabled
+                                        className="flex-1 py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
+                                    >
+                                        Current Plan
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => handleSelect(tier.id, tier.price)}
+                                        className="group flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                        style={{
+                                            background: tier.color,
+                                            color: '#000',
+                                        }}
+                                    >
+                                        Subscribe
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     ))}
                 </motion.div>
@@ -265,7 +298,7 @@ export default function PremiumPage() {
                                 <p className="font-headline text-2xl font-black tracking-tight mb-1">{pkg.price}</p>
                                 <p className="text-muted-foreground text-xs mb-5">RWF</p>
                                 <button
-                                    onClick={() => handleSelect(`AI ${pkg.name}`)}
+                                    onClick={() => handleSelect(`ai_${pkg.id}`, pkg.price)}
                                     className="w-full py-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-sm font-bold hover:bg-purple-500/25 transition-colors flex items-center justify-center gap-2 group"
                                 >
                                     Get Started
@@ -291,6 +324,90 @@ export default function PremiumPage() {
                             window.location.href = '/profile';
                         }} 
                     />
+                )}
+            </AnimatePresence>
+
+            {/* ── Info Modal ────────────────────────────── */}
+            <AnimatePresence>
+                {infoTier && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+                        onClick={() => setInfoTierId(null)}
+                    >
+                        <motion.div
+                            variants={modalVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-card w-full max-w-lg rounded-2xl border border-border/50 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+                        >
+                            {/* Header */}
+                            <div className={`p-5 border-b border-border/30 flex items-center justify-between ${infoTier.accentBg}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-xl ${infoTier.accentBg} border ${infoTier.accentBorder} flex items-center justify-center`}>
+                                        {infoTier.icon}
+                                    </div>
+                                    <div>
+                                        <h2 className="font-headline font-bold text-lg text-foreground">{infoTier.name}</h2>
+                                        <p className="text-sm" style={{ color: infoTier.color }}>
+                                            {infoTier.price === 'Free' ? 'Free forever' : `${infoTier.price} ${infoTier.period}`}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setInfoTierId(null)}
+                                    className="p-2 bg-secondary rounded-full text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="p-5 overflow-y-auto flex-1 space-y-5">
+                                {infoTier.detailedInfo.map((section, i) => (
+                                    <div key={i}>
+                                        <h3 className="font-display font-bold text-sm text-foreground mb-2">{section.title}</h3>
+                                        <ul className="space-y-1.5">
+                                            {section.items.map((item, j) => (
+                                                <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                                    <Check className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: infoTier.color }} />
+                                                    <span>{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-4 border-t border-border/30 bg-secondary/30">
+                                {infoTier.id === 'free' ? (
+                                    <button
+                                        onClick={() => setInfoTierId(null)}
+                                        className="w-full py-3 rounded-xl border border-border text-sm font-bold text-foreground hover:bg-secondary transition-colors"
+                                    >
+                                        Got it
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            setInfoTierId(null);
+                                            handleSelect(infoTier.id, infoTier.price);
+                                        }}
+                                        className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 group"
+                                        style={{ background: infoTier.color, color: '#000' }}
+                                    >
+                                        Subscribe to {infoTier.name}
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

@@ -39,6 +39,7 @@ export default function PrivacyPage() {
                         <li><strong>Service Provision:</strong> To provide a real-time marketplace showing vendor locations.</li>
                         <li><strong>Authentication:</strong> To manage secure access to your account.</li>
                         <li><strong>Communication:</strong> To facilitate contact between customers and vendors.</li>
+                        <li><strong>AI Chat & Model Training:</strong> Any queries, questions, or interactions you have with the AI Discovery tool are securely logged and stored in our database. We use this anonymized conversation history exclusively to improve the AI's accuracy and to fine-tune our own internal machine learning models to better serve the Rwandan marketplace.</li>
                     </ul>
                 </section>
 
