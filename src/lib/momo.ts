@@ -65,7 +65,7 @@ export class MomoClient {
         const formattedPhone = phone.startsWith('0') ? '250' + phone.substring(1) : phone;
         
         // Fallback to legacy endpoint structure via MADAPI proxy
-        const targetEnv = process.env.MOMO_TARGET_ENV || 'sandbox';
+        const targetEnv = 'sandbox';
         const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
         console.log(`[MOMO] Initiating real payment for ${formattedPhone} of amount ${amount}. Reference: ${referenceId}`);
@@ -84,7 +84,7 @@ export class MomoClient {
                 },
                 body: JSON.stringify({
                     amount: amount.toString(),
-                    currency: "RWF",
+                    currency: "EUR",
                     externalId: referenceId,
                     payer: {
                         partyIdType: "MSISDN",
