@@ -10,6 +10,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Missing reference ID' }, { status: 400 });
         }
 
+        if (referenceId.startsWith('ai-sandbox-')) {
+            // For AI sandbox, we already granted the credits in the pay route.
+            // Just simulate a successful status poll.
+            return NextResponse.json({ status: 'completed' });
+        }
+
         const serviceClient = getSupabaseAdminClient();
         
         // Fetch current status from DB
@@ -23,31 +29,9 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
         }
 
-        // In a real integration, we would poll the MTN API here:
-        // const status = await momoClient.getStatus(referenceId);
-        // For development sandbox, we will automatically set it to 'completed' after a few seconds of polling
-        
-        if (sub.payment_status === 'pending') {
-            // Mock sandbox completion: upgrade the user directly for testing
-            const { error: updateSubError } = await serviceClient
-                .from('trader_subscriptions')
-                .update({ payment_status: 'completed' })
-                .eq('id', referenceId);
-
-            if (!updateSubError) {
-                // Update user profile
-                await serviceClient
-                    .from('profiles')
-                    .update({ 
-                        trader_tier: sub.tier,
-                        is_premium: true
-                    })
-                    .eq('id', sub.profile_id);
-            }
-            
-            return NextResponse.json({ status: 'completed' });
-        }
-
+        // We just return whatever status is in the DB.
+        // The asynchronous webhook (callback/route.ts) will be called by MTN 
+        // to update the DB to 'completed' or 'failed'.
         return NextResponse.json({ status: sub.payment_status });
 
     } catch (error: any) {

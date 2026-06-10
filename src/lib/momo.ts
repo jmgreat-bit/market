@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 
+// MADAPI base URL
 const API_BASE_URL = 'https://api.mtn.com/v1';
 
 export class MomoClient {
@@ -25,6 +26,7 @@ export class MomoClient {
             return this.token;
         }
 
+        // MADAPI uses standard OAuth2 Client Credentials
         const credentials = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
 
         const response = await fetch('https://api.mtn.com/oauth/client_credential/accesstoken?grant_type=client_credentials', {
@@ -56,15 +58,50 @@ export class MomoClient {
         const token = await this.getToken();
         const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/momo/callback`;
 
-        // Wait, since we are using MADAPI Consumer Keys, the endpoint for Payments V1 might just be standard /payments
-        // Since we don't have the exact Swagger for MTN's new MADAPI Payments V1, we will mock the successful initiation 
-        // in development so the UI flow can be completed without failing on a strict endpoint mismatch, 
-        // while we finalize the exact endpoint from their Swagger file later.
+        // Format phone to start with country code (assuming Rwanda 250 for now)
+        const formattedPhone = phone.startsWith('0') ? '250' + phone.substring(1) : phone;
+        
+        // Fallback to legacy endpoint structure via MADAPI proxy
+        const targetEnv = process.env.MOMO_TARGET_ENV || 'mtnrwanda';
+        const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
-        console.log(`[MOMO SANDBOX] Initiating payment for ${phone} of amount ${amount}. Reference: ${referenceId}`);
-        console.log(`[MOMO SANDBOX] Callback URL set to: ${callbackUrl}`);
+        console.log(`[MOMO] Initiating real payment for ${formattedPhone} of amount ${amount}. Reference: ${referenceId}`);
+        
+        try {
+            // Trying the pure MADAPI v1 payments endpoint
+            const response = await fetch(`${API_BASE_URL}/payments`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount.toString(),
+                    currency: "RWF",
+                    externalId: referenceId,
+                    payer: {
+                        partyIdType: "MSISDN",
+                        partyId: formattedPhone
+                    },
+                    payerMessage: "Payment for MarketPLC",
+                    payeeNote: "MarketPLC Subscription"
+                })
+            });
 
-        return true;
+            if (!response.ok && response.status !== 202) {
+                const errorText = await response.text();
+                console.error('MTN API RequestToPay Failed:', response.status, errorText);
+                
+                // If it fails due to exact endpoint path, it might be due to the new MADAPI v1 Payments interface,
+                // but usually the proxy handles `/collection/v1_0/requesttopay`.
+                throw new Error(`MTN API Error: ${response.status} - ${errorText}`);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('MomoClient.requestToPay Exception:', error);
+            throw error;
+        }
     }
 }
 
