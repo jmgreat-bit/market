@@ -59,7 +59,7 @@ export class MomoClient {
      */
     public async requestToPay(amount: number, phone: string, referenceId: string): Promise<boolean> {
         const token = await this.getToken();
-        const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/momo/callback`;
+        const callbackUrl = 'https://marketplc.vercel.app/api/momo/callback';
 
         // Format phone to start with country code (assuming Rwanda 250 for now)
         const formattedPhone = phone.startsWith('0') ? '250' + phone.substring(1) : phone;
