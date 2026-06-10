@@ -167,7 +167,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
         }
 
         // Sort nearby by: ads first, then pinned, then distance
-        nearby.sort((a, b) => {
+        nearby.sort((a: any, b: any) => {
             if (a.is_ad && !b.is_ad) return -1;
             if (!a.is_ad && b.is_ad) return 1;
             if (a.is_pinned && !b.is_pinned) return -1;
