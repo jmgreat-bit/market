@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 
-// MADAPI base URL
-const API_BASE_URL = 'https://api.mtn.com/v1';
+// Standard MoMo API base URL
+const API_BASE_URL = process.env.MOMO_TARGET_ENV === 'mtnrwanda' 
+    ? 'https://proxy.momoapi.mtn.com' 
+    : 'https://sandbox.momodeveloper.mtn.com';
 
 export class MomoClient {
     private consumerKey: string;
@@ -26,13 +28,14 @@ export class MomoClient {
             return this.token;
         }
 
-        // MADAPI uses standard OAuth2 Client Credentials
+        // MoMo API uses Basic Auth with API_USER : API_KEY for the token endpoint
         const credentials = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
 
-        const response = await fetch('https://api.mtn.com/oauth/client_credential/accesstoken?grant_type=client_credentials', {
+        const response = await fetch(`${API_BASE_URL}/collection/token/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Basic ${credentials}`,
+                'Ocp-Apim-Subscription-Key': process.env.MOMO_SUBSCRIPTION_KEY || '',
                 'Cache-Control': 'no-cache',
             }
         });
@@ -68,11 +71,15 @@ export class MomoClient {
         console.log(`[MOMO] Initiating real payment for ${formattedPhone} of amount ${amount}. Reference: ${referenceId}`);
         
         try {
-            // Trying the pure MADAPI v1 payments endpoint
-            const response = await fetch(`${API_BASE_URL}/payments`, {
+            // Standard MoMo API collection endpoint
+            const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
+                    'X-Reference-Id': referenceId,
+                    'X-Target-Environment': targetEnv,
+                    'Ocp-Apim-Subscription-Key': subKey,
+                    'X-Callback-Url': callbackUrl,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
