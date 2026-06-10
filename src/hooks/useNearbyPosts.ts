@@ -4,6 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { PostWithBusiness, Coordinates } from '@/types';
 
+type EnrichedPost = PostWithBusiness & {
+    is_ad?: boolean;
+    _distance?: number;
+};
+
 /**
  * Haversine formula — returns distance in km between two lat/lng points.
  */
@@ -25,8 +30,8 @@ function haversineDistance(
 }
 
 interface UseNearbyPostsResult {
-    nearbyPosts: PostWithBusiness[];
-    trendingPosts: PostWithBusiness[];
+    nearbyPosts: EnrichedPost[];
+    trendingPosts: EnrichedPost[];
     isLoading: boolean;
     error: string | null;
     hasNearby: boolean;
@@ -53,7 +58,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                         *,
                         business:business_details(
                             *,
-                            profile:profiles(avatar_url, full_name)
+                            profile:profiles(avatar_url, full_name, username, trader_tier)
                         ),
                         likes:likes(count),
                         comments:comments(count),
@@ -72,7 +77,41 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                     comments_count: post.comments?.[0]?.count ?? 0,
                 }));
 
-                setAllPosts(enriched);
+                // Fetch active ads
+                const { data: adsData } = await supabase
+                    .from('ads')
+                    .select(`
+                        id,
+                        post:posts(
+                            *,
+                            business:business_details(
+                                *,
+                                profile:profiles(avatar_url, full_name, username, trader_tier)
+                            ),
+                            likes:likes(count),
+                            comments:comments(count),
+                            poll_options:poll_options(id, post_id, label, votes_count, created_at)
+                        )
+                    `)
+                    .eq('status', 'active')
+                    .lte('starts_at', now)
+                    .gte('ends_at', now)
+                    .contains('placements', ['feed']);
+
+                const adPosts = (adsData || [])
+                    .filter((ad: any) => ad.post)
+                    .map((ad: any) => ({
+                        ...ad.post,
+                        likes_count: ad.post.likes?.[0]?.count ?? 0,
+                        comments_count: ad.post.comments?.[0]?.count ?? 0,
+                        is_ad: true
+                    }));
+
+                // Combine regular posts and ad posts, filtering duplicates
+                const adPostIds = new Set(adPosts.map((p: any) => p.id));
+                const finalPosts = [...adPosts, ...enriched.filter((p: any) => !adPostIds.has(p.id))];
+
+                setAllPosts(finalPosts);
             } catch (err) {
                 console.error('Failed to fetch posts:', err);
                 setError('Failed to load posts');
@@ -111,21 +150,29 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                 _distance: haversineDistance(userLat, userLng, p.latitude!, p.longitude!),
             }));
 
-        // Try 1km first
-        let nearby = postsWithDistance.filter((p) => p._distance <= 1);
+        // Try 1km first, but always include national traders or active ads
+        let nearby = postsWithDistance.filter((p: any) => p._distance <= 1 || p.is_ad || p.business?.profile?.trader_tier === 'national');
         let radiusUsed = 1;
 
         // If fewer than 3 posts within 1km, expand to 2km
         if (nearby.length < 3) {
-            nearby = postsWithDistance.filter((p) => p._distance <= 2);
+            nearby = postsWithDistance.filter((p: any) => p._distance <= 2 || p.is_ad || p.business?.profile?.trader_tier === 'national');
             radiusUsed = 2;
         }
 
-        // Sort nearby by: pinned first, then distance
+        // If fewer than 3 posts within 2km, expand to 5km
+        if (nearby.length < 3) {
+            nearby = postsWithDistance.filter((p: any) => p._distance <= 5 || p.is_ad || p.business?.profile?.trader_tier === 'national');
+            radiusUsed = 5;
+        }
+
+        // Sort nearby by: ads first, then pinned, then distance
         nearby.sort((a, b) => {
+            if (a.is_ad && !b.is_ad) return -1;
+            if (!a.is_ad && b.is_ad) return 1;
             if (a.is_pinned && !b.is_pinned) return -1;
             if (!a.is_pinned && b.is_pinned) return 1;
-            return a._distance - b._distance;
+            return a._distance! - b._distance!;
         });
 
         // Trending = all posts sorted by engagement (exclude already-shown nearby)
