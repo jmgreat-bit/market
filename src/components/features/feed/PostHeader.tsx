@@ -55,9 +55,9 @@ export function PostHeader({ businessName, category, isPremium, traderTier, crea
                         {businessName || 'Business'}
                     </h3>
                     {(traderTier && traderTier !== 'free') ? (
-                        <TraderBadge tier={traderTier} />
+                        <TraderBadge tier={traderTier} showLabel />
                     ) : isPremium ? (
-                        <TraderBadge tier="pro" />
+                        <TraderBadge tier="pro" showLabel />
                     ) : null}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 font-sans">

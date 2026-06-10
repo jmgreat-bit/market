@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { TraderTier, AiPackage } from '@/types';
 import { MomoPayModal } from '@/components/features/premium/MomoPayModal';
+import { useUser } from '@/hooks/useUser';
 
 // ── Tier data ──────────────────────────────────────────
 const TIERS: {
@@ -131,6 +132,7 @@ const modalVariants = {
 
 // ── Page component ──────────────────────────────────────
 export default function PremiumPage() {
+    const { profile, isLoading } = useUser();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedTier, setSelectedTier] = useState<{ id: string, price: number } | null>(null);
     const [infoTierId, setInfoTierId] = useState<TraderTier | null>(null);
@@ -170,98 +172,103 @@ export default function PremiumPage() {
                     </p>
                 </motion.header>
 
-                {/* ── Tier Cards ─────────────────────────── */}
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-16"
-                >
-                    {TIERS.map((tier) => (
-                        <motion.div
-                            key={tier.id}
-                            variants={cardVariants}
-                            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                            className={`relative glass-card rounded-2xl border ${tier.accentBorder} p-6 flex flex-col transition-shadow hover:shadow-lg hover:shadow-black/10`}
-                        >
-                            {/* Best-value ribbon */}
-                            {tier.highlight && (
-                                <div
-                                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-black"
-                                    style={{ background: tier.color }}
+                <div className="max-w-6xl mx-auto space-y-24 relative z-10">
+                {/* ── Trader Tiers (Only for Traders) ────────────────────── */}
+                {profile?.role === 'trader' && (
+                    <motion.section
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="pt-8"
+                    >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-16">
+                            {TIERS.map((tier) => (
+                                <motion.div
+                                    key={tier.id}
+                                    variants={cardVariants}
+                                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                                    className={`relative glass-card rounded-2xl border ${tier.accentBorder} p-6 flex flex-col transition-shadow hover:shadow-lg hover:shadow-black/10`}
                                 >
-                                    {tier.highlight}
-                                </div>
-                            )}
-
-                            {/* Icon + Name */}
-                            <div className="flex items-center gap-3 mb-5 mt-1">
-                                <div
-                                    className={`w-11 h-11 rounded-xl ${tier.accentBg} flex items-center justify-center`}
-                                >
-                                    {tier.icon}
-                                </div>
-                                <div>
-                                    <h3 className="font-headline font-bold text-base tracking-tight">{tier.name}</h3>
-                                    {tier.id !== 'free' && (
-                                        <p className={`text-[10px] uppercase tracking-widest ${tier.accentText} font-bold`}>Verified</p>
+                                    {/* Best-value ribbon */}
+                                    {tier.highlight && (
+                                        <div
+                                            className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-black"
+                                            style={{ background: tier.color }}
+                                        >
+                                            {tier.highlight}
+                                        </div>
                                     )}
-                                </div>
-                            </div>
 
-                            {/* Price */}
-                            <div className="mb-5">
-                                <span className="font-headline text-3xl font-black tracking-tight">{tier.price}</span>
-                                {tier.period && (
-                                    <span className="text-sm text-muted-foreground ml-1.5">{tier.period}</span>
-                                )}
-                            </div>
+                                    {/* Icon + Name */}
+                                    <div className="flex items-center gap-3 mb-5 mt-1">
+                                        <div
+                                            className={`w-11 h-11 rounded-xl ${tier.accentBg} flex items-center justify-center`}
+                                        >
+                                            {tier.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-headline font-bold text-base tracking-tight">{tier.name}</h3>
+                                            {tier.id !== 'free' && (
+                                                <p className={`text-[10px] uppercase tracking-widest ${tier.accentText} font-bold`}>Verified</p>
+                                            )}
+                                        </div>
+                                    </div>
 
-                            {/* Features */}
-                            <ul className="space-y-3 flex-1 mb-6">
-                                {tier.features.map((feat, i) => (
-                                    <li key={i} className="flex items-start gap-2.5 text-sm">
-                                        <span className="shrink-0 mt-0.5">{feat.icon}</span>
-                                        <span className="text-foreground/80">{feat.text}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                                    {/* Price */}
+                                    <div className="mb-5">
+                                        <span className="font-headline text-3xl font-black tracking-tight">{tier.price}</span>
+                                        {tier.period && (
+                                            <span className="text-sm text-muted-foreground ml-1.5">{tier.period}</span>
+                                        )}
+                                    </div>
 
-                            {/* CTA row */}
-                            <div className="flex gap-2">
-                                {/* Info Button */}
-                                <button
-                                    onClick={() => setInfoTierId(tier.id)}
-                                    className={`py-3 px-4 rounded-xl border ${tier.accentBorder} ${tier.accentBg} transition-colors flex items-center justify-center`}
-                                    title={`Learn more about ${tier.name}`}
-                                >
-                                    <Info className="w-4 h-4" style={{ color: tier.color }} />
-                                </button>
+                                    {/* Features */}
+                                    <ul className="space-y-3 flex-1 mb-6">
+                                        {tier.features.map((feat, i) => (
+                                            <li key={i} className="flex items-start gap-2.5 text-sm">
+                                                <span className="shrink-0 mt-0.5">{feat.icon}</span>
+                                                <span className="text-foreground/80">{feat.text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
 
-                                {tier.id === 'free' ? (
-                                    <button
-                                        disabled
-                                        className="flex-1 py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
-                                    >
-                                        Current Plan
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleSelect(tier.id, tier.price)}
-                                        className="group flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
-                                        style={{
-                                            background: tier.color,
-                                            color: '#000',
-                                        }}
-                                    >
-                                        Subscribe
-                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </button>
-                                )}
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                                    {/* CTA row */}
+                                    <div className="flex gap-2">
+                                        {/* Info Button */}
+                                        <button
+                                            onClick={() => setInfoTierId(tier.id)}
+                                            className={`py-3 px-4 rounded-xl border ${tier.accentBorder} ${tier.accentBg} transition-colors flex items-center justify-center`}
+                                            title={`Learn more about ${tier.name}`}
+                                        >
+                                            <Info className="w-4 h-4" style={{ color: tier.color }} />
+                                        </button>
+
+                                        {tier.id === 'free' ? (
+                                            <button
+                                                disabled
+                                                className="flex-1 py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
+                                            >
+                                                Current Plan
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleSelect(tier.id, tier.price)}
+                                                className="group flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                                                style={{
+                                                    background: tier.color,
+                                                    color: '#000',
+                                                }}
+                                            >
+                                                Subscribe
+                                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.section>
+                )}
 
                 {/* ── AI Discovery Credits ────────────────── */}
                 <motion.section
@@ -308,6 +315,7 @@ export default function PremiumPage() {
                         ))}
                     </div>
                 </motion.section>
+                </div>
 
             </main>
 

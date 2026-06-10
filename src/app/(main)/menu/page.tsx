@@ -97,6 +97,7 @@ export default function MenuPage() {
                 </div>
 
                 {/* Premium Upgrade CTA */}
+                {profile?.role === 'trader' && (
                 <Link
                     href="/premium"
                     className="block w-full p-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
@@ -112,6 +113,7 @@ export default function MenuPage() {
                         <ChevronRight className="w-4 h-4 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </Link>
+                )}
 
                 {/* Main Hub Section */}
                 <div className="space-y-3">
