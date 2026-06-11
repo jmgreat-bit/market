@@ -4,6 +4,7 @@ import { useUser } from '@/hooks/useUser';
 import { useSettings, Theme, Language } from '@/contexts/SettingsContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAdmin } from '@/hooks/useAdmin';
 import { ROUTES } from '@/lib/constants';
 import { 
     User, 
@@ -28,6 +29,7 @@ import {
 
 export default function MenuPage() {
     const { profile, user, isLoading, signOut, isAuthenticated } = useUser();
+    const { isAdmin } = useAdmin();
     const { theme, setTheme, language, setLanguage, t } = useSettings();
     const router = useRouter();
 
@@ -96,8 +98,27 @@ export default function MenuPage() {
                     </div>
                 </div>
 
+                {/* Admin Dashboard CTA */}
+                {isAdmin && (
+                <Link
+                    href="/admin"
+                    className="block w-full p-3 rounded-xl border border-blue-500/30 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-blue-500/10 hover:from-blue-500/20 hover:via-indigo-500/10 hover:to-blue-500/20 transition-all group mb-4"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40 transition-shadow">
+                            <Shield className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-headline font-bold text-[13px] text-foreground">Admin Dashboard</p>
+                            <p className="text-[9px] text-blue-500 uppercase tracking-widest font-bold">Mission Control</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-blue-500/60 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </Link>
+                )}
+
                 {/* Premium Upgrade CTA */}
-                {profile?.role === 'trader' && (
+                {!isAdmin && profile?.role === 'trader' && (
                 <Link
                     href="/premium"
                     className="block w-full p-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
