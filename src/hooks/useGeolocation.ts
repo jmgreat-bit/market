@@ -54,43 +54,33 @@ export function useGeolocation() {
 
         setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-        // Step 1: Try high accuracy (GPS satellites)
+        // Prioritize speed and reliability on mobile over pinpoint GPS accuracy
+        // Demanding highAccuracy often causes mobile browsers to timeout while waking up the GPS chip.
         navigator.geolocation.getCurrentPosition(
             handlePosition,
-            () => {
-                // Step 2: GPS failed — fall back to low accuracy (Wi-Fi / cell towers)
-                navigator.geolocation.getCurrentPosition(
-                    handlePosition,
-                    (error) => {
-                        let errorMessage = 'Unable to retrieve your location';
-                        switch (error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = 'Location permission denied. Please enable location access.';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = 'Location information is unavailable.';
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = 'Location request timed out. Please try again.';
-                                break;
-                        }
-                        setState({
-                            coordinates: null,
-                            error: errorMessage,
-                            isLoading: false,
-                        });
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 15000,
-                        maximumAge: 600000, // Accept cached locations up to 10 minutes old
-                    }
-                );
+            (error) => {
+                let errorMessage = 'Unable to retrieve your location';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'Location permission denied. Please enable location access.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Location information is unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'Location request timed out. Please try again.';
+                        break;
+                }
+                setState({
+                    coordinates: null,
+                    error: errorMessage,
+                    isLoading: false,
+                });
             },
             {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000, // Accept cached locations up to 5 minutes old
+                enableHighAccuracy: false, // Use Wi-Fi/Cell towers instead of physical GPS (much faster)
+                timeout: 30000,            // Give it 30 seconds to figure it out
+                maximumAge: Infinity,      // Accept any recently cached location
             }
         );
     }, [handlePosition]);
