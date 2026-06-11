@@ -131,14 +131,14 @@ export default function AdminOverviewPage() {
                                 <p className="text-xs text-slate-500">{stats?.activeNational || 0} active</p>
                             </div>
                             <p className="font-mono text-lg text-emerald-400 font-bold">
-                                {((stats?.activeNational || 0) * 8000).toLocaleString()} RWF
+                                {((stats?.activeNational || 0) * 35000).toLocaleString()} RWF
                             </p>
                         </div>
                         
                         <div className="pt-4 border-t border-slate-700/50 flex justify-between items-center">
                             <p className="text-slate-400 font-bold">Total Projected Monthly</p>
                             <p className="font-mono text-2xl text-white font-black">
-                                {(((stats?.activePro || 0) * 3000) + ((stats?.activeNational || 0) * 8000)).toLocaleString()} RWF
+                                {(((stats?.activePro || 0) * 3000) + ((stats?.activeNational || 0) * 35000)).toLocaleString()} RWF
                             </p>
                         </div>
                     </div>
