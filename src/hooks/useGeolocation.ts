@@ -62,13 +62,13 @@ export function useGeolocation() {
                 let errorMessage = 'Unable to retrieve your location';
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        errorMessage = 'Location permission denied. Please enable location access.';
+                        errorMessage = "You can't see nearby traders because your browser blocked location access. Please allow GPS.";
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorMessage = 'Location information is unavailable.';
+                        errorMessage = "Your phone's GPS is currently turned off or unavailable. Turn it on to see nearby traders!";
                         break;
                     case error.TIMEOUT:
-                        errorMessage = 'Location request timed out. Please try again.';
+                        errorMessage = "Location request timed out. Please ensure your phone's GPS is turned on and try again.";
                         break;
                 }
                 setState({
