@@ -30,8 +30,8 @@ export async function POST(req: Request) {
             // since there's no pending payment table for AI credits yet.
             const pkgName = tier.replace('ai_', '');
             let prompts = 0;
-            if (pkgName === 'starter') prompts = 20;
-            if (pkgName === 'standard') prompts = 50;
+            if (pkgName === 'starter') prompts = 7;
+            if (pkgName === 'standard') prompts = 20;
             if (pkgName === 'power') prompts = 100;
 
             await adminClient.from('ai_credits').insert({

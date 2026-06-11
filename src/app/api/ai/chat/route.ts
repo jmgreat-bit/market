@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
         // ── 0.5 Save User Message to History ────────────────────
         await supabase.from('ai_conversations').insert({
             user_id: userId,
-            session_id: sessionId,
             role: 'user',
             content: message
         });
@@ -77,7 +76,7 @@ export async function POST(req: NextRequest) {
         const { data: pastMessages } = await supabase
             .from('ai_conversations')
             .select('role, content')
-            .eq('session_id', sessionId)
+            .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(5);
         
@@ -205,7 +204,6 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
         // ── 4. Save AI Response to History ──────────────────
         await supabase.from('ai_conversations').insert({
             user_id: userId,
-            session_id: sessionId,
             role: 'assistant',
             content: finalOutput.text
         });
