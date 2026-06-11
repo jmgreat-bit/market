@@ -232,10 +232,10 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
-    } catch (err) {
+    } catch (err: any) {
         console.error('[AI Chat API] Error:', err);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'The AI is currently experiencing high demand. Please try again in a moment.' },
             { status: 500 }
         );
     }
