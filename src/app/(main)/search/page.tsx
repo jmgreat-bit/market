@@ -97,12 +97,6 @@ export default function SearchPage() {
 
                 const [bizRes, postRes, profRes] = await Promise.all([bizPromise, postPromise, profilePromise]);
 
-                console.log('[Search] Found:', {
-                    biz: bizRes.data?.length,
-                    posts: postRes.data?.length,
-                    profiles: profRes.data?.length
-                });
-
                 setResults({
                     businesses: bizRes.data || [],
                     posts: postRes.data || [],
