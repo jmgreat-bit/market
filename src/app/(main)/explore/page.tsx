@@ -6,10 +6,12 @@ import { FeedList } from '@/components/features/feed/FeedList';
 import { SponsoredPostCard } from '@/components/features/feed/SponsoredPostCard';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useAds } from '@/hooks/useAds';
-import { PostWithBusiness } from '@/types';
+import { PostWithBusiness, CommercialHub } from '@/types';
+import Link from 'next/link';
 
 export default function ExplorePage() {
     const [trendingPosts, setTrendingPosts] = useState<PostWithBusiness[]>([]);
+    const [hubs, setHubs] = useState<CommercialHub[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { ads: exploreAds } = useAds('explore');
@@ -19,6 +21,13 @@ export default function ExplorePage() {
             try {
                 setIsLoading(true);
                 const supabase = getSupabaseClient();
+
+                // Fetch Commercial Hubs
+                const { data: hubsData } = await supabase
+                    .from('commercial_hubs')
+                    .select('*');
+                if (hubsData) setHubs(hubsData);
+
                 const { data, error: fetchError } = await supabase
                     .from('posts')
                     .select(`
@@ -91,6 +100,38 @@ export default function ExplorePage() {
 
             {/* Feed content */}
             <div className="px-4 md:px-8 max-w-3xl mx-auto w-full">
+                
+                {/* Commercial Hubs Carousel */}
+                {!isLoading && hubs.length > 0 && (
+                    <div className="mb-10">
+                        <h2 className="text-xl font-display font-black mb-4 flex items-center gap-2">
+                            <MapPin className="w-5 h-5 text-primary" /> Popular Commercial Hubs
+                        </h2>
+                        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x">
+                            {hubs.map(hub => (
+                                <Link key={hub.id} href={`/explore/hub/${hub.id}`} className="snap-start flex-none w-64 md:w-72 bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                                    <div className="h-32 bg-secondary relative overflow-hidden">
+                                        {hub.image_url ? (
+                                            <img src={hub.image_url} alt={hub.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        ) : (
+                                            <div className="w-full h-full geo-gradient opacity-20" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                        <div className="absolute bottom-3 left-3 text-white">
+                                            <p className="font-bold font-display text-lg leading-tight">{hub.name}</p>
+                                        </div>
+                                    </div>
+                                    <div className="p-3">
+                                        <p className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
+                                            <MapPin className="w-3.5 h-3.5" /> {hub.address || 'Kigali'}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {isLoading ? (
                     <div className="flex flex-col items-center py-20 gap-4">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />

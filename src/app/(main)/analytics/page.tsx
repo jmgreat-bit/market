@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
     Eye, TrendingUp, Activity, Footprints,
     ArrowRight, Zap, Lock, Heart, MessageCircle,
-    Navigation, Calendar, BarChart3, Crown
+    Navigation, Calendar, BarChart3, Crown, RefreshCw, Users, Search as SearchIcon, Loader2, CheckCircle2, AlertTriangle
 } from 'lucide-react';
 import { useAnalytics, TimeFilter } from '@/hooks/useAnalytics';
 import { useUser } from '@/hooks/useUser';
@@ -26,6 +26,13 @@ export default function AnalyticsDashboardPage() {
     const { profile, isLoading: authLoading } = useUser();
     const [traderPosts, setTraderPosts] = useState<Post[]>([]);
     const [postsLoading, setPostsLoading] = useState(false);
+    const [showRepostBanner, setShowRepostBanner] = useState(false);
+    const [isReposting, setIsReposting] = useState(false);
+    const [repostSuccess, setRepostSuccess] = useState(false);
+    const [profileViewSummary, setProfileViewSummary] = useState<{ today: number; yesterday: number } | null>(null);
+    const [demandAlerts, setDemandAlerts] = useState<{ keyword: string; count: number }[]>([]);
+    const [locationStatus, setLocationStatus] = useState<'loading' | 'verified' | 'unverified' | null>(null);
+    const [verificationDistance, setVerificationDistance] = useState<number | null>(null);
 
     const isTrader = profile?.role === 'trader';
     const traderTier = profile?.trader_tier;
@@ -77,6 +84,102 @@ export default function AnalyticsDashboardPage() {
 
         fetchTraderPosts();
     }, [isTrader, profile?.id, hasPaidTier]);
+
+    // Check if merchant should see the Quick Repost banner + fetch profile views & demand
+    useEffect(() => {
+        if (!isTrader || !profile?.id || !hasPaidTier) return;
+
+        async function fetchEngagementData() {
+            const supabase = getSupabaseClient();
+
+            // 1. Check last post age for repost banner
+            const { data: lastPost } = await supabase
+                .from('posts')
+                .select('created_at, business_id')
+                .eq('business_id', (await supabase.from('business_details').select('id').eq('profile_id', profile!.id).single()).data?.id || '')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (lastPost) {
+                const hoursSinceLastPost = (Date.now() - new Date(lastPost.created_at).getTime()) / (1000 * 60 * 60);
+                setShowRepostBanner(hoursSinceLastPost >= 24);
+            }
+
+            // 2. Fetch profile view summary via RPC
+            try {
+                const { data: viewSummary } = await supabase.rpc('get_profile_view_summary', { trader_user_id: profile!.id });
+                if (viewSummary) setProfileViewSummary(viewSummary);
+            } catch { /* RPC may not exist yet */ }
+
+            // 3. Fetch demand summary
+            try {
+                const res = await fetch(`/api/analytics/demand-summary?userId=${profile!.id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data.data)) setDemandAlerts(data.data);
+                }
+            } catch { /* silent */ }
+        }
+
+        fetchEngagementData();
+    }, [isTrader, profile?.id, hasPaidTier]);
+
+    // Verify physical store location silently
+    useEffect(() => {
+        if (!isTrader || !profile?.id) return;
+
+        if ('geolocation' in navigator) {
+            setLocationStatus('loading');
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    try {
+                        const res = await fetch('/api/analytics/verify-location', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                latitude: pos.coords.latitude,
+                                longitude: pos.coords.longitude
+                            })
+                        });
+                        
+                        if (res.ok) {
+                            const data = await res.json();
+                            setLocationStatus(data.isVerified ? 'verified' : 'unverified');
+                            setVerificationDistance(data.distanceMeters);
+                        } else {
+                            setLocationStatus('unverified');
+                        }
+                    } catch {
+                        setLocationStatus('unverified');
+                    }
+                },
+                () => {
+                    // Geolocation denied or error
+                    setLocationStatus('unverified');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+    }, [isTrader, profile?.id]);
+
+    const handleRepost = async () => {
+        if (!profile?.id || isReposting) return;
+        setIsReposting(true);
+        try {
+            const res = await fetch('/api/posts/repost', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: profile.id }),
+            });
+            if (res.ok) {
+                setRepostSuccess(true);
+                setShowRepostBanner(false);
+                setTimeout(() => setRepostSuccess(false), 3000);
+            }
+        } catch { /* silent */ }
+        finally { setIsReposting(false); }
+    };
 
     // ── Non-trader gate ────────────────────────────────
     if (!authLoading && !isTrader) {
@@ -171,12 +274,117 @@ export default function AnalyticsDashboardPage() {
             <main className="flex-1 px-4 sm:px-6 lg:px-12 py-24 md:py-12 max-w-5xl mx-auto w-full">
 
                 {/* Header */}
-                <header className="mb-8">
-                    <h1 className="font-display text-3xl font-black text-foreground tracking-tight mb-1">Analytics</h1>
-                    <p className="text-muted-foreground text-sm">
-                        Track your business performance and post engagement.
-                    </p>
+                <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h1 className="font-display text-3xl font-black text-foreground tracking-tight mb-1">Analytics</h1>
+                        <p className="text-muted-foreground text-sm">
+                            Track your business performance and post engagement.
+                        </p>
+                    </div>
+                    {/* Location Verification Status */}
+                    {locationStatus && (
+                        <div className={`px-4 py-2.5 rounded-xl border flex flex-col justify-center text-sm font-medium ${
+                            locationStatus === 'loading' 
+                                ? 'bg-secondary text-muted-foreground border-border/50' 
+                                : locationStatus === 'verified'
+                                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                    : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                        }`}>
+                            <div className="flex items-center gap-2">
+                                {locationStatus === 'loading' && <Loader2 className="w-4 h-4 animate-spin" />}
+                                {locationStatus === 'verified' && <CheckCircle2 className="w-4 h-4" />}
+                                {locationStatus === 'unverified' && <AlertTriangle className="w-4 h-4" />}
+                                
+                                {locationStatus === 'loading' && 'Verifying store location...'}
+                                {locationStatus === 'verified' && '📍 Location verified today'}
+                                {locationStatus === 'unverified' && 'Location unverified'}
+                            </div>
+                            {locationStatus === 'unverified' && verificationDistance !== null && (
+                                <p className="text-[10px] opacity-80 mt-0.5 ml-6">
+                                    You are ~{verificationDistance}m away from your shop
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </header>
+
+                {/* Quick Repost Banner */}
+                {showRepostBanner && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/20 rounded-2xl p-5 mb-6 flex items-center gap-4"
+                    >
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                            <RefreshCw className="w-6 h-6 text-amber-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-display font-bold text-sm text-foreground">Keep your shop active!</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">You haven&apos;t posted in 24+ hours. Tap to repost your top-performing post instantly.</p>
+                        </div>
+                        <button
+                            onClick={handleRepost}
+                            disabled={isReposting}
+                            className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-full transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                            {isReposting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                            Repost
+                        </button>
+                    </motion.div>
+                )}
+
+                {/* Repost Success Toast */}
+                {repostSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 mb-6 text-center text-sm text-emerald-600 font-medium"
+                    >
+                        ✅ Post reposted successfully! It&apos;s now live on your feed.
+                    </motion.div>
+                )}
+
+                {/* Profile Views + Demand Summary Row */}
+                {(profileViewSummary || demandAlerts.length > 0) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        {/* Profile Views Card */}
+                        {profileViewSummary && (
+                            <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden">
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+                                <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                                    <Users className="w-4 h-4" />
+                                    <span className="text-xs font-medium">Profile Views</span>
+                                </div>
+                                <div className="font-display text-3xl font-bold text-foreground">
+                                    {profileViewSummary.today}
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                    today • {profileViewSummary.yesterday} yesterday
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Demand Alerts Card */}
+                        {demandAlerts.length > 0 && (
+                            <div className="bg-card rounded-2xl p-5 border border-border/30 relative overflow-hidden">
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-violet-500/5 rounded-full blur-2xl pointer-events-none" />
+                                <div className="flex items-center gap-2 text-muted-foreground mb-3">
+                                    <SearchIcon className="w-4 h-4" />
+                                    <span className="text-xs font-medium">Nearby Search Demand</span>
+                                </div>
+                                <div className="space-y-1.5">
+                                    {demandAlerts.slice(0, 3).map((d, i) => (
+                                        <div key={i} className="flex items-center justify-between text-sm">
+                                            <span className="text-foreground font-medium truncate">&quot;{d.keyword}&quot;</span>
+                                            <span className="text-primary font-bold shrink-0 ml-2">{d.count} searches</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-2">in the last 12 hours near you</p>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Time Filter Toggle */}
                 <div className="flex items-center gap-1 bg-secondary p-1 rounded-xl w-fit mb-8">

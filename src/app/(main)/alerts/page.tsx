@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Heart, MessageCircle, Reply, UserPlus, Bell } from 'lucide-react';
+import { Heart, MessageCircle, Reply, UserPlus, Bell, Loader2 } from 'lucide-react';
 import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
@@ -33,12 +33,15 @@ const typeIconMap: Record<AlertType, { icon: typeof Heart; color: string; bg: st
 
 // ── Page component ─────────────────────────────────────
 export default function NotificationsPage() {
-    const { user } = useUser();
+    const { user, isLoading: authLoading } = useUser();
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
+        // Still waiting for auth context to initialise — don't bail out yet
+        if (authLoading) return;
+
         if (!user) {
             setLoading(false);
             return;
@@ -56,7 +59,12 @@ export default function NotificationsPage() {
                     .limit(50);
 
                 if (error) {
-                    setHasError(true);
+                    // If the table simply doesn't exist yet, show empty instead of error
+                    if (error.code === '42P01') {
+                        setAlerts([]);
+                    } else {
+                        setHasError(true);
+                    }
                 } else {
                     setAlerts(data || []);
                 }
@@ -67,21 +75,21 @@ export default function NotificationsPage() {
             }
         }
         fetchAlerts();
-    }, [user]);
+    }, [user, authLoading]);
 
     return (
         <StandalonePageLayout title="Notifications">
             <div className="max-w-2xl mx-auto px-4 py-4">
 
-                {/* Loading state */}
-                {loading && (
+                {/* Loading state — shown while auth is initialising OR fetching alerts */}
+                {(authLoading || loading) && (
                     <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     </div>
                 )}
 
                 {/* Empty / error state */}
-                {!loading && (hasError || alerts.length === 0) && (
+                {!authLoading && !loading && (hasError || alerts.length === 0) && (
                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
                         <div className="w-16 h-16 rounded-2xl bg-muted-foreground/5 flex items-center justify-center mb-5">
                             <Bell className="w-8 h-8 text-muted-foreground/40" />
@@ -96,7 +104,7 @@ export default function NotificationsPage() {
                 )}
 
                 {/* Notifications list */}
-                {!loading && !hasError && alerts.length > 0 && (
+                {!authLoading && !loading && !hasError && alerts.length > 0 && (
                     <div className="divide-y divide-border/10">
                         {alerts.map((alert) => {
                             const typeConfig = typeIconMap[alert.type] || typeIconMap.system;

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Phone, Globe } from 'lucide-react';
 
 export default function SetupBusinessPage() {
     const { profile, user, refreshProfile } = useUser();
@@ -17,7 +17,9 @@ export default function SetupBusinessPage() {
     const [formData, setFormData] = useState({
         name: '',
         category: 'Retail',
-        bio: ''
+        bio: '',
+        phone: '',
+        website: ''
     });
 
     useEffect(() => {
@@ -40,6 +42,8 @@ export default function SetupBusinessPage() {
                     business_name: formData.name,
                     category: formData.category,
                     bio: formData.bio,
+                    phone: formData.phone.trim() || null,
+                    website_url: formData.website.trim() || null,
                 })
                 .eq('profile_id', user?.id);
 
@@ -96,6 +100,34 @@ export default function SetupBusinessPage() {
                             value={formData.bio}
                             onChange={e => setFormData(prev => ({ ...prev, bio: e.target.value }))}
                         />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="phone">WhatsApp Number</Label>
+                        <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input 
+                                id="phone"
+                                type="tel"
+                                placeholder="e.g. 250788123456"
+                                value={formData.phone}
+                                onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                className="h-12 bg-input border-border/50 pl-10"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="website">Website (optional)</Label>
+                        <div className="relative">
+                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input 
+                                id="website"
+                                type="url"
+                                placeholder="e.g. https://myshop.com"
+                                value={formData.website}
+                                onChange={e => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                                className="h-12 bg-input border-border/50 pl-10"
+                            />
+                        </div>
                     </div>
 
                     <Button 

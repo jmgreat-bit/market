@@ -22,6 +22,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/constants';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useUser } from '@/hooks/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { useAds } from '@/hooks/useAds';
 import type { BusinessDetails, PostWithBusiness, Profile } from '@/types';
@@ -39,6 +40,7 @@ export default function SearchPage() {
     const [isSearching, setIsSearching] = useState(false);
     const [loadingTags, setLoadingTags] = useState(true);
     const { coordinates, isLoading: geoLoading, requestLocation } = useGeolocation();
+    const { user } = useUser();
     const inputRef = useRef<HTMLInputElement>(null);
     const supabase = createClient();
     const { ads: searchAds } = useAds('search');
@@ -108,6 +110,20 @@ export default function SearchPage() {
                     posts: postRes.data || [],
                     profiles: profRes.data || []
                 });
+
+                // Silently log search query for aggregated demand alerts
+                try {
+                    fetch('/api/analytics/search-log', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: query.trim(),
+                            latitude: coordinates?.latitude,
+                            longitude: coordinates?.longitude,
+                            searcherId: user?.id || null,
+                        }),
+                    }).catch(() => {}); // Fire-and-forget, never block UI
+                } catch { /* silent */ }
             } catch (err) {
                 console.error('Search failed:', err);
             } finally {

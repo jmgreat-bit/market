@@ -12,9 +12,12 @@ import {
     Sparkles,
     MessageCircle,
     Compass,
-    Navigation
+    Navigation,
+    CheckCircle2
 } from 'lucide-react';
 import { FeedList } from '@/components/features/feed/FeedList';
+import ProfileTracker from '@/components/features/profile/ProfileTracker';
+import ContactButtons from '@/components/features/profile/ContactButtons';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,7 +48,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     if (profile.role === 'trader') {
         const { data: biz } = await supabase
             .from('business_details')
-            .select('*')
+            .select('*, hub:commercial_hubs(name)')
             .eq('profile_id', profile.id)
             .single();
         businessInfo = biz;
@@ -87,9 +90,28 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     const displayName = profile.full_name || resolvedParams.username || 'Navigator';
     const displayRole = isTrader ? 'Verified Trader' : 'Urban Explorer';
 
+    let isVerifiedToday = false;
+    let daysSinceVerified = null;
+
+    if (businessInfo?.last_verified_at) {
+        const verifiedAt = new Date(businessInfo.last_verified_at);
+        const hoursDiff = (Date.now() - verifiedAt.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursDiff <= 24) {
+            isVerifiedToday = true;
+        } else {
+            daysSinceVerified = Math.floor(hoursDiff / 24);
+        }
+    }
+
     return (
         <div className="min-h-screen flex flex-col items-center pb-32 md:pb-12 bg-background">
             <div className="w-full max-w-2xl mx-auto px-6 pt-8 flex flex-col gap-8">
+                
+                {/* Invisible profile view tracker */}
+                {isTrader && businessInfo && (
+                    <ProfileTracker businessId={businessInfo.id} />
+                )}
                 
                 {/* Profile Card */}
                 <div className="flex flex-col items-center py-8 bg-card rounded-3xl border border-border/30 relative overflow-hidden shadow-sm">
@@ -115,6 +137,29 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                     </h2>
                     <p className="text-muted-foreground text-sm z-10 mt-0.5">@{profile.username} • {displayRole}</p>
                     
+                    {isTrader && businessInfo && (
+                        <div className="flex flex-col items-center gap-1.5 mt-3 z-10">
+                            {/* Hub Location */}
+                            {businessInfo.hub && (
+                                <div className="text-[11px] font-bold text-muted-foreground bg-secondary px-3 py-1 rounded-full flex items-center gap-1.5 border border-border/50 shadow-sm">
+                                    <Store className="w-3.5 h-3.5" />
+                                    {businessInfo.hub.name} {businessInfo.hub_stall ? `• ${businessInfo.hub_stall}` : ''}
+                                </div>
+                            )}
+
+                            {/* Verification Badge */}
+                            {isVerifiedToday ? (
+                                <div className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 mt-1 border border-emerald-500/20">
+                                    <CheckCircle2 className="w-3 h-3" /> Location Verified Today
+                                </div>
+                            ) : daysSinceVerified !== null ? (
+                                <div className="text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 mt-1 border border-amber-500/20">
+                                    <CheckCircle2 className="w-3 h-3" /> Verified {daysSinceVerified}d ago
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
+
                         <p className="text-muted-foreground text-sm z-10 mt-4 text-center max-w-xs px-4 leading-relaxed italic">
                             &quot;{profile.bio}&quot;
                         </p>
@@ -199,12 +244,12 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                         </div>
 
                         <div className="space-y-3">
-                            {businessInfo.website_url && (
-                                <a href={businessInfo.website_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm text-foreground/80 hover:text-primary transition-colors">
-                                    <Globe className="w-4 h-4 text-primary" />
-                                    <span>{businessInfo.website_url.replace(/^https?:\/\//, '')}</span>
-                                </a>
-                            )}
+                            {/* Trackable Contact Buttons */}
+                            <ContactButtons 
+                                businessId={businessInfo.id}
+                                phone={businessInfo.phone}
+                                websiteUrl={businessInfo.website_url}
+                            />
                             {businessInfo.latitude && businessInfo.longitude && (
                                 <Link href={`/map`} className="flex items-center gap-3 text-sm text-foreground/80 hover:text-primary transition-colors">
                                     <MapPin className="w-4 h-4 text-primary" />

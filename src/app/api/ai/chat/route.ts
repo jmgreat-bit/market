@@ -208,6 +208,19 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
             content: finalOutput.text
         });
 
+        // ── 4.5 Log search query for aggregated demand alerts ──
+        if (extractedParams.keywords && extractedParams.keywords.length > 0) {
+            try {
+                await supabase.from('search_logs').insert({
+                    query: message.trim(),
+                    category_match: extractedParams.keywords[0] || null,
+                    latitude: latitude || null,
+                    longitude: longitude || null,
+                    searcher_id: userId,
+                });
+            } catch { /* Silent — never fail the chat */ }
+        }
+
         // ── 5. Deduct Credits Securely ──────────────────────
         // Deduct 1 credit because we successfully answered the user's prompt
         const { data: creditRows } = await supabase

@@ -61,6 +61,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                         )}
                         <Link
                             href="/ai"
+                            suppressHydrationWarning
                             className="relative w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all"
                         >
                             <Sparkles className="w-5 h-5" />

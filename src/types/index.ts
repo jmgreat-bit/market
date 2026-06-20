@@ -35,8 +35,34 @@ export interface BusinessDetails {
   twitter_url: string | null;
   instagram_url: string | null;
   is_premium: boolean;
+  hub_id: string | null;
+  hub_floor: string | null;
+  hub_stall: string | null;
+  last_verified_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface CommercialHub {
+  id: string;
+  name: string;
+  description: string | null;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  image_url: string | null;
+  created_at: string;
+  business_count?: number;
+}
+
+export interface LocationVerification {
+  id: string;
+  business_id: string;
+  latitude: number;
+  longitude: number;
+  distance_meters: number;
+  is_verified: boolean;
+  created_at: string;
 }
 
 // Media types for posts

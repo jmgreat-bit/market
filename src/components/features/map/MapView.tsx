@@ -10,8 +10,11 @@ import { UserLocationDot } from './UserLocationDot';
 import { BusinessMarker } from './BusinessMarker';
 import { MapSearchHUD } from './MapSearchHUD';
 import { MapDetailPeek } from './MapDetailPeek';
+import { HubMarker } from './HubMarker';
+import { HubDetailPeek } from './HubDetailPeek';
 import { useSettings } from '@/contexts/SettingsContext';
-import { BusinessDetails, MapBounds } from '@/types';
+import { BusinessDetails, MapBounds, CommercialHub } from '@/types';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Search, X, Navigation, Footprints } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
@@ -103,9 +106,18 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
         DEFAULT_MAP_CENTER.lng,
     ]);
     const [selectedBusiness, setSelectedBusiness] = useState<BusinessDetails | null>(null);
+    const [selectedHub, setSelectedHub] = useState<CommercialHub | null>(null);
     const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
     const [activeRoute, setActiveRoute] = useState<ActiveRoute | null>(null);
     const [isRouting, setIsRouting] = useState(false);
+    
+    const [hubs, setHubs] = useState<CommercialHub[]>([]);
+
+    useEffect(() => {
+        getSupabaseClient().from('commercial_hubs').select('*').then(({ data }: { data: any }) => {
+            if (data) setHubs(data);
+        });
+    }, []);
 
     // Filter businesses based on active category
     const filteredBusinesses = useMemo(() => {
@@ -138,10 +150,18 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
     const handleBusinessSelect = (business: BusinessDetails) => {
         setMapCenter([business.latitude, business.longitude]);
         setSelectedBusiness(business);
+        setSelectedHub(null);
+    };
+
+    const handleHubSelect = (hub: CommercialHub) => {
+        setMapCenter([hub.latitude, hub.longitude]);
+        setSelectedHub(hub);
+        setSelectedBusiness(null);
     };
 
     const handleMapClick = () => {
         setSelectedBusiness(null);
+        setSelectedHub(null);
     };
 
     const fetchRoute = async (targetLat: number, targetLng: number, bizName: string, profile: 'driving' | 'foot' = 'foot') => {
@@ -263,6 +283,15 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
                     </>
                 )}
 
+                {/* Hub markers */}
+                {hubs.map((hub) => (
+                    <HubMarker
+                        key={`hub-${hub.id}`}
+                        hub={hub}
+                        onClick={handleHubSelect}
+                    />
+                ))}
+
                 {/* Business markers */}
                 {filteredBusinesses.map((business) => (
                     <BusinessMarker
@@ -347,6 +376,16 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
                         business={selectedBusiness} 
                         onClose={() => setSelectedBusiness(null)} 
                         onShowRoute={coordinates ? () => fetchRoute(selectedBusiness.latitude, selectedBusiness.longitude, selectedBusiness.business_name, 'foot') : undefined}
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Hub Detail Peek Sheet */}
+            <AnimatePresence>
+                {selectedHub && (
+                    <HubDetailPeek 
+                        hub={selectedHub} 
+                        onClose={() => setSelectedHub(null)} 
                     />
                 )}
             </AnimatePresence>
