@@ -47,7 +47,12 @@ $$;
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Remove any existing cron job with the same name to avoid duplicates
-SELECT cron.unschedule('hard_delete_expired_accounts');
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'hard_delete_expired_accounts') THEN
+    PERFORM cron.unschedule('hard_delete_expired_accounts');
+  END IF;
+END $$;
 
 -- Schedule the job to run daily at midnight ('0 0 * * *')
 SELECT cron.schedule(
