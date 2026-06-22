@@ -17,6 +17,7 @@ export interface Profile {
   is_premium: boolean;
   trader_tier: TraderTier;
   tier_expires_at: string | null;
+  scheduled_for_deletion_at: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -11,19 +11,21 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
-import { Pin, Bell, BellOff, Loader2, Zap } from 'lucide-react';
+import { Pin, Bell, BellOff, Loader2, Zap, X } from 'lucide-react';
 import { BoostModal } from './BoostModal';
 
 interface PostCardProps {
     post: PostWithBusiness;
+    autoExpandComments?: boolean;
+    isModalView?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, autoExpandComments = false, isModalView = false }: PostCardProps) {
     const { profile } = useUser();
     const supabase = useMemo(() => getSupabaseClient(), []);
     const [isLiked, setIsLiked] = useState(post.is_liked ?? false);
     const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(autoExpandComments);
     const initialComments = Array.isArray(post.comments) && post.comments.length > 0 && 'id' in post.comments[0] 
         ? post.comments 
         : [];
@@ -35,6 +37,7 @@ export function PostCard({ post }: PostCardProps) {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
     const [showBoostModal, setShowBoostModal] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Boost Eligibility
     const isOwner = profile?.id === post.business?.profile_id;
@@ -160,15 +163,25 @@ export function PostCard({ post }: PostCardProps) {
         setCommentsCount(prev => prev + 1);
     };
 
+    const handleCardClick = (e: React.MouseEvent) => {
+        if (isModalView) return;
+        const target = e.target as HTMLElement;
+        if (target.closest('button') || target.closest('a')) {
+            return;
+        }
+        setIsModalOpen(true);
+    };
+
     const business = post.business;
 
     return (
         <>
             <motion.div
                 ref={cardRef}
+                onClick={handleCardClick}
                 initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg overflow-hidden bg-card/80 backdrop-blur-[30px] shadow-[0_0_32px_rgba(143,245,255,0.08)] border border-border/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(143,245,255,0.12)]"
+            className={`rounded-lg overflow-hidden bg-card/80 backdrop-blur-[30px] shadow-[0_0_32px_rgba(143,245,255,0.08)] border border-border/30 transition-all duration-500 hover:shadow-[0_0_40px_rgba(143,245,255,0.12)] ${!isModalView ? 'cursor-pointer hover:border-primary/50' : ''}`}
         >
             <div className="flex flex-col bg-transparent">
                 {/* Pinned Badge */}
@@ -293,6 +306,28 @@ export function PostCard({ post }: PostCardProps) {
                     // Optionally handle success visually (e.g. show a "Boosted" tag on the post)
                 }}
             />
+        )}
+
+        {/* Post Detail Modal Overlay */}
+        {isModalOpen && !isModalView && (
+            <div 
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm"
+                onClick={() => setIsModalOpen(false)}
+            >
+                <div 
+                    className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl relative shadow-2xl ring-1 ring-border/50 bg-background"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button 
+                        className="absolute top-3 right-3 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-foreground hover:bg-secondary transition-all"
+                        onClick={() => setIsModalOpen(false)}
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                    {/* We render the card inside itself with isModalView=true so it doesn't nest infinitely */}
+                    <PostCard post={post} autoExpandComments={true} isModalView={true} />
+                </div>
+            </div>
         )}
         </>
     );

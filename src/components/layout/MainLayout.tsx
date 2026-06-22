@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { TabNavigation } from './TabNavigation';
 import { PageTransition } from './PageTransition';
 import Link from 'next/link';
-import { Bell, Plus, Sparkles } from 'lucide-react';
+import { Bell, Plus, Sparkles, AlertTriangle } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
@@ -14,7 +14,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-    const { profile } = useUser();
+    const { profile, signOut } = useUser();
     const [hasUnreadAlerts, setHasUnreadAlerts] = useState(false);
 
     // Check for unread alerts — silent fail if table doesn't exist yet
@@ -35,6 +35,49 @@ export function MainLayout({ children }: MainLayoutProps) {
                 setHasUnreadAlerts(false);
             });
     }, [profile?.id]);
+
+    if (profile?.scheduled_for_deletion_at) {
+        const deleteDate = new Date(profile.scheduled_for_deletion_at);
+        const hardDeleteDate = new Date(deleteDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const daysLeft = Math.max(0, Math.ceil((hardDeleteDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
+
+        const handleRecover = async () => {
+            const supabase = getSupabaseClient();
+            await supabase.rpc('recover_account');
+            window.location.reload();
+        };
+
+        return (
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-destructive/20 blur-[100px] animate-pulse-slow pointer-events-none mix-blend-screen" />
+                <div className="z-10 max-w-md w-full space-y-6 glass-card p-8 rounded-3xl border border-destructive/20">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                        <AlertTriangle className="w-10 h-10 text-destructive" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="font-headline font-black text-2xl tracking-tighter">Account Pending Deletion</h2>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                            Your account is scheduled for permanent deletion in <strong className="text-foreground">{daysLeft} days</strong>. All your data, posts, and business details will be wiped permanently.
+                        </p>
+                    </div>
+                    <div className="space-y-3 pt-4">
+                        <button 
+                            onClick={handleRecover}
+                            className="w-full py-4 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-geo-glow"
+                        >
+                            Recover My Account
+                        </button>
+                        <button 
+                            onClick={signOut}
+                            className="w-full py-4 rounded-xl font-bold bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors border border-border/50"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">

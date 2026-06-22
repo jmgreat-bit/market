@@ -25,6 +25,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { useUser } from '@/hooks/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { useAds } from '@/hooks/useAds';
+import { PostCard } from '@/components/features/feed/PostCard';
 import type { BusinessDetails, PostWithBusiness, Profile } from '@/types';
 
 export default function SearchPage() {
@@ -76,7 +77,7 @@ export default function SearchPage() {
                 // 1. Search Businesses
                 const bizPromise = supabase
                     .from('business_details')
-                    .select('*')
+                    .select('*, profile:profiles(username)')
                     .or(`business_name.ilike.%${query}%,category.ilike.%${query}%,bio.ilike.%${query}%`)
                     .limit(5);
 
@@ -224,7 +225,11 @@ export default function SearchPage() {
                                         </h3>
                                         <div className="space-y-4 mb-2">
                                             {searchAds.map(ad => (
-                                                <div key={ad.id} className="glass-card rounded-2xl overflow-hidden border border-amber-500/30 shadow-[0_0_16px_rgba(245,190,80,0.08)]">
+                                                <button 
+                                                    key={ad.id} 
+                                                    onClick={() => ad.post_id ? router.push(`/p/${ad.post_id}`) : null}
+                                                    className="w-full text-left glass-card rounded-2xl overflow-hidden border border-amber-500/30 shadow-[0_0_16px_rgba(245,190,80,0.08)] hover:border-amber-400/50 transition-all active:scale-[0.98]"
+                                                >
                                                     <div className="p-4 flex gap-4">
                                                         <div className="w-12 h-12 rounded-xl bg-amber-500/15 flex-shrink-0 flex items-center justify-center">
                                                             <Store className="w-6 h-6 text-amber-400" />
@@ -247,7 +252,7 @@ export default function SearchPage() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </button>
                                             ))}
                                         </div>
                                     </section>
@@ -286,8 +291,12 @@ export default function SearchPage() {
                                             <Store className="w-4 h-4" /> Businesses
                                         </h3>
                                         <div className="space-y-4">
-                                            {results.businesses.map(biz => (
-                                                <div key={biz.id} className="glass-card rounded-2xl overflow-hidden border border-border/30">
+                                            {results.businesses.map((biz: any) => (
+                                                <button 
+                                                    key={biz.id} 
+                                                    onClick={() => biz.profile?.username ? router.push(`/u/${biz.profile.username}`) : null}
+                                                    className="w-full text-left glass-card rounded-2xl overflow-hidden border border-border/30 hover:border-primary/40 transition-all active:scale-[0.98]"
+                                                >
                                                     <div className="p-4 flex gap-4">
                                                         <div className="w-12 h-12 rounded-xl bg-secondary flex-shrink-0 flex items-center justify-center">
                                                             <Store className="w-6 h-6 text-primary" />
@@ -295,12 +304,12 @@ export default function SearchPage() {
                                                         <div className="flex-1">
                                                             <div className="flex justify-between items-start">
                                                                 <h4 className="font-bold text-foreground">{biz.business_name}</h4>
-                                                                <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded">{biz.category}</span>
+                                                                {biz.category && <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-0.5 rounded">{biz.category}</span>}
                                                             </div>
                                                             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{biz.bio}</p>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </button>
                                             ))}
                                         </div>
                                     </section>
@@ -314,11 +323,7 @@ export default function SearchPage() {
                                         </h3>
                                         <div className="space-y-4">
                                             {results.posts.map(post => (
-                                                <div key={post.id} className="p-4 glass-card rounded-xl border border-border/30">
-                                                    <p className="text-[10px] font-bold text-primary uppercase mb-2">{post.business?.business_name}</p>
-                                                    <p className="text-sm text-foreground line-clamp-3">{post.content}</p>
-                                                    {post.image_url && <img src={post.image_url} className="mt-3 w-full h-32 object-cover rounded-lg" />}
-                                                </div>
+                                                <PostCard key={post.id} post={post} />
                                             ))}
                                         </div>
                                     </section>

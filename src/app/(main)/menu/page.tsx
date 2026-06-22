@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAdmin } from '@/hooks/useAdmin';
 import { ROUTES } from '@/lib/constants';
+import { getSupabaseClient } from '@/lib/supabase/client';
 import { 
     User, 
     LogOut, 
@@ -24,7 +25,8 @@ import {
     MessageCircleQuestion,
     Compass,
     Crown,
-    Radar
+    Radar,
+    AlertTriangle
 } from 'lucide-react';
 
 export default function MenuPage() {
@@ -253,6 +255,30 @@ export default function MenuPage() {
                         <InfoLink icon={<FileText />} label="Terms of Service" href="/legal/terms" />
                         <InfoLink icon={<Settings />} label="Privacy Policy" href="/legal/privacy" />
                     </div>
+                </div>
+
+                {/* Danger Zone */}
+                <div className="space-y-2 pt-4">
+                    <h3 className="text-[10px] font-bold text-destructive uppercase tracking-widest px-1">Danger Zone</h3>
+                    <button
+                        onClick={() => {
+                            if (window.confirm("Are you sure you want to delete your account? You will have 7 days to log back in and recover it before it is permanently deleted.")) {
+                                const supabase = getSupabaseClient();
+                                supabase.rpc('schedule_account_deletion').then(() => {
+                                    window.location.reload();
+                                });
+                            }
+                        }}
+                        className="w-full flex items-center gap-4 p-4 bg-background border border-destructive/20 rounded-xl hover:bg-destructive/5 transition-all group"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
+                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                        </div>
+                        <div className="flex-1 text-left">
+                            <p className="font-headline font-bold text-destructive">Delete Account</p>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Schedule for deletion</p>
+                        </div>
+                    </button>
                 </div>
 
                 {/* Terminal Action */}
