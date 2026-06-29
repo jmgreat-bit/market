@@ -462,6 +462,15 @@ export default function SignupPage() {
                             Sign In
                         </Link>
                     </p>
+
+                    {/* Legal Links */}
+                    <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+                        <Link href="/legal/privacy" className="text-[11px] text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+                        <span className="text-muted-foreground/30 text-[10px]">•</span>
+                        <Link href="/legal/terms" className="text-[11px] text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
+                        <span className="text-muted-foreground/30 text-[10px]">•</span>
+                        <Link href="/legal/rights" className="text-[11px] text-muted-foreground hover:text-primary transition-colors">Your Data Rights</Link>
+                    </div>
                 </motion.div>
             </div>
         </div>
