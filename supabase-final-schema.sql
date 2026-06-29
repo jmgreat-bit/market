@@ -276,9 +276,9 @@ BEGIN
   INSERT INTO public.profiles (id, email, full_name, username, role)
   VALUES (
     NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-    COALESCE(NEW.raw_user_meta_data->>'username', ''),
+    COALESCE(NEW.email, ''),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', COALESCE(NEW.raw_user_meta_data->>'name', '')),
+    NEW.raw_user_meta_data->>'username',
     COALESCE(NEW.raw_user_meta_data->>'role', 'client')
   )
   ON CONFLICT (id) DO NOTHING;

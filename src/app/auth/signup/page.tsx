@@ -402,6 +402,8 @@ export default function SignupPage() {
                                     className="w-full bg-transparent border border-border text-foreground hover:bg-secondary/50 font-medium"
                                     disabled={!agreeToTerms}
                                     onClick={async () => {
+                                        // Save the selected role in a cookie so we can assign it after Google returns
+                                        document.cookie = `intended_role=${role}; path=/; max-age=3600`;
                                         const supabase = getSupabaseClient();
                                         await supabase.auth.signInWithOAuth({
                                             provider: 'google',
