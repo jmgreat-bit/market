@@ -24,7 +24,7 @@ function MfaOtpInput({
     disabled: boolean;
 }) {
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-    const digits = value.padEnd(6, '').split('').slice(0, 6);
+    const digits = value.padEnd(6, ' ').split('').slice(0, 6);
 
     const focusInput = (index: number) => {
         if (index >= 0 && index < 6) inputRefs.current[index]?.focus();
