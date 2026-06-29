@@ -14,6 +14,7 @@ const PROTECTED_ROUTES = [
     '/profile',
     '/compose',
     '/saved',
+    '/settings',
 ];
 
 // Routes only accessible to guests (redirect to /feed if already logged in)
