@@ -169,8 +169,8 @@ export default function MenuPage() {
                         <MenuButton 
                             icon={<Shield className="w-5 h-5" />} 
                             label="Security" 
-                            desc="Coming soon"
-                            locked={true}
+                            desc="MFA & account safety"
+                            href="/settings/security"
                         />
                         <MenuButton
                             icon={<MessageCircleQuestion className="w-5 h-5" />}
@@ -254,6 +254,7 @@ export default function MenuPage() {
                         <InfoLink icon={<HelpCircle />} label="Help Center" href="/support" />
                         <InfoLink icon={<FileText />} label="Terms of Service" href="/legal/terms" />
                         <InfoLink icon={<Settings />} label="Privacy Policy" href="/legal/privacy" />
+                        <InfoLink icon={<Shield />} label="Your Data Rights" href="/legal/rights" />
                     </div>
                 </div>
 
