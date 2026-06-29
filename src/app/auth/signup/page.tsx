@@ -40,7 +40,7 @@ const OnboardingMap = dynamic(
 export default function SignupPage() {
     const router = useRouter();
     const { t } = useSettings();
-    const [step, setStep] = useState<'role' | 'details' | 'location'>('role');
+    const [step, setStep] = useState<'role' | 'details' | 'location' | 'verify-email'>('role');
     const [role, setRole] = useState<UserRole>('client');
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState('');
@@ -142,11 +142,17 @@ export default function SignupPage() {
                 }
             }
 
-            // Redirect traders to setup-business to fill remaining details, explorers to feed
-            if (role === 'trader') {
-                router.push('/setup-business');
+            // If email confirmation is required, session will be null
+            if (!data.session) {
+                // Show a success state asking the user to verify email
+                setStep('verify-email');
             } else {
-                router.push(ROUTES.FEED);
+                // Redirect traders to setup-business to fill remaining details, explorers to feed
+                if (role === 'trader') {
+                    router.push('/setup-business');
+                } else {
+                    router.push(ROUTES.FEED);
+                }
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign up');
@@ -193,14 +199,16 @@ export default function SignupPage() {
                             <Map className="w-8 h-8 text-[#003f43]" />
                         </div>
                         <h1 className="text-2xl font-bold text-foreground font-display">
-                            {step === 'role' ? 'Join MarketPLC' : step === 'location' ? 'Pin Your Location' : 'Create Account'}
+                            {step === 'role' ? 'Join MarketPLC' : step === 'location' ? 'Pin Your Location' : step === 'verify-email' ? 'Almost there!' : 'Create Account'}
                         </h1>
                         <p className="text-muted-foreground text-sm text-center mt-1">
                             {step === 'role'
                                 ? 'Choose how you want to use MarketPLC'
                                 : step === 'location'
                                     ? 'Drop a pin where your business is located'
-                                    : role === 'trader' ? 'Set up your business presence' : 'Start discovering local businesses'}
+                                    : step === 'verify-email'
+                                        ? 'Check your inbox to verify your account'
+                                        : role === 'trader' ? 'Set up your business presence' : 'Start discovering local businesses'}
                         </p>
                         {/* Progress dots */}
                         <div className="flex gap-2 mt-4">
@@ -411,7 +419,7 @@ export default function SignupPage() {
                                 </Button>
                             </form>
                         </Card>
-                    ) : (
+                    ) : step === 'location' ? (
                         /* Location Picker for Traders (Full Screen Overlay) */
                         <div className="fixed inset-0 z-50 bg-background flex flex-col">
                             {/* Full screen map */}
@@ -484,8 +492,26 @@ export default function SignupPage() {
                                 </div>
                             </div>
                         </div>
+                    ) : (
+                        /* Verify Email Step */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl text-center">
+                            <div className="flex justify-center mb-6">
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <Mail className="w-8 h-8 text-primary" />
+                                </div>
+                            </div>
+                            <h2 className="text-lg font-bold text-foreground mb-2">Check your email</h2>
+                            <p className="text-sm text-muted-foreground mb-6">
+                                We've sent a verification link to <span className="text-foreground font-medium">{email}</span>. Please click the link to verify your account.
+                            </p>
+                            <Button
+                                onClick={() => router.push('/auth/login')}
+                                className="w-full bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold"
+                            >
+                                Go to Login
+                            </Button>
+                        </Card>
                     )}
-
                     {/* Footer */}
                     <p className="text-center text-sm text-muted-foreground mt-6">
                         Already have an account?{' '}
