@@ -152,8 +152,10 @@ export default function MfaEnrollPage() {
                 }
             }
 
+            // Also pass a unique friendlyName to guarantee no conflicts if multiple unverified factors exist
             const { data, error } = await supabase.auth.mfa.enroll({
                 factorType: 'totp',
+                friendlyName: `Authenticator-${Date.now()}`
             });
             if (error) throw error;
 
