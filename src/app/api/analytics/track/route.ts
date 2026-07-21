@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { businessId, type, viewerId } = body as {
       businessId?: string;
-      type?: 'view' | 'whatsapp' | 'website';
+      type?: 'view' | 'whatsapp' | 'website' | 'phone';
       viewerId?: string;
     };
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validTypes = ['view', 'whatsapp', 'website'] as const;
+    const validTypes = ['view', 'whatsapp', 'website', 'phone'] as const;
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: `Invalid type. Must be one of: ${validTypes.join(', ')}` },
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     } else {
-      // type is 'whatsapp' or 'website'
+      // type is 'whatsapp', 'website', or 'phone'
       const { error } = await supabase.from('contact_clicks').insert({
         business_id: businessId,
         click_type: type,

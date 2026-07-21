@@ -104,7 +104,7 @@ export default function PrivacyPage() {
                             <p className="font-bold text-foreground">d) Geolocation Data</p>
                             <ul className="list-disc list-inside space-y-1 pl-2">
                                 <li><strong>Vendors:</strong> GPS coordinates are stored permanently as part of your shop listing to enable map-based discovery.</li>
-                                <li><strong>Explorers:</strong> GPS location is accessed temporarily in real-time to display nearby shops. It is <strong>never stored</strong> in our database and is discarded once the session ends.</li>
+                                <li><strong>Explorers:</strong> GPS location is accessed temporarily in real-time to display nearby shops and improve search relevance. Your approximate location may be logged alongside search queries to help match you with relevant local results. This data is pseudonymized and linked to your account.</li>
                             </ul>
                         </div>
 
@@ -120,8 +120,10 @@ export default function PrivacyPage() {
                         <div className="space-y-1">
                             <p className="font-bold text-foreground">f) Application Analytics</p>
                             <ul className="list-disc list-inside space-y-1 pl-2">
-                                <li>Search queries (aggregated and anonymized for service improvement)</li>
-                                <li>Page/shop view counts (aggregated, not linked to individual users)</li>
+                                <li>Search queries and approximate location at time of search (pseudonymized — linked to your account ID for service improvement, not shared with third parties)</li>
+                                <li>Page and shop view counts (linked to your account to provide vendors with engagement insights)</li>
+                                <li>Contact interaction logs — when you tap a vendor&apos;s WhatsApp, phone, or website link, the action type is recorded to measure business engagement</li>
+                                <li>Navigation events — when you request directions to a shop, this is logged to provide the vendor with foot-traffic insights</li>
                             </ul>
                         </div>
 

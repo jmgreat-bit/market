@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, Globe } from 'lucide-react';
+import { MessageCircle, Globe, Phone } from 'lucide-react';
 
 interface ContactButtonsProps {
     businessId: string;
@@ -10,7 +10,7 @@ interface ContactButtonsProps {
 }
 
 export default function ContactButtons({ businessId, phone, websiteUrl, viewerId }: ContactButtonsProps) {
-    const trackClick = (type: 'whatsapp' | 'website') => {
+    const trackClick = (type: 'whatsapp' | 'website' | 'phone') => {
         fetch('/api/analytics/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -34,6 +34,16 @@ export default function ContactButtons({ businessId, phone, websiteUrl, viewerId
                 >
                     <MessageCircle className="w-4 h-4" />
                     WhatsApp
+                </a>
+            )}
+            {phone && (
+                <a
+                    href={`tel:${phone}`}
+                    onClick={() => trackClick('phone')}
+                    className="rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 px-4 py-2.5 text-sm font-medium flex items-center gap-2 transition-colors"
+                >
+                    <Phone className="w-4 h-4" />
+                    Call
                 </a>
             )}
             {websiteUrl && (
