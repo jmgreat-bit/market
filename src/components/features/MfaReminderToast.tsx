@@ -73,11 +73,6 @@ export function MfaReminderToast() {
                 // No MFA — show toast after 3s delay
                 showTimerRef.current = setTimeout(() => {
                     setIsVisible(true);
-
-                    // Auto-dismiss after 15s
-                    autoDismissRef.current = setTimeout(() => {
-                        dismiss();
-                    }, 15000);
                 }, 3000);
 
             } catch (err) {
