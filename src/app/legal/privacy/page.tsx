@@ -56,7 +56,7 @@ export default function PrivacyPage() {
                         </div>
                         <p>Our designated Data Protection Officer (DPO) is:</p>
                         <div className="pl-4 border-l-2 border-primary/30 space-y-1">
-                            <p><strong>James Uwingeneye</strong> — Managing Director</p>
+                            <p><strong>Data Protection Officer (DPO)</strong></p>
                             <p>Email: <a href="mailto:synchrosphere@proton.me" className="text-primary underline">synchrosphere@proton.me</a></p>
                         </div>
                         <p>
@@ -269,7 +269,7 @@ export default function PrivacyPage() {
                     <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                         <p>If you have any questions, concerns, or complaints about this Privacy Notice or our data processing practices, please contact our Data Protection Officer:</p>
                         <div className="pl-4 border-l-2 border-primary/30 space-y-1">
-                            <p><strong>James Uwingeneye</strong> — Data Protection Officer</p>
+                            <p><strong>Data Protection Officer</strong></p>
                             <p>SynchroSphere Ltd (TIN: 156004518)</p>
                             <p>Email: <a href="mailto:synchrosphere@proton.me" className="text-primary underline">synchrosphere@proton.me</a></p>
                         </div>

@@ -200,7 +200,7 @@ export default function RightsPage() {
                 <section className="p-6 rounded-2xl bg-primary/5 border border-primary/10 space-y-3">
                     <p className="font-display font-bold text-lg text-foreground">Data Protection Officer</p>
                     <div className="text-sm text-muted-foreground space-y-1">
-                        <p><strong>James Uwingeneye</strong> — Managing Director &amp; DPO</p>
+                        <p><strong>Data Protection Officer (DPO)</strong></p>
                         <p>SynchroSphere Ltd (TIN: 156004518)</p>
                         <p>Email: <a href="mailto:synchrosphere@proton.me" className="text-primary underline">synchrosphere@proton.me</a></p>
                     </div>

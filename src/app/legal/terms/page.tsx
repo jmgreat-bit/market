@@ -114,7 +114,7 @@ export default function TermsPage() {
                     <h3 className="font-display font-bold text-xl">10. Contact Us</h3>
                     <div className="text-sm leading-relaxed text-muted-foreground space-y-1">
                         <p><strong className="text-foreground">SynchroSphere Ltd</strong></p>
-                        <p>Data Protection Officer: James Uwingeneye</p>
+                        <p>Data Protection Officer (DPO)</p>
                         <p>Email: synchrosphere@proton.me</p>
                         <p>TIN: 156004518</p>
                     </div>
