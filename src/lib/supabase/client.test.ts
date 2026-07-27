@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { getSupabaseClient } from './client';
+import { getSupabaseClient } from './client.ts';
 
 test('getSupabaseClient returns the same instance (singleton)', () => {
     // Set environment variables for createClient
