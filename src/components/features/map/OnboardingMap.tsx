@@ -1,18 +1,10 @@
 'use client';
 
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@/lib/leaflet-fix';
 import { useState } from 'react';
 import { LocateFixed, Loader2 } from 'lucide-react';
-
-// Fix for default marker icons in Leaflet + Next.js
-const customIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
 
 interface OnboardingMapProps {
     initialCenter: [number, number];
@@ -98,7 +90,7 @@ export default function OnboardingMap({ initialCenter, onLocationSelect }: Onboa
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             />
-            <Marker position={position} icon={customIcon} />
+            <Marker position={position} />
             <MapClickHandler />
             <GpsLocator onLocationSelect={onLocationSelect} setPosition={setPosition} />
         </MapContainer>
