@@ -10,12 +10,6 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Missing reference ID' }, { status: 400 });
         }
 
-        if (referenceId.startsWith('ai-sandbox-')) {
-            // For AI sandbox, we already granted the credits in the pay route.
-            // Just simulate a successful status poll.
-            return NextResponse.json({ status: 'completed' });
-        }
-
         const serviceClient = getSupabaseAdminClient();
         
         // Fetch current status from DB
