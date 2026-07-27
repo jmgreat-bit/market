@@ -53,12 +53,7 @@ export async function POST(req: NextRequest) {
         
         let hasCredits = false;
         if (creditCheck) {
-            for (const row of creditCheck) {
-                if (row.used_credits < row.total_credits) {
-                    hasCredits = true;
-                    break;
-                }
-            }
+            hasCredits = creditCheck.some(row => row.used_credits < row.total_credits);
         }
         
         if (!hasCredits) {
