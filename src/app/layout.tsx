@@ -38,6 +38,7 @@ export const viewport: Viewport = {
 
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { UserProvider } from '@/contexts/UserContext';
+import Script from 'next/script';
 
 export default function RootLayout({
   children,
@@ -54,19 +55,17 @@ export default function RootLayout({
             {children}
           </SettingsProvider>
         </UserProvider>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                    console.log('SW registration failed:', err);
-                  });
+        <Script id="sw-register">
+          {`
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                  console.log('SW registration failed:', err);
                 });
-              }
-            `,
-          }}
-        />
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
