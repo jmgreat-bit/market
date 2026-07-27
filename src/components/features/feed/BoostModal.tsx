@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { X, Target, Zap, Globe, Loader2, Check } from 'lucide-react';
+import { X, Zap, Globe, Loader2, Check } from 'lucide-react';
 import { TraderTier } from '@/types';
 import { getSupabaseClient } from '@/lib/supabase/client';
 
