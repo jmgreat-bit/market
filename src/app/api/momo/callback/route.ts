@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase/admin';
+import { momoClient } from '@/lib/momo';
 
 export async function POST(req: Request) {
     try {
@@ -10,10 +11,18 @@ export async function POST(req: Request) {
 
         console.log(`[MOMO WEBHOOK] Received payload:`, payload);
 
-        // If you were checking standard requestToPay callback:
-        // payload usually looks like: { financialTransactionId: "...", status: "SUCCESSFUL" }
+        // Verify transaction status securely with MoMo API
+        let actualStatus = 'FAILED';
+        if (referenceId) {
+            try {
+                actualStatus = await momoClient.getTransactionStatus(referenceId);
+                console.log(`[MOMO WEBHOOK] Verified status for ${referenceId}:`, actualStatus);
+            } catch (err) {
+                console.error(`[MOMO WEBHOOK] Failed to verify status for ${referenceId}`, err);
+            }
+        }
 
-        if (payload.status === 'SUCCESSFUL') {
+        if (actualStatus === 'SUCCESSFUL') {
             const serviceClient = getSupabaseAdminClient();
             
             // Get the subscription record

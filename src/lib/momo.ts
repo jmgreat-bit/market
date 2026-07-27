@@ -53,6 +53,37 @@ export class MomoClient {
     }
 
     /**
+     * Gets the transaction status securely from the MTN MoMo API.
+     */
+    public async getTransactionStatus(referenceId: string): Promise<string> {
+        const token = await this.getToken();
+        const targetEnv = process.env.MOMO_TARGET_ENV || 'sandbox';
+        const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay/${referenceId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Target-Environment': targetEnv,
+                    'Ocp-Apim-Subscription-Key': subKey,
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`MTN API GetTransactionStatus Error: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            return data.status; // Usually "SUCCESSFUL", "FAILED", or "PENDING"
+        } catch (error) {
+            console.error('MomoClient.getTransactionStatus Exception:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Initiates a payment prompt (USSD) on the user's phone.
      * Note: MTN MADAPI may use different endpoints than the legacy MoMo API.
      * We will use a proxy to the legacy collections requesttopay endpoint using the new tokens if needed.
