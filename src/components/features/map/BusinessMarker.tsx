@@ -5,7 +5,6 @@ import L from 'leaflet';
 import { useMemo } from 'react';
 import { BusinessDetails } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { MapPin, Star, ExternalLink } from 'lucide-react';
 
 interface BusinessMarkerProps {
