@@ -3,9 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ── Supabase admin client (server-side only) ────────────
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+let _supabaseClient: any = null;
+const getSupabase = () => {
+  if (_supabaseClient) return _supabaseClient;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in environment variables.');
+  }
+  _supabaseClient = createClient(supabaseUrl, supabaseKey);
+  return _supabaseClient;
+};
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -45,7 +53,7 @@ export async function POST(req: NextRequest) {
         }
 
         // ── 0. Pre-flight Credit Check ──────────────────────────
-        const { data: creditCheck } = await supabase
+        const { data: creditCheck } = await getSupabase()
             .from('ai_credits')
             .select('id, total_credits, used_credits')
             .eq('user_id', userId)
@@ -66,14 +74,14 @@ export async function POST(req: NextRequest) {
         }
 
         // ── 0.5 Save User Message to History ────────────────────
-        await supabase.from('ai_conversations').insert({
+        await getSupabase().from('ai_conversations').insert({
             user_id: userId,
             role: 'user',
             content: message
         });
 
         // ── 0.6 Fetch Past 5 Messages for Memory Context ────────
-        const { data: pastMessages } = await supabase
+        const { data: pastMessages } = await getSupabase()
             .from('ai_conversations')
             .select('role, content')
             .eq('user_id', userId)
@@ -84,7 +92,7 @@ export async function POST(req: NextRequest) {
         if (pastMessages && pastMessages.length > 0) {
             // Reverse so they are chronological
             const chronological = pastMessages.reverse();
-            chatContext = chronological.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+            chatContext = chronological.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
         }
 
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: "application/json" } });
@@ -115,7 +123,7 @@ Task:
         const ninetyDaysAgo = new Date();
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-        let query = supabase
+        let query = getSupabase()
             .from('posts')
             .select(`
                 id, content, image_url, latitude, longitude, created_at,
@@ -131,7 +139,7 @@ Task:
         // Apply Proximity Filter
         if (latitude && longitude) {
             const RADIUS_KM = 30; // Search within 30km
-            candidatePosts = candidatePosts.filter((post) => {
+            candidatePosts = candidatePosts.filter((post: any) => {
                 const pLat = post.latitude || (post.business as any)?.latitude;
                 const pLng = post.longitude || (post.business as any)?.longitude;
                 if (!pLat || !pLng) return true; 
@@ -141,7 +149,7 @@ Task:
 
         // Apply Keyword Filter (in memory to avoid complex SQL ilike chains)
         if (extractedParams.keywords && extractedParams.keywords.length > 0) {
-            candidatePosts = candidatePosts.filter((post) => {
+            candidatePosts = candidatePosts.filter((post: any) => {
                 const text = (post.content + ' ' + (post.business as any)?.business_name + ' ' + (post.business as any)?.category).toLowerCase();
                 return extractedParams.keywords.some(k => text.includes(k.toLowerCase()));
             });
@@ -158,7 +166,7 @@ You are MarketPLC AI, a friendly and helpful local assistant in Rwanda.
 User request: "${message}"
 
 Here are the candidate posts from our database based on the user's keywords:
-${candidatePosts.length === 0 ? "[] (No matches found for specific keywords)" : JSON.stringify(candidatePosts.map(p => ({
+${candidatePosts.length === 0 ? "[] (No matches found for specific keywords)" : JSON.stringify(candidatePosts.map((p: any) => ({
     id: p.id,
     business: (p.business as any)?.business_name,
     content: p.content,
@@ -192,7 +200,7 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
         }
 
         // Map the selected IDs back to full post objects for the frontend
-        const selectedPosts = candidatePosts.filter(p => finalOutput.post_ids.includes(p.id));
+        const selectedPosts = candidatePosts.filter((p: any) => finalOutput.post_ids.includes(p.id));
 
         // Note: Client expects `response` field containing a string if it's text, or JSON string
         // We'll return it as a JSON string so frontend can JSON.parse it.
@@ -202,7 +210,7 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
         });
 
         // ── 4. Save AI Response to History ──────────────────
-        await supabase.from('ai_conversations').insert({
+        await getSupabase().from('ai_conversations').insert({
             user_id: userId,
             role: 'assistant',
             content: finalOutput.text
@@ -211,7 +219,7 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
         // ── 4.5 Log search query for aggregated demand alerts ──
         if (extractedParams.keywords && extractedParams.keywords.length > 0) {
             try {
-                await supabase.from('search_logs').insert({
+                await getSupabase().from('search_logs').insert({
                     query: message.trim(),
                     category_match: extractedParams.keywords[0] || null,
                     latitude: latitude || null,
@@ -223,7 +231,7 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
 
         // ── 5. Deduct Credits Securely ──────────────────────
         // Deduct 1 credit because we successfully answered the user's prompt
-        const { data: creditRows } = await supabase
+        const { data: creditRows } = await getSupabase()
             .from('ai_credits')
             .select('id, total_credits, used_credits')
             .eq('user_id', userId)
@@ -234,8 +242,8 @@ ${chatContext ? chatContext : 'No previous messages in this session yet.'}
         if (creditRows && creditRows.length > 0) {
             const row = creditRows[0];
             if (row.used_credits < row.total_credits) {
-                await supabase
-                    .from('ai_credits')
+                await getSupabase()
+            .from('ai_credits')
                     .update({ used_credits: row.used_credits + 1 })
                     .eq('id', row.id);
             }

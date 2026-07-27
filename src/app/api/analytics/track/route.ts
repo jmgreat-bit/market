@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let _supabaseClient: any = null;
+const getSupabase = () => {
+  if (_supabaseClient) return _supabaseClient;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in environment variables.');
+  }
+  _supabaseClient = createClient(supabaseUrl, supabaseKey);
+  return _supabaseClient;
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (type === 'view') {
-      const { error } = await supabase.from('profile_views').insert({
+      const { error } = await getSupabase().from('profile_views').insert({
         business_id: businessId,
         viewer_id: viewerId || null,
       });
@@ -43,7 +50,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // type is 'whatsapp', 'website', or 'phone'
-      const { error } = await supabase.from('contact_clicks').insert({
+      const { error } = await getSupabase().from('contact_clicks').insert({
         business_id: businessId,
         click_type: type,
         viewer_id: viewerId || null,
