@@ -167,12 +167,14 @@ export default function DirectionsPage() {
                 .eq('id', businessId);
 
             // Save captions + sort order
-            for (let i = 0; i < photos.length; i++) {
-                await supabase
-                    .from('direction_photos')
-                    .update({ caption: photos[i].caption, sort_order: i })
-                    .eq('id', photos[i].id);
-            }
+            await Promise.all(
+                photos.map((photo, i) =>
+                    supabase
+                        .from('direction_photos')
+                        .update({ caption: photo.caption, sort_order: i })
+                        .eq('id', photo.id)
+                )
+            );
             showToast('success', 'Directions saved!');
         } catch (err) {
             showToast('error', 'Failed to save. Please try again.');
