@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Navigation, Bookmark, X } from 'lucide-react';
 import { BusinessDetails } from '@/types';
 import { getSupabaseClient } from '@/lib/supabase/client';
