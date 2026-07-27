@@ -1,6 +1,6 @@
 'use client';
 
-import { Marker, Popup } from 'react-leaflet';
+import { Marker } from 'react-leaflet';
 import L from 'leaflet';
 import { useMemo } from 'react';
 import { BusinessDetails } from '@/types';
