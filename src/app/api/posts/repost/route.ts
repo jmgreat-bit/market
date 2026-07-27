@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let _supabaseClient: any = null;
+const getSupabase = () => {
+  if (_supabaseClient) return _supabaseClient;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in environment variables.');
+  }
+  _supabaseClient = createClient(supabaseUrl, supabaseKey);
+  return _supabaseClient;
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Find the user's business
-    const { data: business, error: bizError } = await supabase
+    const { data: business, error: bizError } = await getSupabase()
       .from('business_details')
       .select('id')
       .eq('profile_id', userId)
@@ -39,8 +46,8 @@ export async function POST(req: NextRequest) {
 
     // 2. Find the most-viewed post for this business
     //    Join posts with post_views, count views, pick top 1
-    const { data: topPost, error: topError } = await supabase
-      .from('posts')
+    const { data: topPost, error: topError } = await getSupabase()
+            .from('posts')
       .select(`
         id,
         content,
@@ -67,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Sort by view count descending and pick the most-viewed
-    const sorted = topPost.sort((a, b) => {
+    const sorted = topPost.sort((a: any, b: any) => {
       const aViews = Array.isArray(a.post_views) ? a.post_views.length : 0;
       const bViews = Array.isArray(b.post_views) ? b.post_views.length : 0;
       return bViews - aViews;
@@ -76,8 +83,8 @@ export async function POST(req: NextRequest) {
     const best = sorted[0];
 
     // 3. Clone the post with a fresh created_at
-    const { data: newPost, error: insertError } = await supabase
-      .from('posts')
+    const { data: newPost, error: insertError } = await getSupabase()
+            .from('posts')
       .insert({
         content: best.content,
         image_url: best.image_url,
