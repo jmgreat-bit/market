@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         
         let hasCredits = false;
         if (creditCheck) {
-            hasCredits = creditCheck.some(row => row.used_credits < row.total_credits);
+            hasCredits = creditCheck.some((row: any) => row.used_credits < row.total_credits);
         }
         
         if (!hasCredits) {
