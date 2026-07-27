@@ -99,8 +99,6 @@ export class MomoClient {
         const targetEnv = 'sandbox';
         const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
-        console.log(`[MOMO] Initiating real payment for ${formattedPhone} of amount ${amount}. Reference: ${referenceId}`);
-        
         try {
             // Standard MoMo API collection endpoint
             const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay`, {
