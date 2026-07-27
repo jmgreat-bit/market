@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { X, Building2, MapPin, Navigation, ArrowRight } from 'lucide-react';
+import { X, Building2, MapPin, ArrowRight } from 'lucide-react';
 import { CommercialHub } from '@/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
