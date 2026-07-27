@@ -1,0 +1,16 @@
+<<<<<<< SEARCH
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+=======
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "jest"
+  },
+>>>>>>> REPLACE
