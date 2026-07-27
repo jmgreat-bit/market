@@ -8,8 +8,6 @@ export async function POST(req: Request) {
         const payload = await req.json();
         const referenceId = payload.externalId || req.url.split('/').pop(); // Sometimes passed as externalId or in URL
 
-        console.log(`[MOMO WEBHOOK] Received payload:`, payload);
-
         // If you were checking standard requestToPay callback:
         // payload usually looks like: { financialTransactionId: "...", status: "SUCCESSFUL" }
 
