@@ -8,15 +8,9 @@ import { Loader2, LayoutDashboard, Users, AlertOctagon, LogOut, Shield } from 'l
 import { ROUTES } from '@/lib/constants';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const { isAdmin, isMaster, isLoading, role } = useAdmin();
+    const { isAdmin, isMaster, isLoading, role, user } = useAdmin();
     const router = useRouter();
     const pathname = usePathname();
-
-    useEffect(() => {
-        if (!isLoading && !isAdmin) {
-            router.replace(ROUTES.HOME);
-        }
-    }, [isLoading, isAdmin, router]);
 
     if (isLoading) {
         return (
@@ -27,7 +21,43 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     if (!isAdmin) {
-        return null; // Will redirect
+        return (
+            <div className="min-h-screen bg-[#0f172a] text-white flex items-center justify-center p-6 text-center">
+                <div className="max-w-md w-full bg-[#1e293b]/80 backdrop-blur-xl border border-blue-900/40 p-8 rounded-3xl space-y-6 shadow-2xl">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-500">
+                        <Shield className="w-8 h-8" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <h2 className="font-display font-black text-2xl tracking-tight text-white">Admin Access Required</h2>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            You are currently signed in as <span className="text-blue-400 font-semibold">{user?.email || 'Guest'}</span>, which does not have Admin privileges.
+                        </p>
+                    </div>
+
+                    <div className="bg-[#0f172a] p-4 rounded-xl border border-slate-800 text-xs text-slate-400 text-left space-y-2">
+                        <p className="font-bold text-white uppercase tracking-wider text-[10px]">Authorized Admin Email:</p>
+                        <p>• Master Admin: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">thegreat@admin.sir</code></p>
+                        <p>• Staff Accounts: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">*@staff.marketplc.com</code></p>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                        <Link
+                            href="/auth/login"
+                            className="block w-full py-3.5 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-600/25"
+                        >
+                            Log In with Admin Account
+                        </Link>
+                        <Link
+                            href={ROUTES.HOME}
+                            className="block w-full py-3.5 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700"
+                        >
+                            Return to Main App
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const navItems = [
