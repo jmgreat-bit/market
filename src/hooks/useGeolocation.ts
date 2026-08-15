@@ -62,7 +62,7 @@ export function useGeolocation() {
                 let errorMessage = 'Unable to retrieve your location';
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        errorMessage = "Location access is blocked by your browser. Please tap the lock icon (🔒) or settings in your address bar to allow location, then click Retry.";
+                        errorMessage = "Location access is blocked. Please turn on your device's GPS, or check your app permissions in settings, then click Retry.";
                         break;
                     case error.POSITION_UNAVAILABLE:
                         errorMessage = "Your phone's GPS is currently turned off or unavailable. Turn it on to see nearby traders!";
