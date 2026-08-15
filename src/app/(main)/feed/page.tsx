@@ -59,15 +59,7 @@ export default function FeedPage() {
                     Discover what&apos;s happening around you.
                 </p>
 
-                {!coordinates && !locationLoading && (
-                    <button
-                        onClick={requestLocation}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors mb-4"
-                    >
-                        <LocateFixed className="w-3.5 h-3.5" />
-                        Refresh Location
-                    </button>
-                )}
+
 
                 {geoError && (
                     <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/40 text-muted-foreground text-xs mb-4 shadow-sm">
