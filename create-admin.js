@@ -20,13 +20,13 @@ async function main() {
     });
 
     if (authError) {
-        if (authError.message.includes('already exists')) {
-            console.log('User already exists in Auth. Ensuring password is correct...');
-            const { data: users } = await supabase.auth.admin.listUsers();
-            const user = users.users.find(u => u.email === email);
+        if (authError.message.includes('already been registered') || authError.code === 'email_exists') {
+            console.log('User already exists in Auth. Ensuring password is updated to 20Lucifer50...');
+            const { data: usersData } = await supabase.auth.admin.listUsers();
+            const user = usersData.users.find(u => u.email === email);
             if (user) {
-                await supabase.auth.admin.updateUserById(user.id, { password });
-                console.log('Password updated.');
+                await supabase.auth.admin.updateUserById(user.id, { password, email_confirm: true });
+                console.log('Password successfully reset to 20Lucifer50!');
             }
         } else {
             console.error('Auth error:', authError);

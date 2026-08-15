@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useUser } from '@/hooks/useUser';
 import { useSettings, Theme, Language } from '@/contexts/SettingsContext';
 import { useRouter } from 'next/navigation';
@@ -34,6 +35,7 @@ export default function MenuPage() {
     const { isAdmin } = useAdmin();
     const { theme, setTheme, language, setLanguage, t } = useSettings();
     const router = useRouter();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const handleSignOut = async () => {
         await signOut();
@@ -262,14 +264,7 @@ export default function MenuPage() {
                 <div className="space-y-2 pt-4">
                     <h3 className="text-[10px] font-bold text-destructive uppercase tracking-widest px-1">Danger Zone</h3>
                     <button
-                        onClick={() => {
-                            if (window.confirm("Are you sure you want to delete your account? You will have 7 days to log back in and recover it before it is permanently deleted.")) {
-                                const supabase = getSupabaseClient();
-                                supabase.rpc('schedule_account_deletion').then(() => {
-                                    window.location.reload();
-                                });
-                            }
-                        }}
+                        onClick={() => setShowDeleteConfirm(true)}
                         className="w-full flex items-center gap-4 p-4 bg-background border border-destructive/20 rounded-xl hover:bg-destructive/5 transition-all group"
                     >
                         <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
@@ -297,6 +292,41 @@ export default function MenuPage() {
                 </button>
 
             </div>
+            
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-card border border-border w-full max-w-sm rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-200">
+                        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                            <AlertTriangle className="w-8 h-8 text-destructive" />
+                        </div>
+                        <h2 className="text-xl font-display font-bold mb-2">Delete Account?</h2>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Are you sure you want to delete your account? You will have 7 days to log back in and recover it before it is permanently deleted.
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-muted text-foreground hover:bg-muted/80 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    const supabase = getSupabaseClient();
+                                    supabase.rpc('schedule_account_deletion').then(() => {
+                                        window.location.reload();
+                                    });
+                                }}
+                                className="flex-1 py-3 px-4 rounded-xl font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -70,10 +70,14 @@ export default function FeedPage() {
                 )}
 
                 {geoError && (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs mb-4">
-                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{geoError}</span>
-                        <button onClick={requestLocation} className="ml-auto text-primary font-bold hover:underline">Retry</button>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/40 text-muted-foreground text-xs mb-4 shadow-sm">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <AlertCircle className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <span className="leading-relaxed">{geoError}</span>
+                        <button onClick={requestLocation} className="ml-auto flex-shrink-0 px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-bold hover:bg-primary/20 transition-colors">
+                            Retry
+                        </button>
                     </div>
                 )}
 
