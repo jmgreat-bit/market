@@ -36,7 +36,7 @@ export default function AdminMarketsPage() {
             
         if (data) {
             // Get business counts
-            const hubsWithCounts = await Promise.all(data.map(async (hub) => {
+            const hubsWithCounts = await Promise.all(data.map(async (hub: CommercialHub) => {
                 const { count } = await supabase
                     .from('business_details')
                     .select('*', { count: 'exact', head: true })
