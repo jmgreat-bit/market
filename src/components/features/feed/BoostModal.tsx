@@ -76,7 +76,7 @@ export function BoostModal({ postId, businessId, tier, latitude, longitude, onCl
                 ends_at: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
                 daily_rate: dailyRate,
                 total_cost: totalCost,
-                status: 'active' // Auto-active for this MVP, normally 'pending' until paid
+                status: 'pending'
             });
 
             setIsSuccess(true);

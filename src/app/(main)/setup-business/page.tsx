@@ -28,6 +28,18 @@ export default function SetupBusinessPage() {
         }
     }, [profile, router]);
 
+    function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c; // Distance in km
+    }
+
     const handleSubmit = async () => {
         if (!formData.name) return;
         setLoading(true);
@@ -35,7 +47,29 @@ export default function SetupBusinessPage() {
         try {
             const supabase = getSupabaseClient();
             
-            // Update Business Details (location is already saved from signup step)
+            // 1. Check if business is near a Commercial Hub
+            const { data: bizData } = await supabase
+                .from('business_details')
+                .select('latitude, longitude')
+                .eq('profile_id', user?.id)
+                .single();
+
+            let matchedHubId = null;
+
+            if (bizData?.latitude && bizData?.longitude) {
+                const { data: hubs } = await supabase.from('commercial_hubs').select('id, latitude, longitude');
+                if (hubs) {
+                    for (const hub of hubs) {
+                        const distance = getDistanceFromLatLonInKm(bizData.latitude, bizData.longitude, hub.latitude, hub.longitude);
+                        if (distance <= 0.5) { // 500 meters
+                            matchedHubId = hub.id;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Update Business Details
             const { error: bizError } = await supabase
                 .from('business_details')
                 .update({
@@ -44,6 +78,7 @@ export default function SetupBusinessPage() {
                     bio: formData.bio,
                     phone: formData.phone.trim() || null,
                     website_url: formData.website.trim() || null,
+                    ...(matchedHubId ? { hub_id: matchedHubId } : {})
                 })
                 .eq('profile_id', user?.id);
 

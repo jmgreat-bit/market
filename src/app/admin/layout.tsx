@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAdmin } from '@/hooks/useAdmin';
-import { Loader2, LayoutDashboard, Users, AlertOctagon, LogOut, Shield } from 'lucide-react';
+import { Loader2, LayoutDashboard, Users, AlertOctagon, LogOut, Shield, Megaphone, Building2 } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -63,6 +63,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const navItems = [
         { name: 'Overview', href: '/admin', icon: LayoutDashboard, show: isMaster },
         { name: 'Users', href: '/admin/users', icon: Users, show: true },
+        { name: 'Ads Queue', href: '/admin/ads', icon: Megaphone, show: true },
+        { name: 'Markets', href: '/admin/markets', icon: Building2, show: true },
         { name: 'Complaints', href: '/admin/complaints', icon: AlertOctagon, show: true },
     ];
 
