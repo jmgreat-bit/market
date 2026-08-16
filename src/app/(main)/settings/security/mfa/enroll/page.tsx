@@ -146,7 +146,7 @@ export default function MfaEnrollPage() {
             const { data: factorsData } = await supabase.auth.mfa.listFactors();
             if (factorsData?.totp) {
                 const unverifiedFactors = factorsData.totp.filter(
-                    (factor) => factor.status === 'unverified'
+                    (factor: { status: string; id: string }) => factor.status === 'unverified'
                 );
                 if (unverifiedFactors.length > 0) {
                     await Promise.all(
