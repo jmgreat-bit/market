@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 
 
 let _supabaseClient: any = null;
@@ -16,13 +17,15 @@ const getSupabase = () => {
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     const body = await req.json();
-    const { query, categoryMatch, latitude, longitude, searcherId } = body as {
+    const { query, categoryMatch, latitude, longitude } = body as {
       query?: string;
       categoryMatch?: string;
       latitude?: number;
       longitude?: number;
-      searcherId?: string;
     };
 
     if (!query) {
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
       category_match: categoryMatch || null,
       latitude: latitude ?? null,
       longitude: longitude ?? null,
-      searcher_id: searcherId || null,
+      searcher_id: user?.id || null,
     });
 
     if (error) {
