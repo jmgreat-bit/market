@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // ── Supabase admin client (server-side only) ────────────
@@ -11,7 +12,7 @@ const getSupabase = () => {
   if (!supabaseKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in environment variables.');
   }
-  _supabaseClient = createClient(supabaseUrl, supabaseKey);
+  _supabaseClient = createSupabaseClient(supabaseUrl, supabaseKey);
   return _supabaseClient;
 };
 
@@ -49,6 +50,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
+            );
+        }
+
+        // ── Authentication & Authorization Check ────────────────
+        const supabase = await createClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        if (user.id !== userId) {
+            return NextResponse.json(
+                { error: 'Forbidden: You cannot perform this action for another user' },
+                { status: 403 }
             );
         }
 
