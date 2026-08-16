@@ -145,10 +145,15 @@ export default function MfaEnrollPage() {
             // Clean up any existing unverified factors first to prevent the "friendly name already exists" error
             const { data: factorsData } = await supabase.auth.mfa.listFactors();
             if (factorsData?.totp) {
-                for (const factor of factorsData.totp) {
-                    if (factor.status === 'unverified') {
-                        await supabase.auth.mfa.unenroll({ factorId: factor.id });
-                    }
+                const unverifiedFactors = factorsData.totp.filter(
+                    (factor) => factor.status === 'unverified'
+                );
+                if (unverifiedFactors.length > 0) {
+                    await Promise.all(
+                        unverifiedFactors.map((factor) =>
+                            supabase.auth.mfa.unenroll({ factorId: factor.id })
+                        )
+                    );
                 }
             }
 
