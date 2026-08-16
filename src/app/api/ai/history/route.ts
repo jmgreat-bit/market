@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         if (error) throw error;
 
         // Group by session
-        const sessionsMap = new Map<string, { id: string, created_at: string, preview: string, messages: any[] }>();
+        const sessionsMap = new Map<string, { id: string, created_at: string, preview: string, messages: any[], timestamp: number }>();
 
         for (const msg of history || []) {
             if (!msg.session_id) continue;
@@ -54,16 +54,21 @@ export async function GET(req: NextRequest) {
                     id: msg.session_id,
                     created_at: msg.created_at,
                     preview: msg.role === 'user' ? msg.content : 'New Conversation',
-                    messages: []
+                    messages: [],
+                    timestamp: new Date(msg.created_at).getTime()
                 });
             }
             sessionsMap.get(msg.session_id)!.messages.push(msg);
         }
 
         // Sort sessions by newest first
-        const sessions = Array.from(sessionsMap.values()).sort((a, b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        const sessions = Array.from(sessionsMap.values())
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .map(session => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { timestamp, ...rest } = session;
+                return rest;
+            });
 
         return NextResponse.json({ sessions });
     } catch (err) {
