@@ -2,178 +2,247 @@
 
 import { useEffect, useState } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import { Users, Building2, Megaphone, TrendingUp, DollarSign } from 'lucide-react';
+import { Users, Building2, Megaphone, TrendingUp, DollarSign, Calendar, Activity, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-interface AdminStats {
-    totalUsers: number;
-    totalBusinesses: number;
-    totalAds: number;
-    activePro: number;
-    activeNational: number;
+interface AnalyticsData {
+    usersOverTime: { date: string, signups: number }[];
+    revenueOverTime: { date: string, revenue: number }[];
+    peakUsage: { hour: string, searches: number, views: number }[];
+    topSearches: { query: string, count: number }[];
+    overview: {
+        totalUsers: number;
+        totalBusinesses: number;
+        totalAds: number;
+        mrr: number;
+    }
 }
 
 export default function AdminOverviewPage() {
-    const { isMaster, isLoading } = useAdmin();
+    const { isMaster, isLoading, role } = useAdmin();
     const router = useRouter();
-    const [stats, setStats] = useState<AdminStats | null>(null);
-    const [statsLoading, setStatsLoading] = useState(true);
+    const [data, setData] = useState<AnalyticsData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [dateRange, setDateRange] = useState('7d'); // 'today', '7d', '30d', 'all'
 
     useEffect(() => {
-        if (!isLoading && !isMaster) {
+        if (!isLoading && !isMaster && role !== 'staff') {
             router.replace('/admin/users');
         }
-    }, [isLoading, isMaster, router]);
+    }, [isLoading, isMaster, role, router]);
 
     useEffect(() => {
-        if (!isMaster) return;
+        if (!isMaster && role !== 'staff') return;
 
-        async function fetchStats() {
-            setStatsLoading(true);
-            const supabase = getSupabaseClient();
-            
+        async function fetchAnalytics() {
+            setLoading(true);
             try {
-                // In a real app we'd use count queries
-                const [
-                    { count: totalUsers },
-                    { count: totalBusinesses },
-                    { count: totalAds },
-                    { count: activePro },
-                    { count: activeNational }
-                ] = await Promise.all([
-                    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-                    supabase.from('business_details').select('*', { count: 'exact', head: true }),
-                    supabase.from('ads').select('*', { count: 'exact', head: true }),
-                    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('trader_tier', 'pro'),
-                    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('trader_tier', 'national'),
-                ]);
-
-                setStats({
-                    totalUsers: totalUsers || 0,
-                    totalBusinesses: totalBusinesses || 0,
-                    totalAds: totalAds || 0,
-                    activePro: activePro || 0,
-                    activeNational: activeNational || 0
-                });
+                const res = await fetch(`/api/admin/analytics?range=${dateRange}`);
+                if (res.ok) {
+                    const json = await res.json();
+                    setData(json);
+                }
             } catch (err) {
-                console.error('Failed to fetch stats', err);
+                console.error('Failed to fetch analytics', err);
             } finally {
-                setStatsLoading(false);
+                setLoading(false);
             }
         }
         
-        fetchStats();
-    }, [isMaster]);
+        fetchAnalytics();
+    }, [isMaster, role, dateRange]);
 
-    if (!isMaster) return null;
+    if (!isMaster && role !== 'staff') return null;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div>
-                <h2 className="text-3xl font-display font-black text-white tracking-tight">Platform Overview</h2>
-                <p className="text-slate-400 mt-1">Real-time metrics and monetization status.</p>
-            </div>
-
-            {statsLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="h-32 bg-slate-800/50 rounded-2xl animate-pulse border border-slate-700/50" />
+        <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-display font-black text-white tracking-tight">Platform Analytics</h2>
+                    <p className="text-slate-400 mt-1">Comprehensive oversight of platform usage, growth, and monetization.</p>
+                </div>
+                
+                {/* Date Range Selector */}
+                <div className="flex items-center bg-[#0f172a] p-1 rounded-lg border border-slate-700/50">
+                    {[
+                        { id: 'today', label: 'Today' },
+                        { id: '7d', label: '7 Days' },
+                        { id: '30d', label: '30 Days' },
+                        { id: 'all', label: 'All Time' }
+                    ].map(range => (
+                        <button
+                            key={range.id}
+                            onClick={() => setDateRange(range.id)}
+                            className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                                dateRange === range.id 
+                                ? 'bg-blue-600 text-white shadow-md' 
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                            }`}
+                        >
+                            {range.label}
+                        </button>
                     ))}
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <StatCard 
-                        title="Total Users" 
-                        value={stats?.totalUsers.toString() || '0'} 
-                        icon={<Users className="w-5 h-5 text-blue-500" />} 
-                        trend="+12% this week"
-                    />
-                    <StatCard 
-                        title="Verified Businesses" 
-                        value={stats?.totalBusinesses.toString() || '0'} 
-                        icon={<Building2 className="w-5 h-5 text-indigo-500" />} 
-                        trend="+4% this week"
-                    />
-                    <StatCard 
-                        title="Active Ads" 
-                        value={stats?.totalAds.toString() || '0'} 
-                        icon={<Megaphone className="w-5 h-5 text-emerald-500" />} 
-                        trend="+24% this week"
-                    />
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Snapshot */}
-                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                            <DollarSign className="w-5 h-5 text-emerald-500" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white">Projected MRR</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center p-4 bg-[#0f172a] rounded-xl border border-slate-800">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-300">Pro Subscriptions</p>
-                                <p className="text-xs text-slate-500">{stats?.activePro || 0} active</p>
-                            </div>
-                            <p className="font-mono text-lg text-emerald-400 font-bold">
-                                {((stats?.activePro || 0) * 3000).toLocaleString()} RWF
-                            </p>
-                        </div>
-                        
-                        <div className="flex justify-between items-center p-4 bg-[#0f172a] rounded-xl border border-slate-800">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-300">National Subscriptions</p>
-                                <p className="text-xs text-slate-500">{stats?.activeNational || 0} active</p>
-                            </div>
-                            <p className="font-mono text-lg text-emerald-400 font-bold">
-                                {((stats?.activeNational || 0) * 35000).toLocaleString()} RWF
-                            </p>
-                        </div>
-                        
-                        <div className="pt-4 border-t border-slate-700/50 flex justify-between items-center">
-                            <p className="text-slate-400 font-bold">Total Projected Monthly</p>
-                            <p className="font-mono text-2xl text-white font-black">
-                                {(((stats?.activePro || 0) * 3000) + ((stats?.activeNational || 0) * 35000)).toLocaleString()} RWF
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* System Status */}
-                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                            <TrendingUp className="w-5 h-5 text-blue-500" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white">System Status</h3>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        <StatusRow label="Mobile Money API (MTN)" status="Operational" dot="bg-emerald-500" />
-                        <StatusRow label="AI Discovery Engine (Gemini)" status="Operational" dot="bg-emerald-500" />
-                        <StatusRow label="Realtime Database (Supabase)" status="Operational" dot="bg-emerald-500" />
-                        <StatusRow label="Global CDN (Vercel)" status="Operational" dot="bg-emerald-500" />
-                    </div>
-                </div>
             </div>
+
+            <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="bg-[#1e293b]/50 border border-slate-700/50 p-1 mb-8 w-full justify-start overflow-x-auto h-auto">
+                    <TabsTrigger value="overview" className="px-6 py-2.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all">Overview</TabsTrigger>
+                    <TabsTrigger value="growth" className="px-6 py-2.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all">Growth & Usage</TabsTrigger>
+                    <TabsTrigger value="insights" className="px-6 py-2.5 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg transition-all">Insights</TabsTrigger>
+                    {isMaster && (
+                        <TabsTrigger value="financials" className="px-6 py-2.5 data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg transition-all">Financials</TabsTrigger>
+                    )}
+                </TabsList>
+
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+                        {[1, 2, 3].map(i => <div key={i} className="h-32 bg-slate-800/50 rounded-2xl border border-slate-700/50" />)}
+                    </div>
+                ) : (
+                    <>
+                        {/* ── OVERVIEW TAB ── */}
+                        <TabsContent value="overview" className="space-y-6 m-0 focus:outline-none">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <StatCard title="Total Users" value={data?.overview.totalUsers.toString() || '0'} icon={<Users className="text-blue-500" />} />
+                                <StatCard title="Verified Businesses" value={data?.overview.totalBusinesses.toString() || '0'} icon={<Building2 className="text-indigo-500" />} />
+                                <StatCard title="Active Ads" value={data?.overview.totalAds.toString() || '0'} icon={<Megaphone className="text-amber-500" />} />
+                                {isMaster && (
+                                    <StatCard title="Projected MRR" value={`${data?.overview.mrr.toLocaleString() || 0} RWF`} icon={<DollarSign className="text-emerald-500" />} />
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                                        <TrendingUp className="w-5 h-5 text-blue-500" />
+                                        Recent Growth
+                                    </h3>
+                                    <div className="h-[250px] w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={data?.usersOverTime}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickMargin={10} minTickGap={30} />
+                                                <YAxis stroke="#94a3b8" fontSize={12} allowDecimals={false} />
+                                                <Tooltip 
+                                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                                                    itemStyle={{ color: '#fff' }}
+                                                />
+                                                <Line type="monotone" dataKey="signups" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                                        <Activity className="w-5 h-5 text-indigo-500" />
+                                        System Status
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <StatusRow label="Mobile Money API (MTN)" status="Operational" dot="bg-emerald-500" />
+                                        <StatusRow label="AI Discovery Engine (Gemini)" status="Operational" dot="bg-emerald-500" />
+                                        <StatusRow label="Realtime Database (Supabase)" status="Operational" dot="bg-emerald-500" />
+                                        <StatusRow label="Global CDN (Vercel)" status="Operational" dot="bg-emerald-500" />
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* ── GROWTH & USAGE TAB ── */}
+                        <TabsContent value="growth" className="space-y-6 m-0 focus:outline-none">
+                            <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
+                                <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                                    <Calendar className="w-5 h-5 text-blue-500" />
+                                    Peak Usage Times (Activity by Hour)
+                                </h3>
+                                <p className="text-sm text-slate-400 mb-6">Shows when users are most actively searching and viewing profiles during the selected time period.</p>
+                                <div className="h-[350px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={data?.peakUsage}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                            <XAxis dataKey="hour" stroke="#94a3b8" fontSize={12} tickMargin={10} />
+                                            <YAxis stroke="#94a3b8" fontSize={12} allowDecimals={false} />
+                                            <Tooltip 
+                                                cursor={{ fill: '#334155', opacity: 0.4 }}
+                                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                                                itemStyle={{ color: '#fff' }}
+                                            />
+                                            <Bar dataKey="searches" name="Searches" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                            <Bar dataKey="views" name="Profile Views" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* ── INSIGHTS TAB ── */}
+                        <TabsContent value="insights" className="space-y-6 m-0 focus:outline-none">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                                        <Search className="w-5 h-5 text-amber-500" />
+                                        Top Search Queries
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {data?.topSearches && data.topSearches.length > 0 ? (
+                                            data.topSearches.map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center p-3 bg-[#0f172a] rounded-xl border border-slate-700/50">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center">{i + 1}</span>
+                                                        <span className="text-white font-medium capitalize">{item.query}</span>
+                                                    </div>
+                                                    <span className="text-amber-500 font-bold">{item.count}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-slate-500 text-center py-8">No search data for this period.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* ── FINANCIALS TAB ── */}
+                        {isMaster && (
+                            <TabsContent value="financials" className="space-y-6 m-0 focus:outline-none">
+                                <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                                        <DollarSign className="w-5 h-5 text-emerald-500" />
+                                        Completed Payments (Revenue)
+                                    </h3>
+                                    <div className="h-[350px] w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={data?.revenueOverTime}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickMargin={10} minTickGap={30} />
+                                                <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(v) => `${(v/1000)}k`} />
+                                                <Tooltip 
+                                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
+                                                    itemStyle={{ color: '#fff' }}
+                                                    formatter={(value: number) => [`${value.toLocaleString()} RWF`, 'Revenue']}
+                                                />
+                                                <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        )}
+                    </>
+                )}
+            </Tabs>
         </div>
     );
 }
 
-function StatCard({ title, value, icon, trend }: { title: string, value: string, icon: React.ReactNode, trend: string }) {
+function StatCard({ title, value, icon }: { title: string, value: string, icon: React.ReactNode }) {
     return (
-        <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden group">
+        <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 rounded-xl bg-[#0f172a] flex items-center justify-center border border-slate-800 group-hover:border-slate-600 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#0f172a] flex items-center justify-center border border-slate-800">
                     {icon}
-                </div>
-                <div className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold tracking-widest uppercase">
-                    {trend}
                 </div>
             </div>
             <div>
