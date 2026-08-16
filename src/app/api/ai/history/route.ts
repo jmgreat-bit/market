@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 
 let _supabaseClient: any = null;
 const getSupabase = () => {
@@ -20,6 +21,17 @@ export async function GET(req: NextRequest) {
 
         if (!userId) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+        }
+
+        const supabase = await createServerClient();
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        if (user.id !== userId) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         // Fetch user's conversation history
