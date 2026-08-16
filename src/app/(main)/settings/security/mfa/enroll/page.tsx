@@ -150,7 +150,7 @@ export default function MfaEnrollPage() {
                 );
                 if (unverifiedFactors.length > 0) {
                     await Promise.all(
-                        unverifiedFactors.map((factor) =>
+                        unverifiedFactors.map((factor: { id: string }) =>
                             supabase.auth.mfa.unenroll({ factorId: factor.id })
                         )
                     );
