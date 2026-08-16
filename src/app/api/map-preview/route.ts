@@ -2,11 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const lat = searchParams.get('lat');
-    const lng = searchParams.get('lng');
+    const latParam = searchParams.get('lat');
+    const lngParam = searchParams.get('lng');
 
-    if (!lat || !lng) {
+    if (!latParam || !lngParam) {
         return new NextResponse('Missing coordinates', { status: 400 });
+    }
+
+    const lat = Number(latParam);
+    const lng = Number(lngParam);
+
+    if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        return new NextResponse('Invalid coordinates', { status: 400 });
     }
 
     const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
