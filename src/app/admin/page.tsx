@@ -221,7 +221,7 @@ export default function AdminOverviewPage() {
                                                 <Tooltip 
                                                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
                                                     itemStyle={{ color: '#fff' }}
-                                                    formatter={(value: number) => [`${value.toLocaleString()} RWF`, 'Revenue']}
+                                                    formatter={(value: any) => [`${(value || 0).toLocaleString()} RWF`, 'Revenue']}
                                                 />
                                                 <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 6 }} />
                                             </LineChart>
