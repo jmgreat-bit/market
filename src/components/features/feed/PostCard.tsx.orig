@@ -26,8 +26,8 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     const [isLiked, setIsLiked] = useState(post.is_liked ?? false);
     const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
     const [showComments, setShowComments] = useState(autoExpandComments);
-    const initialComments = Array.isArray(post.comments) && post.comments.length > 0 && 'id' in post.comments[0] 
-        ? post.comments 
+    const initialComments = Array.isArray(post.comments) && post.comments.length > 0 && 'id' in post.comments[0]
+        ? post.comments
         : [];
     const [comments, setComments] = useState<Comment[]>(initialComments);
     const [commentsCount, setCommentsCount] = useState(post.comments_count ?? 0);
@@ -233,10 +233,10 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                         avatarUrl={(business as any)?.profile?.avatar_url}
                         profileUsername={(business as any)?.profile?.username}
                     />
-                    
+
                     {/* Boost Button for Owner */}
                     {isEligibleForBoost && (
-                        <button 
+                        <button
                             onClick={() => setShowBoostModal(true)}
                             className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
                         >
@@ -300,8 +300,6 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
             <BoostModal
                 postId={post.id}
                 businessId={business.id}
-                latitude={post.latitude}
-                longitude={post.longitude}
                 tier={profile.trader_tier}
                 onClose={() => setShowBoostModal(false)}
                 onSuccess={() => {
@@ -312,15 +310,15 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
 
         {/* Post Detail Modal Overlay */}
         {isModalOpen && !isModalView && (
-            <div 
+            <div
                 className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm"
                 onClick={() => setIsModalOpen(false)}
             >
-                <div 
+                <div
                     className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl relative shadow-2xl ring-1 ring-border/50 bg-background"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <button 
+                    <button
                         className="absolute top-3 right-3 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-foreground hover:bg-secondary transition-all"
                         onClick={() => setIsModalOpen(false)}
                     >
