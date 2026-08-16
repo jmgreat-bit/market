@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-
-let _supabaseClient: any = null;
-const getSupabase = () => {
-  if (_supabaseClient) return _supabaseClient;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY in environment variables.');
-  }
-  _supabaseClient = createClient(supabaseUrl, supabaseKey);
-  return _supabaseClient;
-};
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { businessId, type, viewerId } = body as {
+    const { businessId, type } = body as {
       businessId?: string;
       type?: 'view' | 'whatsapp' | 'website' | 'phone';
-      viewerId?: string;
     };
 
     if (!businessId || !type) {
@@ -38,10 +24,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const viewerId = user?.id || null;
+
     if (type === 'view') {
-      const { error } = await getSupabase().from('profile_views').insert({
+      const { error } = await supabase.from('profile_views').insert({
         business_id: businessId,
-        viewer_id: viewerId || null,
+        viewer_id: viewerId,
       });
 
       if (error) {
@@ -50,10 +43,10 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // type is 'whatsapp', 'website', or 'phone'
-      const { error } = await getSupabase().from('contact_clicks').insert({
+      const { error } = await supabase.from('contact_clicks').insert({
         business_id: businessId,
         click_type: type,
-        viewer_id: viewerId || null,
+        viewer_id: viewerId,
       });
 
       if (error) {
