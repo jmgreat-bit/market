@@ -145,9 +145,9 @@ export default function ComposePage() {
         setError(null);
 
         const timeoutId = setTimeout(() => {
-            setError("Submission taking too long. Please check your connection.");
+            setError("This is taking longer than usual. If it fails, please check your connection and try again.");
             setIsSubmitting(false);
-        }, 15000);
+        }, 60000);
 
         try {
             const supabase = getSupabaseClient();

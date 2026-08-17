@@ -124,9 +124,23 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         initSession();
 
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                // Force a session refresh to prevent stale token hangs when tab wakes up
+                supabase.auth.getSession().catch(console.error);
+            }
+        };
+
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
+
         return () => {
             mounted = false;
             authSubscription?.unsubscribe();
+            if (typeof document !== 'undefined') {
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }
         };
     }, [fetchProfile]);
 
