@@ -31,6 +31,28 @@ export async function GET(request: Request) {
                 if (intendedRole === 'trader') {
                     next = '/setup-business';
                 }
+            } else {
+                // No cookie — this is likely an email verification callback.
+                // Check the user's profile role in the database to route them correctly.
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.session.user.id)
+                    .single();
+
+                if (profile?.role === 'trader') {
+                    // Check if they've already completed business setup
+                    const { data: biz } = await supabase
+                        .from('business_details')
+                        .select('business_name')
+                        .eq('profile_id', data.session.user.id)
+                        .single();
+
+                    // If no business details at all, or still the auto-generated placeholder name
+                    if (!biz || biz.business_name?.endsWith("'s Business")) {
+                        next = '/setup-business';
+                    }
+                }
             }
             
             return NextResponse.redirect(`${origin}${next}`);
@@ -40,3 +62,4 @@ export async function GET(request: Request) {
     // Return the user to an error page or login with error indication
     return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
 }
+

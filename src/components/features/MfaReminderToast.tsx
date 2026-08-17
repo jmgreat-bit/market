@@ -5,11 +5,13 @@ import { ShieldCheck, X, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
+import { usePathname } from 'next/navigation';
 
 const SESSION_KEY = 'mfa_reminder_dismissed';
 
 export function MfaReminderToast() {
-    const { user } = useUser();
+    const { user, profile } = useUser();
+    const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(false);
     const [shouldRender, setShouldRender] = useState(true);
     const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -36,6 +38,21 @@ export function MfaReminderToast() {
 
     useEffect(() => {
         if (!user) return;
+
+        // Don't show during onboarding
+        if (pathname?.startsWith('/setup-business')) {
+            setShouldRender(false);
+            return;
+        }
+
+        // Don't pester brand-new users (< 10 minutes old)
+        if (user.created_at) {
+            const accountAge = Date.now() - new Date(user.created_at).getTime();
+            if (accountAge < 10 * 60 * 1000) {
+                setShouldRender(false);
+                return;
+            }
+        }
 
         // Already dismissed this session?
         try {
