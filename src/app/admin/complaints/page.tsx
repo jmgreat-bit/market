@@ -5,6 +5,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { CheckCircle2, Bug, Flag, HelpCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Link from 'next/link';
 
 interface SupportTicket {
     id: string;
@@ -30,6 +31,7 @@ export default function AdminComplaintsPage() {
             const { data } = await supabase
                 .from('support_tickets')
                 .select('*')
+                .eq('status', 'open')
                 .order('created_at', { ascending: false });
             
             if (data) setTickets(data as SupportTicket[]);
@@ -40,6 +42,17 @@ export default function AdminComplaintsPage() {
     }, [isAdmin]);
 
     if (!isAdmin) return null;
+
+    const handleResolve = async (id: string) => {
+        const supabase = getSupabaseClient();
+        // Optimistically remove from UI
+        setTickets(tickets.filter(t => t.id !== id));
+        // Update in database
+        await supabase
+            .from('support_tickets')
+            .update({ status: 'resolved' })
+            .eq('id', id);
+    };
 
     const filteredTickets = tickets.filter(t => activeTab === 'all' || t.category === activeTab);
 
@@ -105,10 +118,28 @@ export default function AdminComplaintsPage() {
                                     {ticket.message}
                                 </div>
                                 {ticket.reference_id && (
-                                    <div className="mt-4 pt-4 border-t border-slate-700/50 text-xs text-slate-400">
-                                        <span className="font-bold text-slate-300 uppercase">Target {ticket.reference_type}:</span> {ticket.reference_id}
+                                    <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between gap-4 flex-wrap">
+                                        <div className="text-xs text-slate-400">
+                                            <span className="font-bold text-slate-300 uppercase">Target {ticket.reference_type}:</span> {ticket.reference_id}
+                                        </div>
+                                        <Link 
+                                            href={ticket.reference_type === 'user' ? `/u/${ticket.reference_id}` : `/p/${ticket.reference_id}`}
+                                            target="_blank"
+                                            className="px-3 py-1.5 bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 rounded-md text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+                                        >
+                                            View Content ↗
+                                        </Link>
                                     </div>
                                 )}
+                                <div className="mt-4 flex justify-end">
+                                    <button 
+                                        onClick={() => handleResolve(ticket.id)}
+                                        className="px-4 py-2 bg-emerald-600/10 text-emerald-500 hover:bg-emerald-600/20 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
+                                    >
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        Mark Resolved
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
