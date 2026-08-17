@@ -15,11 +15,12 @@ interface PostActionsProps {
     onLike: () => void;
     onToggleComments: () => void;
     postId: string;
+    postSlug?: string;
     postContent?: string;
     phone?: string | null;
 }
 
-export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postContent, phone }: PostActionsProps) {
+export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postSlug, postContent, phone }: PostActionsProps) {
     const { profile } = useUser();
     const [isSaved, setIsSaved] = useState(false);
     const [isCheckingBookmark, setIsCheckingBookmark] = useState(true);
@@ -57,10 +58,11 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
     }, [profile?.id, postId]);
 
     const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/p/${postSlug || postId}`;
         const shareData = {
-            title: 'GeoPulse Post',
-            text: postContent?.substring(0, 100) || 'Check out this post on GeoPulse!',
-            url: `${window.location.origin}/feed?post=${postId}`,
+            title: 'MarketPLC Post',
+            text: postContent?.substring(0, 100) || 'Check out this post on MarketPLC!',
+            url: shareUrl,
         };
 
         try {
@@ -162,7 +164,8 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
                         whileTap={{ scale: 0.95 }}
                         onClick={() => {
                             const snippet = postContent ? `"${postContent.substring(0, 50)}${postContent.length > 50 ? '...' : ''}"` : 'this post';
-                            const waMessage = encodeURIComponent(`Hi! I'm interested in ${snippet} on MarketPLC:\n\n${window.location.origin}/feed?post=${postId}`);
+                            const shareUrl = `${window.location.origin}/p/${postSlug || postId}`;
+                            const waMessage = encodeURIComponent(`Hi! I'm interested in ${snippet} on MarketPLC:\n\n${shareUrl}`);
                             window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${waMessage}`, '_blank');
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-300 font-sans font-medium text-[13px] text-green-500 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 shadow-[0_0_12px_rgba(34,197,94,0.15)]"

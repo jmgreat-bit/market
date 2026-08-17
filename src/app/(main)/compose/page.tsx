@@ -186,12 +186,20 @@ export default function ComposePage() {
             const expiresAt = new Date();
             expiresAt.setHours(expiresAt.getHours() + durationHours);
 
+            // Generate a slug from the first few words of the content + random string
+            const baseSlug = content
+                ? content.substring(0, 30).toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-')
+                : 'post';
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const slug = `${baseSlug || 'post'}-${randomSuffix}`;
+
             // Create post
             const { data: newPost, error: postError } = await supabase
                 .from('posts')
                 .insert({
                     business_id: business.id,
                     content: content.trim(),
+                    slug: slug,
                     image_url: imageUrl,
                     latitude: business.latitude,
                     longitude: business.longitude,

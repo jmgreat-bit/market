@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostWithBusiness, Comment } from '@/types';
 import { CommentSection } from './CommentSection';
@@ -11,7 +12,7 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
-import { Pin, Bell, BellOff, Loader2, Zap, X } from 'lucide-react';
+import { Pin, Bell, BellOff, Loader2, Zap } from 'lucide-react';
 import { BoostModal } from './BoostModal';
 
 interface PostCardProps {
@@ -22,6 +23,7 @@ interface PostCardProps {
 
 export function PostCard({ post, autoExpandComments = false, isModalView = false }: PostCardProps) {
     const { profile } = useUser();
+    const router = useRouter();
     const supabase = useMemo(() => getSupabaseClient(), []);
     const [isLiked, setIsLiked] = useState(post.is_liked ?? false);
     const [likesCount, setLikesCount] = useState(post.likes_count ?? 0);
@@ -37,11 +39,16 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
     const [showBoostModal, setShowBoostModal] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Boost Eligibility
     const isOwner = profile?.id === post.business?.profile_id;
     const isEligibleForBoost = isOwner && (profile?.trader_tier === 'pro' || profile?.trader_tier === 'national');
+
+    useEffect(() => {
+        if (isModalView) {
+            setShowComments(true);
+        }
+    }, [isModalView, autoExpandComments]);
 
     // Analytics tracking
     const cardRef = useRef<HTMLDivElement>(null);
@@ -169,7 +176,7 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
         if (target.closest('button') || target.closest('a')) {
             return;
         }
-        setIsModalOpen(true);
+        router.push(`/p/${(post as any).slug || post.id}`);
     };
 
     const business = post.business;
@@ -271,6 +278,7 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                     onLike={handleLike}
                     onToggleComments={handleToggleComments}
                     postId={post.id}
+                    postSlug={(post as any).slug}
                     postContent={post.content}
                     phone={business?.phone}
                 />
@@ -311,27 +319,6 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
             />
         )}
 
-        {/* Post Detail Modal Overlay */}
-        {isModalOpen && !isModalView && (
-            <div 
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/60 backdrop-blur-sm"
-                onClick={() => setIsModalOpen(false)}
-            >
-                <div 
-                    className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl relative shadow-2xl ring-1 ring-border/50 bg-background"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <button 
-                        className="absolute top-3 right-3 z-50 w-8 h-8 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/50 text-foreground hover:bg-secondary transition-all"
-                        onClick={() => setIsModalOpen(false)}
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                    {/* We render the card inside itself with isModalView=true so it doesn't nest infinitely */}
-                    <PostCard post={post} autoExpandComments={true} isModalView={true} />
-                </div>
-            </div>
-        )}
         </>
     );
 }
