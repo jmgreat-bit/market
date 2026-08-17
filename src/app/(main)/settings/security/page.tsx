@@ -121,7 +121,7 @@ export default function SecuritySettingsPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4 }}
-                                className="bg-[#1a191b]/50 backdrop-blur-[30px] rounded-xl p-6 relative overflow-hidden group"
+                                className="bg-card border border-border shadow-sm rounded-xl p-4 sm:p-6 relative overflow-hidden group"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
@@ -130,7 +130,7 @@ export default function SecuritySettingsPage() {
                                         className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
                                             mfaEnabled
                                                 ? 'bg-emerald-500/15 border border-emerald-500/30'
-                                                : 'bg-[#262627] border border-[rgba(72,72,73,0.2)]'
+                                                : 'bg-muted border border-border'
                                         }`}
                                     >
                                         {mfaEnabled ? (
@@ -141,8 +141,8 @@ export default function SecuritySettingsPage() {
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="font-display text-xl font-semibold text-foreground">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                                            <h3 className="font-display text-lg sm:text-xl font-semibold text-foreground">
                                                 Two-Factor Authentication
                                             </h3>
                                             {mfaEnabled ? (
@@ -151,7 +151,7 @@ export default function SecuritySettingsPage() {
                                                     Active
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#262627] text-muted-foreground border border-[rgba(72,72,73,0.2)]">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border">
                                                     Disabled
                                                 </span>
                                             )}
@@ -165,16 +165,16 @@ export default function SecuritySettingsPage() {
                                 </div>
 
                                 {/* Action area */}
-                                <div className="relative z-10 mt-6 pt-5 border-t border-[rgba(72,72,73,0.15)]">
+                                <div className="relative z-10 mt-6 pt-5 border-t border-border">
                                     {mfaEnabled ? (
                                         <div className="space-y-4">
                                             {/* List verified factors */}
                                             {factors
                                                 .filter((f) => f.status === 'verified')
                                                 .map((factor) => (
-                                                    <div
+                                                        <div
                                                         key={factor.id}
-                                                        className="flex items-center justify-between p-4 rounded-lg bg-[#262627]/50 border border-[rgba(72,72,73,0.15)]"
+                                                        className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border border-border"
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <Smartphone className="w-5 h-5 text-primary" />
@@ -256,9 +256,9 @@ export default function SecuritySettingsPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, delay: 0.1 }}
-                                className="bg-[#131314] rounded-xl p-1"
+                                className="bg-card border border-border shadow-sm rounded-xl p-1"
                             >
-                                <div className="bg-[#1a191b]/40 backdrop-blur-xl rounded-lg p-6">
+                                <div className="bg-secondary/30 rounded-lg p-4 sm:p-6">
                                     <h3 className="font-display text-base font-semibold text-foreground mb-3">
                                         How does it work?
                                     </h3>
