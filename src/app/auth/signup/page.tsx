@@ -56,6 +56,28 @@ export default function SignupPage() {
     const [locationLng, setLocationLng] = useState(30.0619);
     const [locationSet, setLocationSet] = useState(false);
 
+    const [isResending, setIsResending] = useState(false);
+    const [resendSuccess, setResendSuccess] = useState(false);
+
+    const handleResendEmail = async () => {
+        setIsResending(true);
+        setError(null);
+        setResendSuccess(false);
+        try {
+            const supabase = getSupabaseClient();
+            const { error: resendError } = await supabase.auth.resend({
+                type: 'signup',
+                email: email,
+            });
+            if (resendError) throw resendError;
+            setResendSuccess(true);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to resend email');
+        } finally {
+            setIsResending(false);
+        }
+    };
+
     const handleLocationSelect = (lat: number, lng: number) => {
         setLocationLat(lat);
         setLocationLng(lng);
@@ -506,12 +528,36 @@ export default function SignupPage() {
                             <p className="text-sm text-muted-foreground mb-6">
                                 We've sent a verification link to <span className="text-foreground font-medium">{email}</span>. Please click the link to verify your account.
                             </p>
-                            <Button
-                                onClick={() => router.push('/auth/login')}
-                                className="w-full bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold"
-                            >
-                                Go to Login
-                            </Button>
+                            
+                            {error && (
+                                <div className="p-3 mb-4 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20 text-left">
+                                    {error}
+                                </div>
+                            )}
+
+                            {resendSuccess && (
+                                <div className="p-3 mb-4 rounded-lg bg-emerald-500/10 text-emerald-500 text-sm border border-emerald-500/20 text-center font-medium">
+                                    Email resent successfully!
+                                </div>
+                            )}
+
+                            <div className="space-y-3">
+                                <Button
+                                    onClick={() => router.push('/auth/login')}
+                                    className="w-full bg-gradient-to-r from-primary to-accent text-[#003f43] font-display font-bold"
+                                >
+                                    Go to Login
+                                </Button>
+                                
+                                <Button
+                                    onClick={handleResendEmail}
+                                    variant="outline"
+                                    disabled={isResending || resendSuccess}
+                                    className="w-full border-border/50 bg-secondary/20 hover:bg-secondary text-foreground transition-all"
+                                >
+                                    {isResending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</> : 'Resend Email'}
+                                </Button>
+                            </div>
                         </Card>
                     )}
                     {/* Footer */}
