@@ -710,7 +710,7 @@ export default function ProfilePage() {
                                                 className="w-28 bg-input border border-border rounded-md text-sm px-2 focus:outline-none focus:border-primary/50 text-foreground"
                                             >
                                                 {COUNTRY_CODES.map(c => (
-                                                    <option key={c.code} value={c.code}>{c.country}</option>
+                                                    <option key={c.code} value={c.code} className="bg-background text-foreground">{c.country}</option>
                                                 ))}
                                             </select>
                                             <Input 
