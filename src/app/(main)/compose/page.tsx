@@ -219,9 +219,8 @@ export default function ComposePage() {
             }
 
             clearTimeout(timeoutId);
-            window.alert("Post Broadcasted Successfully!");
             setIsSubmitting(false);
-            window.location.href = '/feed';
+            router.push('/feed');
         } catch (err: any) {
             clearTimeout(timeoutId);
             setError(err.message || "Failed to publish post. Please try again.");
