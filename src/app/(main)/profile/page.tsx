@@ -47,6 +47,7 @@ const COUNTRY_CODES = [
     { code: '+44', country: 'UK (+44)' },
     { code: '+27', country: 'ZA (+27)' },
     { code: '+234', country: 'NG (+234)' },
+    { code: '+250', country: 'RW (+250)' },
     { code: '+254', country: 'KE (+254)' },
     { code: '+256', country: 'UG (+256)' },
     { code: '+255', country: 'TZ (+255)' },
@@ -103,7 +104,7 @@ export default function ProfilePage() {
     const [editWebsite, setEditWebsite] = useState('');
     const [editTwitter, setEditTwitter] = useState('');
     const [editInstagram, setEditInstagram] = useState('');
-    const [editCountryCode, setEditCountryCode] = useState('+1');
+    const [editCountryCode, setEditCountryCode] = useState('+250');
     const [editPhone, setEditPhone] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -285,7 +286,7 @@ export default function ProfilePage() {
             setEditInstagram(businessInfo.instagram_url || '');
             
             let p = businessInfo.phone || '';
-            let cc = '+1';
+            let cc = '+250';
             let num = p;
             
             if (p.startsWith('+')) {
@@ -295,7 +296,7 @@ export default function ProfilePage() {
                     num = p.slice(match.code.length).trim();
                 }
             } else if (p && p.length > 7) {
-                // If it doesn't start with +, just assume the rest is the number and default to +1
+                // If it doesn't start with +, just assume the rest is the number and default to +250
                 num = p;
             }
             
@@ -708,9 +709,10 @@ export default function ProfilePage() {
                                                 value={editCountryCode}
                                                 onChange={e => setEditCountryCode(e.target.value)}
                                                 className="w-28 bg-input border border-border rounded-md text-sm px-2 focus:outline-none focus:border-primary/50 text-foreground"
+                                                style={{ colorScheme: 'dark' }}
                                             >
                                                 {COUNTRY_CODES.map(c => (
-                                                    <option key={c.code} value={c.code} className="bg-background text-foreground">{c.country}</option>
+                                                    <option key={c.code} value={c.code}>{c.country}</option>
                                                 ))}
                                             </select>
                                             <Input 
