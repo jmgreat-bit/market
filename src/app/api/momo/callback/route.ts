@@ -54,12 +54,15 @@ export async function POST(req: Request) {
                     });
                     console.log(`[MOMO WEBHOOK] Successfully granted ${prompts} AI credits to user ${sub.profile_id}`);
                 } else {
-                    // Upgrade user
-                    await serviceClient
+                    const expiryDate = new Date();
+                    expiryDate.setDate(expiryDate.getDate() + 30);
+                    
+                    const { error: profileUpdateError } = await serviceClient
                         .from('profiles')
-                        .update({
+                        .update({ 
                             trader_tier: sub.tier,
-                            is_premium: true
+                            is_premium: true,
+                            tier_expires_at: expiryDate.toISOString()
                         })
                         .eq('id', sub.profile_id);
 

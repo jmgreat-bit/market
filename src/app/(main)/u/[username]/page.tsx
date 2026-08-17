@@ -111,20 +111,22 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         <div className="min-h-screen bg-background pb-32">
             {isTrader && businessInfo && <ProfileTracker businessId={businessInfo.id} />}
             
-            {/* 1. Cover Banner */}
-            <div className="h-32 md:h-48 w-full bg-gradient-to-r from-slate-800 to-slate-900 relative">
-                {/* Fallback pattern */}
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent bg-[length:20px_20px]" />
-                
-                {/* Report Account Button */}
-                <div className="absolute top-4 right-4">
-                    <Link 
-                        href={`/support?category=report&reference_type=user&reference_id=${profile.username}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-red-400 hover:bg-black/60 transition-all text-xs font-bold uppercase tracking-wider border border-white/10"
-                    >
-                        <ShieldAlert className="w-3.5 h-3.5" />
-                        Report
-                    </Link>
+            {/* 1. Cover Banner Container */}
+            <div className="max-w-3xl mx-auto sm:px-6 sm:pt-6">
+                <div className="h-32 md:h-48 w-full bg-gradient-to-r from-slate-800 to-slate-900 relative sm:rounded-3xl overflow-hidden shadow-lg border border-border/20">
+                    {/* Fallback pattern */}
+                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent bg-[length:20px_20px]" />
+                    
+                    {/* Report Account Button */}
+                    <div className="absolute top-4 right-4">
+                        <Link 
+                            href={`/support?category=report&reference_type=user&reference_id=${profile.username}`}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/80 hover:text-red-400 hover:bg-black/60 transition-all text-xs font-bold uppercase tracking-wider border border-white/10"
+                        >
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            Report
+                        </Link>
+                    </div>
                 </div>
             </div>
 

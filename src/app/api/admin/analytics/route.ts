@@ -117,10 +117,19 @@ export async function GET(req: NextRequest) {
         const { count: totalAds } = await supabase.from('ads').select('*', { count: 'exact', head: true });
         
         let mrr = 0;
+        let proCount = 0;
+        let nationalCount = 0;
+        let totalAiCreditsSold = 0;
+        
         if (isMaster) {
             const { count: activePro } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('trader_tier', 'pro');
             const { count: activeNational } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('trader_tier', 'national');
-            mrr = ((activePro || 0) * 3000) + ((activeNational || 0) * 35000);
+            const { count: aiCreditsCount } = await supabase.from('ai_credits').select('*', { count: 'exact', head: true });
+            
+            proCount = activePro || 0;
+            nationalCount = activeNational || 0;
+            totalAiCreditsSold = aiCreditsCount || 0;
+            mrr = (proCount * 3000) + (nationalCount * 35000);
         }
 
         return NextResponse.json({
@@ -132,7 +141,10 @@ export async function GET(req: NextRequest) {
                 totalUsers,
                 totalBusinesses,
                 totalAds,
-                mrr
+                mrr,
+                proCount,
+                nationalCount,
+                totalAiCreditsSold
             }
         });
 

@@ -17,6 +17,9 @@ interface AnalyticsData {
         totalBusinesses: number;
         totalAds: number;
         mrr: number;
+        proCount: number;
+        nationalCount: number;
+        totalAiCreditsSold: number;
     }
 }
 
@@ -113,6 +116,33 @@ export default function AdminOverviewPage() {
                                     <StatCard title="Projected MRR" value={`${data?.overview.mrr.toLocaleString() || 0} RWF`} icon={<DollarSign className="text-emerald-500" />} />
                                 )}
                             </div>
+
+                            {/* Additional Master-only Metrics */}
+                            {isMaster && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <StatCard 
+                                        title="Active Pro Subs" 
+                                        value={data?.overview.proCount.toString() || '0'} 
+                                        icon={
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                        } 
+                                    />
+                                    <StatCard 
+                                        title="Active National Subs" 
+                                        value={data?.overview.nationalCount.toString() || '0'} 
+                                        icon={
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        } 
+                                    />
+                                    <StatCard 
+                                        title="AI Credit Packages Sold" 
+                                        value={data?.overview.totalAiCreditsSold.toString() || '0'} 
+                                        icon={
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        } 
+                                    />
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-6">
