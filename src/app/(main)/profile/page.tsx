@@ -31,7 +31,8 @@ import {
     Globe,
     Twitter,
     Instagram,
-    Sparkles
+    Sparkles,
+    ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -493,98 +494,96 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* Posts / Pulses */}
-                    <div className="bg-card rounded-xl p-5 border border-border/30 relative overflow-hidden">
-                        <Compass className="w-5 h-5 text-primary mb-3" />
+                {/* Stats Strip */}
+                <div className="bg-card rounded-2xl border border-border/30 p-2 flex items-center justify-between shadow-sm overflow-hidden divide-x divide-border/20">
+                    <div className="flex-1 py-3 text-center">
                         <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">
-                            {isTrader ? 'Posts Created' : 'Posts Liked'}
+                            {isTrader ? 'Posts' : 'Liked'}
                         </p>
                         {statsLoading ? (
-                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-16" />
+                            <div className="h-8 bg-secondary rounded-lg animate-pulse w-12 mx-auto" />
                         ) : (
-                            <p className="font-display text-3xl font-bold text-foreground">
+                            <p className="font-display text-2xl font-bold text-foreground">
                                 {isTrader ? postCount : likedCount}
                             </p>
                         )}
                     </div>
-
-                    {/* Saved Hubs */}
-                    <Link href={ROUTES.SAVED} className="bg-card rounded-xl p-5 border border-border/30 relative overflow-hidden block transition-colors hover:border-primary/50 group">
-                        <Bookmark className="w-5 h-5 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Saved Posts</p>
+                    
+                    <Link href={ROUTES.SAVED} className="flex-1 py-3 text-center group hover:bg-secondary/30 transition-colors">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1 group-hover:text-primary transition-colors">Saved</p>
                         {statsLoading ? (
-                            <div className="h-9 bg-secondary rounded-lg animate-pulse w-16" />
+                            <div className="h-8 bg-secondary rounded-lg animate-pulse w-12 mx-auto" />
                         ) : (
-                            <p className="font-display text-3xl font-bold text-foreground">{bookmarkCount}</p>
+                            <p className="font-display text-2xl font-bold text-foreground">{bookmarkCount}</p>
                         )}
                     </Link>
 
-                    {/* Explorer Rank / Premium */}
-                    <div className="bg-gradient-to-br from-primary/10 to-accent/5 rounded-xl p-5 border border-primary/20 relative overflow-hidden">
-                        <Trophy className="w-5 h-5 text-primary mb-3" />
+                    <div className="flex-1 py-3 text-center">
                         <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">
-                            {isTrader ? 'Status' : 'Explorer Rank'}
+                            {isTrader ? 'Status' : 'Rank'}
                         </p>
-                        <p className="font-display text-3xl font-bold text-foreground">
-                            {isTrader ? (businessInfo?.is_premium ? '⭐ PRO' : 'Active') : 'New'}
+                        <p className="font-display text-2xl font-bold text-primary">
+                            {isTrader ? (businessInfo?.is_premium ? 'PRO' : 'Active') : 'New'}
                         </p>
                     </div>
                 </div>
 
-                {/* Trader Dashboard */}
-                {isTrader && (
-                    <div className="space-y-3 mt-2">
-                        <div className="flex items-center justify-between px-1">
-                            <h3 className="font-display text-lg font-bold text-foreground">Trader Campaign Manager</h3>
+                {/* Action Menus */}
+                <div className="space-y-6">
+                    {isTrader && (
+                        <div className="space-y-2">
+                            <h3 className="font-display text-xs font-bold text-muted-foreground px-2 uppercase tracking-widest">Trader Manager</h3>
+                            <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-sm divide-y divide-border/20">
+                                <Link href={ROUTES.COMPOSE} className="flex items-center p-4 hover:bg-secondary/40 transition-colors group">
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                                        <Zap className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <span className="flex-1 font-medium text-foreground text-sm">Create Post</span>
+                                    <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                                </Link>
+                                <Link href={ROUTES.ANALYTICS} className="flex items-center p-4 hover:bg-secondary/40 transition-colors group">
+                                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                                        <Activity className="w-4 h-4 text-foreground" />
+                                    </div>
+                                    <span className="flex-1 font-medium text-foreground text-sm">Analytics Data</span>
+                                    <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+                                </Link>
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <Link 
-                                href={ROUTES.COMPOSE}
-                                className="bg-primary/10 border border-primary/30 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-primary/20 hover:border-primary/50 transition-all group"
-                            >
-                                <Zap className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                                <span className="text-sm font-display font-bold text-primary">Create Post</span>
+                    )}
+
+                    <div className="space-y-2">
+                        <h3 className="font-display text-xs font-bold text-muted-foreground px-2 uppercase tracking-widest">Settings & Security</h3>
+                        <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-sm divide-y divide-border/20">
+                            <Link href="/menu" className="flex items-center p-4 hover:bg-secondary/40 transition-colors group">
+                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-4">
+                                    <Settings className="w-4 h-4 text-foreground" />
+                                </div>
+                                <span className="flex-1 font-medium text-foreground text-sm">Preferences</span>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
                             </Link>
-                            <Link 
-                                href={ROUTES.ANALYTICS}
-                                className="bg-card border border-border/30 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-secondary hover:border-border/50 transition-all group"
-                            >
-                                <Activity className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                                <span className="text-sm font-display font-bold text-foreground">Analytics Data</span>
-                            </Link>
+                            <div className="flex items-center p-4 hover:bg-secondary/40 transition-colors group cursor-not-allowed opacity-50">
+                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-4">
+                                    <Shield className="w-4 h-4 text-foreground" />
+                                </div>
+                                <span className="flex-1 font-medium text-foreground text-sm">Privacy</span>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground/50" />
+                            </div>
+                            <div className="flex items-center p-4 hover:bg-secondary/40 transition-colors group cursor-not-allowed opacity-50">
+                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center mr-4">
+                                    <Smartphone className="w-4 h-4 text-foreground" />
+                                </div>
+                                <span className="flex-1 font-medium text-foreground text-sm">Devices</span>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground/50" />
+                            </div>
+                            <button onClick={handleSignOut} className="w-full flex items-center p-4 hover:bg-destructive/5 transition-colors group">
+                                <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center mr-4">
+                                    <LogOut className="w-4 h-4 text-destructive" />
+                                </div>
+                                <span className="flex-1 font-medium text-left text-destructive text-sm">Disconnect</span>
+                            </button>
                         </div>
                     </div>
-                )}
-
-                {/* Access & Security */}
-                <div className="space-y-3">
-                    <h3 className="font-display text-lg font-bold text-foreground px-1">Access & Security</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        <SecurityCard icon={<Settings className="w-6 h-6" />} label="Preferences" href="/menu" />
-                        <SecurityCard icon={<Shield className="w-6 h-6" />} label="Privacy" />
-                        <SecurityCard icon={<Smartphone className="w-6 h-6" />} label="Devices" />
-                        <button 
-                            onClick={handleSignOut}
-                            className="bg-card border border-border/30 rounded-xl p-5 flex flex-col items-center justify-center gap-2 hover:bg-destructive/10 hover:border-destructive/30 transition-all group"
-                        >
-                            <LogOut className="w-6 h-6 text-muted-foreground group-hover:text-destructive transition-colors" />
-                            <span className="text-xs font-medium text-muted-foreground group-hover:text-destructive transition-colors">Disconnect</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Profile Visibility - Disabled for now */}
-                <div className="flex items-center justify-between bg-card rounded-xl p-4 px-5 border border-border/30 opacity-50 cursor-not-allowed">
-                    <div className="flex items-center gap-3">
-                        <Eye className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium text-sm text-foreground">Profile Visibility</span>
-                    </div>
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                        <span className="w-2 h-2 rounded-full bg-muted-foreground/50" />
-                        Public
-                    </span>
                 </div>
 
                 {/* My Posts Section */}
@@ -622,7 +621,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="p-6 overflow-y-auto flex-1 space-y-4">
                             <div className="space-y-2">
-                                <Label className="text-foreground">Full Name</Label>
+                                <Label className="text-foreground flex items-center gap-1">Full Name <span className="text-destructive">*</span></Label>
                                 <Input 
                                     value={editFullName} 
                                     onChange={e => setEditFullName(e.target.value)} 
@@ -631,14 +630,14 @@ export default function ProfilePage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-foreground">Username</Label>
+                                <Label className="text-foreground flex items-center gap-1">Username <span className="text-destructive">*</span></Label>
                                 <Input 
                                     value={editUsername} 
                                     onChange={e => setEditUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase())} 
                                     className="bg-input border-border focus:border-primary/50"
                                     maxLength={20}
                                 />
-                                <p className="text-[10px] text-muted-foreground">Letters, numbers, underscores only.</p>
+                                <p className="text-[10px] text-muted-foreground">Letters, numbers, underscores only. Required to save.</p>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-foreground">Headline</Label>
@@ -719,20 +718,3 @@ export default function ProfilePage() {
     );
 }
 
-function SecurityCard({ icon, label, href }: { icon: ReactNode, label: string, href?: string }) {
-    const Component = href ? Link : 'button';
-    return (
-        <Component
-            href={href as string}
-            disabled={!href}
-            className={`bg-card border border-border/30 rounded-xl p-5 flex flex-col items-center justify-center gap-2 transition-all ${
-                href 
-                ? 'hover:bg-secondary hover:border-primary/20' 
-                : 'opacity-50 cursor-not-allowed'
-            }`}
-        >
-            <div className="text-muted-foreground">{icon}</div>
-            <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        </Component>
-    );
-}
