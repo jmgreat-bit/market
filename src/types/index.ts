@@ -52,6 +52,7 @@ export interface CommercialHub {
   longitude: number;
   address: string | null;
   image_url: string | null;
+  polygon?: { lat: number; lng: number }[] | null;
   created_at: string;
   business_count?: number;
 }

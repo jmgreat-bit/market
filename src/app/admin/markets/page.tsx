@@ -5,6 +5,12 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { CommercialHub } from '@/types';
 import { Building2, Plus, Loader2, MapPin } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const PolygonDrawMap = dynamic(
+    () => import('@/components/features/map/PolygonDrawMap'),
+    { ssr: false }
+);
 
 export default function AdminMarketsPage() {
     const { isAdmin } = useAdmin();
@@ -15,8 +21,7 @@ export default function AdminMarketsPage() {
     // Form state
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [latitude, setLatitude] = useState('');
-    const [longitude, setLongitude] = useState('');
+    const [points, setPoints] = useState<{lat: number, lng: number}[]>([]);
     const [address, setAddress] = useState('');
 
     useEffect(() => {
@@ -50,22 +55,40 @@ export default function AdminMarketsPage() {
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (points.length > 0 && points.length < 3) {
+            alert('A market region must have at least 3 points to form a shape.');
+            return;
+        }
+
         setIsCreating(true);
         const supabase = getSupabaseClient();
         
+        // Calculate rough center for backwards compatibility and map centering
+        let centerLat = 0, centerLng = 0;
+        if (points.length > 0) {
+            centerLat = points.reduce((acc, p) => acc + p.lat, 0) / points.length;
+            centerLng = points.reduce((acc, p) => acc + p.lng, 0) / points.length;
+        } else {
+            // If they didn't draw, we can't create it
+            alert('Please draw a market region on the map.');
+            setIsCreating(false);
+            return;
+        }
+
         const { error } = await supabase.from('commercial_hubs').insert({
             name,
             description,
-            latitude: parseFloat(latitude),
-            longitude: parseFloat(longitude),
-            address
+            latitude: centerLat,
+            longitude: centerLng,
+            address,
+            polygon: points
         });
 
         if (!error) {
             setName('');
             setDescription('');
-            setLatitude('');
-            setLongitude('');
+            setPoints([]);
             setAddress('');
             fetchHubs();
         } else {
@@ -123,31 +146,15 @@ export default function AdminMarketsPage() {
                                     className="w-full bg-[#0f172a] border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50 transition-colors"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Latitude</label>
-                                    <input 
-                                        type="number" 
-                                        step="any"
-                                        required
-                                        value={latitude}
-                                        onChange={e => setLatitude(e.target.value)}
-                                        placeholder="-1.9441" 
-                                        className="w-full bg-[#0f172a] border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Longitude</label>
-                                    <input 
-                                        type="number" 
-                                        step="any"
-                                        required
-                                        value={longitude}
-                                        onChange={e => setLongitude(e.target.value)}
-                                        placeholder="30.0619" 
-                                        className="w-full bg-[#0f172a] border border-slate-700/50 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50 transition-colors"
-                                    />
-                                </div>
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Market Boundaries</label>
+                                <PolygonDrawMap 
+                                    points={points} 
+                                    onChange={setPoints} 
+                                />
+                                <p className="text-xs text-slate-500 mt-2">
+                                    Click on the map to draw the custom boundaries for this market. Must have at least 3 points.
+                                </p>
                             </div>
                             <div className="pt-2">
                                 <button

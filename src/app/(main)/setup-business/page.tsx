@@ -41,6 +41,18 @@ export default function SetupBusinessPage() {
         return R * c; // Distance in km
     }
 
+    function isPointInPolygon(point: {lat: number, lng: number}, polygon: {lat: number, lng: number}[]) {
+        let x = point.lng, y = point.lat;
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            let xi = polygon[i].lng, yi = polygon[i].lat;
+            let xj = polygon[j].lng, yj = polygon[j].lat;
+            let intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
     const handleSubmit = async () => {
         if (!formData.name) return;
         setLoading(true);
@@ -58,13 +70,21 @@ export default function SetupBusinessPage() {
             let matchedHubId = null;
 
             if (bizData?.latitude && bizData?.longitude) {
-                const { data: hubs } = await supabase.from('commercial_hubs').select('id, latitude, longitude');
+                const { data: hubs } = await supabase.from('commercial_hubs').select('id, latitude, longitude, polygon');
                 if (hubs) {
                     for (const hub of hubs) {
-                        const distance = getDistanceFromLatLonInKm(bizData.latitude, bizData.longitude, hub.latitude, hub.longitude);
-                        if (distance <= 0.5) { // 500 meters
-                            matchedHubId = hub.id;
-                            break;
+                        if (hub.polygon && Array.isArray(hub.polygon) && hub.polygon.length >= 3) {
+                            if (isPointInPolygon({ lat: bizData.latitude, lng: bizData.longitude }, hub.polygon)) {
+                                matchedHubId = hub.id;
+                                break;
+                            }
+                        } else {
+                            // Fallback to radius if no polygon is defined
+                            const distance = getDistanceFromLatLonInKm(bizData.latitude, bizData.longitude, hub.latitude, hub.longitude);
+                            if (distance <= 0.5) { // 500 meters
+                                matchedHubId = hub.id;
+                                break;
+                            }
                         }
                     }
                 }
