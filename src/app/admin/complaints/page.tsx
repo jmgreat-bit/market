@@ -22,24 +22,26 @@ export default function AdminComplaintsPage() {
     const [tickets, setTickets] = useState<SupportTicket[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all');
+    const [ticketStatus, setTicketStatus] = useState<'open' | 'resolved'>('open');
 
     useEffect(() => {
         if (!isAdmin) return;
 
         async function fetchTickets() {
+            setLoading(true);
             const supabase = getSupabaseClient();
             const { data } = await supabase
                 .from('support_tickets')
                 .select('*')
-                .eq('status', 'open')
-                .order('created_at', { ascending: false });
+                .eq('status', ticketStatus)
+                .order(ticketStatus === 'resolved' ? 'updated_at' : 'created_at', { ascending: false });
             
             if (data) setTickets(data as SupportTicket[]);
             setLoading(false);
         }
 
         fetchTickets();
-    }, [isAdmin]);
+    }, [isAdmin, ticketStatus]);
 
     if (!isAdmin) return null;
 
@@ -58,9 +60,26 @@ export default function AdminComplaintsPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-12">
-            <div>
-                <h2 className="text-3xl font-display font-black text-white tracking-tight">Complaints & Moderation</h2>
-                <p className="text-slate-400 mt-1">Review user reports and support tickets.</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-display font-black text-white tracking-tight">Complaints & Moderation</h2>
+                    <p className="text-slate-400 mt-1">Review user reports and support tickets.</p>
+                </div>
+
+                <div className="flex p-1 bg-[#1e293b]/50 border border-slate-700/50 rounded-lg">
+                    <button 
+                        onClick={() => setTicketStatus('open')}
+                        className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${ticketStatus === 'open' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                        Active Tickets
+                    </button>
+                    <button 
+                        onClick={() => setTicketStatus('resolved')}
+                        className={`px-4 py-2 text-sm font-bold rounded-md transition-all ${ticketStatus === 'resolved' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                        Resolved History
+                    </button>
+                </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -131,15 +150,17 @@ export default function AdminComplaintsPage() {
                                         </Link>
                                     </div>
                                 )}
-                                <div className="mt-4 flex justify-end">
-                                    <button 
-                                        onClick={() => handleResolve(ticket.id)}
-                                        className="px-4 py-2 bg-emerald-600/10 text-emerald-500 hover:bg-emerald-600/20 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
-                                    >
-                                        <CheckCircle2 className="w-4 h-4" />
-                                        Mark Resolved
-                                    </button>
-                                </div>
+                                {ticketStatus === 'open' && (
+                                    <div className="mt-4 flex justify-end">
+                                        <button 
+                                            onClick={() => handleResolve(ticket.id)}
+                                            className="px-4 py-2 bg-emerald-600/10 text-emerald-500 hover:bg-emerald-600/20 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4" />
+                                            Mark Resolved
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
