@@ -160,7 +160,11 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank')}
+                        onClick={() => {
+                            const snippet = postContent ? `"${postContent.substring(0, 50)}${postContent.length > 50 ? '...' : ''}"` : 'this post';
+                            const waMessage = encodeURIComponent(`Hi! I'm interested in ${snippet} on MarketPLC:\n\n${window.location.origin}/feed?post=${postId}`);
+                            window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${waMessage}`, '_blank');
+                        }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-300 font-sans font-medium text-[13px] text-green-500 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 shadow-[0_0_12px_rgba(34,197,94,0.15)]"
                     >
                         <Phone className="w-[16px] h-[16px] fill-current" />
