@@ -10,13 +10,15 @@ import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { formatDistanceToNow, isToday, isThisWeek } from 'date-fns';
+import Link from 'next/link';
 
 // ── Types ──────────────────────────────────────────────
 type AlertType =
     | 'like' | 'comment' | 'reply' | 'follow' | 'system'
     | 'contact_click' | 'profile_view' | 'bookmark' | 'navigation'
     | 'search_match' | 'competitive' | 'inactivity' | 'demand_signal'
-    | 'reach_report' | 'repost_suggestion' | 'followed_post' | 'trending';
+    | 'reach_report' | 'repost_suggestion' | 'followed_post' | 'trending'
+    | 'system_inactive' | 'system_trending' | 'system_expiring';
 
 interface Alert {
     id: string;
@@ -49,6 +51,9 @@ const typeIconMap: Record<AlertType, { icon: typeof Heart; color: string; bg: st
     repost_suggestion: { icon: RefreshCw,      color: 'text-teal-400',    bg: 'bg-teal-500/10' },
     followed_post:     { icon: Rss,            color: 'text-pink-400',    bg: 'bg-pink-500/10' },
     trending:          { icon: Flame,          color: 'text-amber-400',   bg: 'bg-amber-500/10' },
+    system_inactive:   { icon: Clock,          color: 'text-zinc-400',    bg: 'bg-zinc-500/10' },
+    system_trending:   { icon: Flame,          color: 'text-amber-400',   bg: 'bg-amber-500/10' },
+    system_expiring:   { icon: Bell,           color: 'text-red-400',     bg: 'bg-red-500/10' },
 };
 
 // ── Grouping helper ────────────────────────────────────
@@ -261,6 +266,19 @@ export default function NotificationsPage() {
                                                                         {isReposting ? 'Reposting…' : 'Repost Now'}
                                                                     </button>
                                                                 )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Quick link for system_inactive and system_trending */}
+                                                        {(alert.type === 'system_inactive' || alert.type === 'system_trending') && (
+                                                            <div className="mt-2">
+                                                                <Link 
+                                                                    href="/compose"
+                                                                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                                                                >
+                                                                    <Zap className="w-3.5 h-3.5" />
+                                                                    Create Post Now
+                                                                </Link>
                                                             </div>
                                                         )}
                                                     </div>
