@@ -77,11 +77,11 @@ export function PostHeader({ postId, businessName, category, isPremium, traderTi
     return (
         <div className="p-3 pb-2 flex items-start gap-2.5">
             {profileUsername ? (
-                <Link href={`/u/${profileUsername}`} className="flex-1 flex items-start gap-2.5">
+                <Link href={`/u/${profileUsername}`} className="flex-1 min-w-0 flex items-start gap-2.5">
                     {innerContent}
                 </Link>
             ) : (
-                <div className="flex-1 flex items-start gap-2.5">
+                <div className="flex-1 min-w-0 flex items-start gap-2.5">
                     {innerContent}
                 </div>
             )}
