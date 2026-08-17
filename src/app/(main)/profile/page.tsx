@@ -42,6 +42,26 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import TraderBadge from '@/components/ui/TraderBadge';
 import { FeedList } from '@/components/features/feed/FeedList';
 
+const COUNTRY_CODES = [
+    { code: '+1', country: 'US/CA (+1)' },
+    { code: '+44', country: 'UK (+44)' },
+    { code: '+27', country: 'ZA (+27)' },
+    { code: '+234', country: 'NG (+234)' },
+    { code: '+254', country: 'KE (+254)' },
+    { code: '+256', country: 'UG (+256)' },
+    { code: '+255', country: 'TZ (+255)' },
+    { code: '+233', country: 'GH (+233)' },
+    { code: '+20', country: 'EG (+20)' },
+    { code: '+91', country: 'IN (+91)' },
+    { code: '+61', country: 'AU (+61)' },
+    { code: '+971', country: 'AE (+971)' },
+    { code: '+380', country: 'UA (+380)' },
+    { code: '+49', country: 'DE (+49)' },
+    { code: '+33', country: 'FR (+33)' },
+    { code: '+34', country: 'ES (+34)' },
+    { code: '+39', country: 'IT (+39)' }
+];
+
 interface BusinessInfo {
     id: string;
     business_name: string;
@@ -83,6 +103,7 @@ export default function ProfilePage() {
     const [editWebsite, setEditWebsite] = useState('');
     const [editTwitter, setEditTwitter] = useState('');
     const [editInstagram, setEditInstagram] = useState('');
+    const [editCountryCode, setEditCountryCode] = useState('+1');
     const [editPhone, setEditPhone] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -262,7 +283,24 @@ export default function ProfilePage() {
             setEditWebsite(businessInfo.website_url || '');
             setEditTwitter(businessInfo.twitter_url || '');
             setEditInstagram(businessInfo.instagram_url || '');
-            setEditPhone(businessInfo.phone || '');
+            
+            let p = businessInfo.phone || '';
+            let cc = '+1';
+            let num = p;
+            
+            if (p.startsWith('+')) {
+                const match = COUNTRY_CODES.find(c => p.startsWith(c.code));
+                if (match) {
+                    cc = match.code;
+                    num = p.slice(match.code.length).trim();
+                }
+            } else if (p && p.length > 7) {
+                // If it doesn't start with +, just assume the rest is the number and default to +1
+                num = p;
+            }
+            
+            setEditCountryCode(cc);
+            setEditPhone(num);
         }
         setIsEditModalOpen(true);
     };
@@ -295,11 +333,12 @@ export default function ProfilePage() {
             if (profileError) throw profileError;
 
             if (profile.role === 'trader' && businessInfo) {
+                const finalPhone = editPhone.trim() ? `${editCountryCode} ${editPhone.trim()}` : '';
                 const { error: bizError } = await supabase.from('business_details').update({
                     website_url: editWebsite.trim(),
                     twitter_url: editTwitter.trim(),
                     instagram_url: editInstagram.trim(),
-                    phone: editPhone.trim()
+                    phone: finalPhone
                 }).eq('id', businessInfo.id);
 
                 if (bizError) throw bizError;
@@ -663,13 +702,24 @@ export default function ProfilePage() {
                             {isTrader && (
                                 <>
                                     <div className="space-y-2 pt-2 border-t border-border/30">
-                                        <Label className="text-foreground">Phone Number (WhatsApp)</Label>
-                                        <Input 
-                                            value={editPhone} 
-                                            onChange={e => setEditPhone(e.target.value)} 
-                                            placeholder="+1234567890"
-                                            className="bg-input border-border focus:border-primary/50"
-                                        />
+                                        <Label className="text-foreground">WhatsApp Number</Label>
+                                        <div className="flex gap-2">
+                                            <select
+                                                value={editCountryCode}
+                                                onChange={e => setEditCountryCode(e.target.value)}
+                                                className="w-28 bg-input border border-border rounded-md text-sm px-2 focus:outline-none focus:border-primary/50 text-foreground"
+                                            >
+                                                {COUNTRY_CODES.map(c => (
+                                                    <option key={c.code} value={c.code}>{c.country}</option>
+                                                ))}
+                                            </select>
+                                            <Input 
+                                                value={editPhone} 
+                                                onChange={e => setEditPhone(e.target.value.replace(/[^\d\s-]/g, ''))} 
+                                                placeholder="e.g. 82 123 4567"
+                                                className="flex-1 bg-input border-border focus:border-primary/50"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-foreground">Website URL</Label>
