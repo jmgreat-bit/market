@@ -221,9 +221,9 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                     </div>
                 )}
 
-                {/* Header Container */}
                 <div className="relative">
                     <PostHeader
+                        postId={post.id}
                         businessName={business?.business_name}
                         category={business?.category ?? undefined}
                         isPremium={business?.is_premium}

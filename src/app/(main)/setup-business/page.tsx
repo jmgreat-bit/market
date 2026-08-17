@@ -19,7 +19,8 @@ export default function SetupBusinessPage() {
         category: 'Retail',
         bio: '',
         phone: '',
-        website: ''
+        website: '',
+        is_reviews_enabled: true
     });
 
     useEffect(() => {
@@ -70,19 +71,36 @@ export default function SetupBusinessPage() {
             }
             
             // Update Business Details
-            const { error: bizError } = await supabase
-                .from('business_details')
-                .update({
-                    business_name: formData.name,
-                    category: formData.category,
-                    bio: formData.bio,
-                    phone: formData.phone.trim() || null,
-                    website_url: formData.website.trim() || null,
-                    ...(matchedHubId ? { hub_id: matchedHubId } : {})
-                })
-                .eq('profile_id', user?.id);
-
-            if (bizError) throw bizError;
+            // Use try/catch so it doesn't fail completely if the user hasn't run the SQL for is_reviews_enabled
+            try {
+                const { error: bizError } = await supabase
+                    .from('business_details')
+                    .update({
+                        business_name: formData.name,
+                        category: formData.category,
+                        bio: formData.bio,
+                        phone: formData.phone.trim() || null,
+                        website_url: formData.website.trim() || null,
+                        is_reviews_enabled: formData.is_reviews_enabled,
+                        ...(matchedHubId ? { hub_id: matchedHubId } : {})
+                    })
+                    .eq('profile_id', user?.id);
+                if (bizError) throw bizError;
+            } catch (e) {
+                // Fallback if column doesn't exist yet
+                const { error: bizError } = await supabase
+                    .from('business_details')
+                    .update({
+                        business_name: formData.name,
+                        category: formData.category,
+                        bio: formData.bio,
+                        phone: formData.phone.trim() || null,
+                        website_url: formData.website.trim() || null,
+                        ...(matchedHubId ? { hub_id: matchedHubId } : {})
+                    })
+                    .eq('profile_id', user?.id);
+                if (bizError) throw bizError;
+            }
 
             await refreshProfile();
             router.push('/feed');
@@ -163,6 +181,22 @@ export default function SetupBusinessPage() {
                                 className="h-12 bg-input border-border/50 pl-10"
                             />
                         </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border border-border/50 rounded-xl bg-secondary/50">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="reviews-enabled" className="text-base">Enable Customer Reviews</Label>
+                            <p className="text-sm text-muted-foreground">Allow users to rate and review your business</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                id="reviews-enabled"
+                                className="sr-only peer"
+                                checked={formData.is_reviews_enabled}
+                                onChange={(e) => setFormData(prev => ({ ...prev, is_reviews_enabled: e.target.checked }))}
+                            />
+                            <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
                     </div>
 
                     <Button 

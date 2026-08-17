@@ -25,7 +25,7 @@ jest.mock('next/server', () => {
   };
 });
 
-let rpcMock = jest.fn();
+let rpcMock: any = jest.fn();
 jest.mock('@supabase/supabase-js', () => {
   return {
     createClient: () => ({

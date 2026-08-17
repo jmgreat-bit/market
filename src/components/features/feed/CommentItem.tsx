@@ -29,11 +29,20 @@ export function CommentItem({ comment, index }: CommentItemProps) {
                     <span className="font-semibold text-[13px] font-sans text-foreground drop-shadow-sm">
                         {comment.user_name || 'User'}
                     </span>
-                    <span className="text-[11px] text-muted-foreground font-medium">
-                        {comment.created_at && !isNaN(new Date(comment.created_at).getTime()) 
-                            ? formatDistanceToNow(new Date(comment.created_at), { addSuffix: true }) 
-                            : 'Just now'}
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <span className="text-[11px] text-muted-foreground font-medium">
+                            {comment.created_at && !isNaN(new Date(comment.created_at).getTime()) 
+                                ? formatDistanceToNow(new Date(comment.created_at), { addSuffix: true }) 
+                                : 'Just now'}
+                        </span>
+                        <a 
+                            href={`/support?category=report&reference_type=comment&reference_id=${comment.id}`}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                            title="Report Comment"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+                        </a>
+                    </div>
                 </div>
                 {comment.content && (
                     <p className="text-[13px] text-foreground/80 font-sans leading-relaxed">
