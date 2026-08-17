@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
@@ -16,9 +16,10 @@ interface PostActionsProps {
     onToggleComments: () => void;
     postId: string;
     postContent?: string;
+    phone?: string | null;
 }
 
-export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postContent }: PostActionsProps) {
+export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postContent, phone }: PostActionsProps) {
     const { profile } = useUser();
     const [isSaved, setIsSaved] = useState(false);
     const [isCheckingBookmark, setIsCheckingBookmark] = useState(true);
@@ -153,6 +154,19 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
                     <MessageCircle className="w-[18px] h-[18px]" />
                     <span>{commentsCount > 0 ? commentsCount : 'Comment'}</span>
                 </motion.button>
+
+                {/* WhatsApp Contact Button */}
+                {phone && (
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-300 font-sans font-medium text-[13px] text-green-500 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 shadow-[0_0_12px_rgba(34,197,94,0.15)]"
+                    >
+                        <Phone className="w-[16px] h-[16px] fill-current" />
+                        <span>Contact</span>
+                    </motion.button>
+                )}
             </div>
 
             <div className="flex items-center gap-1">

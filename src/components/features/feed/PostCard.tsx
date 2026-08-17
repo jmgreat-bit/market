@@ -272,6 +272,7 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                     onToggleComments={handleToggleComments}
                     postId={post.id}
                     postContent={post.content}
+                    phone={business?.phone}
                 />
 
                 {/* Comments Section */}
