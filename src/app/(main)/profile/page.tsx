@@ -82,6 +82,7 @@ export default function ProfilePage() {
     const [editWebsite, setEditWebsite] = useState('');
     const [editTwitter, setEditTwitter] = useState('');
     const [editInstagram, setEditInstagram] = useState('');
+    const [editPhone, setEditPhone] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     // Sync avatar from profile
@@ -260,6 +261,7 @@ export default function ProfilePage() {
             setEditWebsite(businessInfo.website_url || '');
             setEditTwitter(businessInfo.twitter_url || '');
             setEditInstagram(businessInfo.instagram_url || '');
+            setEditPhone(businessInfo.phone || '');
         }
         setIsEditModalOpen(true);
     };
@@ -295,7 +297,8 @@ export default function ProfilePage() {
                 const { error: bizError } = await supabase.from('business_details').update({
                     website_url: editWebsite.trim(),
                     twitter_url: editTwitter.trim(),
-                    instagram_url: editInstagram.trim()
+                    instagram_url: editInstagram.trim(),
+                    phone: editPhone.trim()
                 }).eq('id', businessInfo.id);
 
                 if (bizError) throw bizError;
@@ -661,6 +664,15 @@ export default function ProfilePage() {
                             {isTrader && (
                                 <>
                                     <div className="space-y-2 pt-2 border-t border-border/30">
+                                        <Label className="text-foreground">Phone Number (WhatsApp)</Label>
+                                        <Input 
+                                            value={editPhone} 
+                                            onChange={e => setEditPhone(e.target.value)} 
+                                            placeholder="+1234567890"
+                                            className="bg-input border-border focus:border-primary/50"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
                                         <Label className="text-foreground">Website URL</Label>
                                         <Input 
                                             value={editWebsite} 
