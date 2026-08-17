@@ -177,13 +177,25 @@ function SupportContent() {
                                     </button>
                                 ))}
                             </div>
-                            <input
-                                type="text"
-                                value={referenceId}
-                                onChange={(e) => setReferenceId(e.target.value)}
-                                placeholder={`ID or username of the ${referenceType} (optional)`}
-                                className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-                            />
+                            {/* Reference ID Input / Display */}
+                            {searchParams?.get('reference_id') ? (
+                                <div className="w-full bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 text-sm text-blue-400 font-medium flex items-center justify-between">
+                                    <span>
+                                        {referenceType === 'user' 
+                                            ? `Reporting User: @${referenceId}` 
+                                            : `Attached ${referenceType} securely`}
+                                    </span>
+                                    <CheckCircle className="w-4 h-4 text-blue-500" />
+                                </div>
+                            ) : (
+                                <input
+                                    type="text"
+                                    value={referenceId}
+                                    onChange={(e) => setReferenceId(e.target.value)}
+                                    placeholder={`Username or link to the ${referenceType} (optional)`}
+                                    className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                                />
+                            )}
                         </div>
                     )}
 
