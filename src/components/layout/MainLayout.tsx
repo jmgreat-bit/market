@@ -18,6 +18,40 @@ export function MainLayout({ children }: MainLayoutProps) {
     const { profile, signOut } = useUser();
     const [hasUnreadAlerts, setHasUnreadAlerts] = useState(false);
 
+    // Auto-reload the app if it was backgrounded/suspended by the OS for more than 5 minutes.
+    // This prevents Supabase auth sessions and fetch connection pools from silently hanging.
+    useEffect(() => {
+        const SLEEP_THRESHOLD_MS = 5 * 60 * 1000;
+        let lastActive = Date.now();
+
+        const checkWakeup = () => {
+            const now = Date.now();
+            if (now - lastActive > SLEEP_THRESHOLD_MS) {
+                window.location.reload();
+            }
+            lastActive = now;
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                checkWakeup();
+            } else {
+                lastActive = Date.now();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', checkWakeup);
+        
+        const interval = setInterval(checkWakeup, 15000); // Polling checks if OS thread was suspended
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', checkWakeup);
+            clearInterval(interval);
+        };
+    }, []);
+
     // Check for unread alerts — silent fail if table doesn't exist yet
     useEffect(() => {
         if (!profile?.id) return;

@@ -92,29 +92,43 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     // Check like status
     useEffect(() => {
         if (!profile?.id) return;
+        const abortController = new AbortController();
+
         supabase
             .from('likes')
             .select('id')
             .eq('post_id', post.id)
             .eq('user_id', profile.id)
+            .abortSignal(abortController.signal)
             .maybeSingle()
-            .then(({ data }: { data: { id: string } | null }) => {
+            .then(({ data, error }: any) => {
+                if (error && error.name === 'AbortError') return;
                 setIsLiked(!!data);
-            });
+            })
+            .catch(() => {});
+
+        return () => abortController.abort();
     }, [post.id, profile?.id, supabase]);
 
     // Check subscription status for pinned posts
     useEffect(() => {
         if (!profile?.id || !post.is_pinned) return;
+        const abortController = new AbortController();
+
         supabase
             .from('post_subscriptions')
             .select('id')
             .eq('post_id', post.id)
             .eq('user_id', profile.id)
+            .abortSignal(abortController.signal)
             .maybeSingle()
-            .then(({ data }: { data: { id: string } | null }) => {
+            .then(({ data, error }: any) => {
+                if (error && error.name === 'AbortError') return;
                 setIsSubscribed(!!data);
-            });
+            })
+            .catch(() => {});
+
+        return () => abortController.abort();
     }, [post.id, post.is_pinned, profile?.id, supabase]);
 
 
