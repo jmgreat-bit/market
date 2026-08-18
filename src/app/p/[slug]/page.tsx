@@ -76,7 +76,10 @@ export default async function PostPage({ params }: PostPageProps) {
                     avatar_url,
                     trader_tier
                 )
-            )
+            ),
+            likes:likes(count),
+            comments:comments(count),
+            poll_options:poll_options(id, post_id, label, votes_count, created_at)
         `);
 
     if (isUuid) {
@@ -101,6 +104,10 @@ export default async function PostPage({ params }: PostPageProps) {
     if (post.business && Array.isArray(post.business.profile)) {
         post.business.profile = post.business.profile[0];
     }
+
+    // Map counts from relations
+    post.likes_count = (data.likes as any)?.[0]?.count ?? 0;
+    post.comments_count = (data.comments as any)?.[0]?.count ?? 0;
 
     return (
         <div className="min-h-screen bg-background pb-32 pt-6">

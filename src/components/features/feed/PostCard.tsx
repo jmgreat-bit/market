@@ -45,10 +45,11 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     const isEligibleForBoost = isOwner && (profile?.trader_tier === 'pro' || profile?.trader_tier === 'national');
 
     useEffect(() => {
-        if (isModalView) {
+        if (isModalView || autoExpandComments) {
             setShowComments(true);
+            fetchComments();
         }
-    }, [isModalView, autoExpandComments]);
+    }, [isModalView, autoExpandComments, fetchComments]);
 
     // Analytics tracking
     const cardRef = useRef<HTMLDivElement>(null);
