@@ -8,7 +8,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
     const pathname = usePathname();
 
     return (
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
             <motion.div
                 key={pathname}
                 initial={{ opacity: 0 }}
