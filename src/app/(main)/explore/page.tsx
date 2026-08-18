@@ -39,6 +39,7 @@ export default function ExplorePage() {
                         likes:likes(count),
                         comments:comments(count)
                     `)
+                    .eq('is_hidden', false)
                     .order('created_at', { ascending: false })
                     .limit(10);
                 

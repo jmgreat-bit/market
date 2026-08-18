@@ -18,9 +18,11 @@ interface PostHeaderProps {
     expiresAt?: string | null;
     avatarUrl?: string | null;
     profileUsername?: string | null;
+    isEligibleForBoost?: boolean;
+    onBoostClick?: () => void;
 }
 
-export function PostHeader({ postId, businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl, profileUsername }: PostHeaderProps) {
+export function PostHeader({ postId, businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl, profileUsername, isEligibleForBoost, onBoostClick }: PostHeaderProps) {
     const [mounted, setMounted] = useState(false);
     
     useEffect(() => {
@@ -87,6 +89,16 @@ export function PostHeader({ postId, businessName, category, isPremium, traderTi
             )}
 
             <div className="flex items-center gap-2">
+                {isEligibleForBoost && onBoostClick && (
+                    <button 
+                        onClick={onBoostClick}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                    >
+                        <Zap className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider">Boost</span>
+                    </button>
+                )}
+
                 {isExpiringSoon && (
                     <motion.div
                         animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}

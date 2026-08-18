@@ -98,8 +98,10 @@ export function BoostModal({ postId, businessId, tier, latitude, longitude, onCl
                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                         <Check className="w-8 h-8 text-primary" />
                     </div>
-                    <h2 className="font-display font-bold text-2xl text-foreground mb-2">Boost Activated!</h2>
-                    <p className="text-muted-foreground text-sm">Your ad is now running across the network.</p>
+                    <h2 className="text-2xl font-black text-foreground mb-2">Boost Submitted!</h2>
+                    <p className="text-muted-foreground text-sm mb-6">
+                        Your boost has been submitted and is pending admin approval. You can view its status in your Ads Dashboard.
+                    </p>
                 </div>
             </div>
         );

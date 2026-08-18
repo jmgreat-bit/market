@@ -140,8 +140,9 @@ export default function PremiumPage() {
     const infoTier = TIERS.find(t => t.id === infoTierId);
 
     const handleSelect = (tierId: string, priceStr: string) => {
-        if (tierId === 'free') {
-            alert("Free tier is already assigned by default.");
+        const currentTier = profile?.trader_tier || 'free';
+        if (tierId === currentTier) {
+            alert(`You are already subscribed to the ${tierId} tier.`);
             return;
         }
         const price = parseInt(priceStr.replace(/,/g, ''));
@@ -243,12 +244,13 @@ export default function PremiumPage() {
                                             <Info className="w-4 h-4" style={{ color: tier.color }} />
                                         </button>
 
-                                        {tier.id === 'free' ? (
+                                        {(profile?.trader_tier || 'free') === tier.id ? (
                                             <button
                                                 disabled
-                                                className="flex-1 py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default"
+                                                className="flex-1 py-3 rounded-xl border border-white/15 text-sm font-bold text-muted-foreground bg-white/10 cursor-default flex items-center justify-center gap-2"
                                             >
-                                                Current Plan
+                                                <Check className="w-4 h-4" />
+                                                Active Plan
                                             </button>
                                         ) : (
                                             <button
@@ -259,7 +261,7 @@ export default function PremiumPage() {
                                                     color: '#000',
                                                 }}
                                             >
-                                                Subscribe
+                                                {tier.id === 'free' ? 'Downgrade' : 'Subscribe'}
                                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                             </button>
                                         )}
@@ -393,12 +395,12 @@ export default function PremiumPage() {
 
                             {/* Footer */}
                             <div className="p-4 border-t border-border/30 bg-secondary/30">
-                                {infoTier.id === 'free' ? (
+                                {(profile?.trader_tier || 'free') === infoTier.id ? (
                                     <button
                                         onClick={() => setInfoTierId(null)}
                                         className="w-full py-3 rounded-xl border border-border text-sm font-bold text-foreground hover:bg-secondary transition-colors"
                                     >
-                                        Got it
+                                        Active Plan
                                     </button>
                                 ) : (
                                     <button
@@ -409,7 +411,7 @@ export default function PremiumPage() {
                                         className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 group"
                                         style={{ background: infoTier.color, color: '#000' }}
                                     >
-                                        Subscribe to {infoTier.name}
+                                        {infoTier.id === 'free' ? 'Downgrade to ' : 'Subscribe to '}{infoTier.name}
                                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </button>
                                 )}

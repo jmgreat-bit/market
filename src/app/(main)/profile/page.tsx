@@ -154,6 +154,7 @@ export default function ProfilePage() {
                             poll_options:poll_options(id, post_id, label, votes_count, created_at)
                         `, { count: 'exact' })
                         .eq('business_id', biz.id)
+                        .eq('is_hidden', false)
                         .order('is_pinned', { ascending: false })
                         .order('created_at', { ascending: false });
                     

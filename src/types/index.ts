@@ -109,6 +109,7 @@ export interface Post {
   // Post type system
   post_type: PostType;
   is_pinned: boolean;
+  is_hidden?: boolean;
   // Counter post fields
   counter_value: number | null;
   counter_label: string | null;

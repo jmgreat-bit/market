@@ -65,6 +65,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                         poll_options:poll_options(id, post_id, label, votes_count, created_at)
                     `)
                     .or(`expires_at.gte.${now},expires_at.is.null`)
+                    .eq('is_hidden', false)
                     .order('is_pinned', { ascending: false })
                     .order('created_at', { ascending: false })
                     .limit(50);

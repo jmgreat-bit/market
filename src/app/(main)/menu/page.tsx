@@ -79,9 +79,11 @@ export default function MenuPage() {
                                 )}
                             </div>
                         </div>
+                        {((profile?.trader_tier && profile.trader_tier !== 'free') || profile?.is_premium) && (
                             <div className="absolute -bottom-1 -right-1 bg-primary p-1 rounded-full border-2 border-surface shadow-lg">
                                 <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
                             </div>
+                        )}
                     </div>
                     <div className="flex-1">
                         {isLoading ? (
@@ -123,21 +125,39 @@ export default function MenuPage() {
 
                 {/* Premium Upgrade CTA */}
                 {!isAdmin && profile?.role === 'trader' && (
-                <Link
-                    href="/premium"
-                    className="block w-full p-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-shadow">
-                            <Crown className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-headline font-bold text-[13px] text-foreground">Upgrade to Premium</p>
-                            <p className="text-[9px] text-amber-500 uppercase tracking-widest font-bold">Unlock pro features</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                </Link>
+                    (profile.trader_tier === 'free' && !profile.is_premium) ? (
+                        <Link
+                            href="/premium"
+                            className="block w-full p-3 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-yellow-500/5 to-amber-500/10 hover:from-amber-500/20 hover:via-yellow-500/10 hover:to-amber-500/20 transition-all group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/40 transition-shadow">
+                                    <Crown className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-headline font-bold text-[13px] text-foreground">Upgrade to Premium</p>
+                                    <p className="text-[9px] text-amber-500 uppercase tracking-widest font-bold">Unlock pro features</p>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-amber-500/60 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/premium"
+                            className="block w-full p-3 rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-blue-500/5 to-primary/10 hover:from-primary/20 hover:via-blue-500/10 hover:to-primary/20 transition-all group"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-primary to-blue-500 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
+                                    <CheckCircle2 className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-headline font-bold text-[13px] text-foreground">Premium Active</p>
+                                    <p className="text-[9px] text-primary uppercase tracking-widest font-bold">Manage subscription</p>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-primary/60 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                        </Link>
+                    )
                 )}
 
                 {/* Main Hub Section */}

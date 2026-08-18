@@ -255,18 +255,9 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                         expiresAt={post.expires_at}
                         avatarUrl={(business as any)?.profile?.avatar_url}
                         profileUsername={(business as any)?.profile?.username}
+                        isEligibleForBoost={isEligibleForBoost}
+                        onBoostClick={() => setShowBoostModal(true)}
                     />
-                    
-                    {/* Boost Button for Owner */}
-                    {isEligibleForBoost && (
-                        <button 
-                            onClick={() => setShowBoostModal(true)}
-                            className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
-                        >
-                            <Zap className="w-3.5 h-3.5" />
-                            <span className="text-[10px] font-bold uppercase tracking-wider">Boost</span>
-                        </button>
-                    )}
                 </div>
 
                 {/* Content */}

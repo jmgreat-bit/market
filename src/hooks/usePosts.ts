@@ -35,6 +35,7 @@ export function usePosts(options: UsePostsOptions = {}) {
                         comments:comments(count),
                         poll_options:poll_options(id, post_id, label, votes_count, created_at)
                     `)
+                    .eq('is_hidden', false)
                     .order('is_pinned', { ascending: false })
                     .order('created_at', { ascending: false });
 

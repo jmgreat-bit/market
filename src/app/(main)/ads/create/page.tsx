@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Target, Check, Globe, MapPin, Clock,
     ArrowRight, ArrowLeft, Megaphone,
-    Crown, BarChart3, Lock, Loader2, CheckCircle2
+    Crown, BarChart3, Lock, Loader2, CheckCircle2,
+    Image as ImageIcon, X
 } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import { getSupabaseClient } from '@/lib/supabase/client';
@@ -62,6 +63,13 @@ export default function AdsCreatePage() {
     // ── Step state ──
     const [step, setStep] = useState(0);
     const [direction, setDirection] = useState(1);
+
+    // ── Direct Ad mode ──
+    const [newAdMode, setNewAdMode] = useState(false);
+    const [newAdContent, setNewAdContent] = useState('');
+    const [newAdImage, setNewAdImage] = useState<File | null>(null);
+    const [newAdImagePreview, setNewAdImagePreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // ── Step 1: posts ──
     const [posts, setPosts] = useState<Post[]>([]);
@@ -128,8 +136,32 @@ export default function AdsCreatePage() {
     const goNext = () => { setDirection(1); setStep(s => Math.min(s + 1, 3)); };
     const goBack = () => { setDirection(-1); setStep(s => Math.max(s - 1, 0)); };
 
+    // ── Image Selection ──
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image must be less than 5MB');
+            return;
+        }
+
+        setNewAdImage(file);
+        const url = URL.createObjectURL(file);
+        setNewAdImagePreview(url);
+    };
+
+    const removeImage = () => {
+        setNewAdImage(null);
+        if (newAdImagePreview) {
+            URL.revokeObjectURL(newAdImagePreview);
+            setNewAdImagePreview(null);
+        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     const canProceed = (): boolean => {
-        if (step === 0) return selectedPostId !== null;
+        if (step === 0) return newAdMode ? newAdContent.trim().length > 0 : selectedPostId !== null;
         if (step === 1) return selectedPlacements.length > 0;
         if (step === 2) return true;
         return true;
@@ -151,11 +183,46 @@ export default function AdsCreatePage() {
 
     // ── Submit ──
     const handleSubmit = async () => {
-        if (!selectedPostId || !businessId || selectedPlacements.length === 0) return;
+        if ((!selectedPostId && !newAdMode) || !businessId || selectedPlacements.length === 0) return;
         setIsSubmitting(true);
 
         try {
             const supabase = getSupabaseClient();
+            let finalPostId = selectedPostId;
+
+            if (newAdMode) {
+                let imageUrl = null;
+                if (newAdImage) {
+                    const fileExt = newAdImage.name.split('.').pop();
+                    const fileName = `${profile?.id}-${Math.random()}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('posts')
+                        .upload(fileName, newAdImage, { cacheControl: '3600', upsert: false });
+                    
+                    if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+                    const { data: { publicUrl } } = supabase.storage.from('posts').getPublicUrl(fileName);
+                    imageUrl = publicUrl;
+                }
+
+                const { data: newPost, error: postError } = await supabase
+                    .from('posts')
+                    .insert({
+                        business_id: businessId,
+                        content: newAdContent,
+                        image_url: imageUrl,
+                        post_type: 'standard',
+                        is_pinned: false,
+                        is_hidden: true,
+                        latitude: coordinates?.latitude ?? null,
+                        longitude: coordinates?.longitude ?? null,
+                    })
+                    .select('id')
+                    .single();
+
+                if (postError || !newPost) throw new Error(`Post creation failed: ${postError?.message}`);
+                finalPostId = newPost.id;
+            }
+
             const now = new Date();
             const endsAt = new Date(now);
             endsAt.setDate(endsAt.getDate() + selectedDuration.days);
@@ -164,7 +231,7 @@ export default function AdsCreatePage() {
 
             await supabase.from('ads').insert({
                 business_id: businessId,
-                post_id: selectedPostId,
+                post_id: finalPostId,
                 placements: selectedPlacements,
                 radius_km: selectedRadius.km,
                 center_lat: coordinates?.latitude ?? -1.9441,
@@ -383,54 +450,108 @@ export default function AdsCreatePage() {
                                     <h2 className="font-display text-lg font-bold text-foreground mb-1">Select a Post to Promote</h2>
                                     <p className="text-xs text-muted-foreground mb-5">Choose one of your posts to turn into an ad.</p>
 
-                                    {postsLoading ? (
-                                        <div className="space-y-3">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="h-16 bg-secondary/50 rounded-xl animate-pulse" />
-                                            ))}
-                                        </div>
-                                    ) : posts.length === 0 ? (
-                                        <div className="text-center py-10">
-                                            <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-30" />
-                                            <p className="text-muted-foreground text-sm">No posts found. Create a post first!</p>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                                            {posts.map(post => (
-                                                <button
-                                                    key={post.id}
-                                                    onClick={() => setSelectedPostId(post.id)}
-                                                    className={`w-full text-left p-4 rounded-xl flex items-center gap-4 border transition-all ${
-                                                        selectedPostId === post.id
-                                                            ? 'bg-primary/10 border-primary/40 shadow-sm'
-                                                            : 'bg-secondary/40 border-border/20 hover:bg-secondary/70'
-                                                    }`}
-                                                >
-                                                    {/* Thumbnail */}
-                                                    <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-secondary">
-                                                        {post.image_url ? (
-                                                            <img src={post.image_url} alt="" className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <Megaphone className="w-5 h-5 text-muted-foreground" />
-                                                        )}
-                                                    </div>
-                                                    {/* Content */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-sm text-foreground truncate">
-                                                            {post.content?.substring(0, 60)}{(post.content?.length ?? 0) > 60 ? '…' : ''}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground mt-0.5">
-                                                            {new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                                        </p>
-                                                    </div>
-                                                    {/* Check */}
-                                                    {selectedPostId === post.id && (
-                                                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
-                                                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                                    <div className="flex gap-2 mb-6 p-1 bg-secondary/50 rounded-xl">
+                                        <button
+                                            onClick={() => setNewAdMode(false)}
+                                            className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${!newAdMode ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                        >
+                                            Existing Post
+                                        </button>
+                                        <button
+                                            onClick={() => setNewAdMode(true)}
+                                            className={`flex-1 py-2 rounded-lg font-bold text-sm transition-all ${newAdMode ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                        >
+                                            Create New Ad
+                                        </button>
+                                    </div>
+
+                                    {!newAdMode ? (
+                                        postsLoading ? (
+                                            <div className="space-y-3">
+                                                {[1, 2, 3].map(i => (
+                                                    <div key={i} className="h-16 bg-secondary/50 rounded-xl animate-pulse" />
+                                                ))}
+                                            </div>
+                                        ) : posts.length === 0 ? (
+                                            <div className="text-center py-10">
+                                                <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-30" />
+                                                <p className="text-muted-foreground text-sm">No posts found. Create a post first!</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                                                {posts.map(post => (
+                                                    <button
+                                                        key={post.id}
+                                                        onClick={() => setSelectedPostId(post.id)}
+                                                        className={`w-full text-left p-4 rounded-xl flex items-center gap-4 border transition-all ${
+                                                            selectedPostId === post.id
+                                                                ? 'bg-primary/10 border-primary/40 shadow-sm'
+                                                                : 'bg-secondary/40 border-border/20 hover:bg-secondary/70'
+                                                        }`}
+                                                    >
+                                                        {/* Thumbnail */}
+                                                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-secondary">
+                                                            {post.image_url ? (
+                                                                <img src={post.image_url} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Megaphone className="w-5 h-5 text-muted-foreground" />
+                                                            )}
                                                         </div>
-                                                    )}
+                                                        {/* Content */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-semibold text-sm text-foreground truncate">
+                                                                {post.content?.substring(0, 60)}{(post.content?.length ?? 0) > 60 ? '…' : ''}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                                {new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
+                                                        {/* Check */}
+                                                        {selectedPostId === post.id && (
+                                                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                                                <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <textarea
+                                                placeholder="Write your ad copy here..."
+                                                value={newAdContent}
+                                                onChange={(e) => setNewAdContent(e.target.value)}
+                                                className="w-full h-32 bg-secondary/40 border border-border/50 rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                                            />
+                                            
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                ref={fileInputRef}
+                                                onChange={handleImageSelect}
+                                            />
+                                            
+                                            {newAdImagePreview ? (
+                                                <div className="relative rounded-xl overflow-hidden border border-border/50 h-48 bg-secondary">
+                                                    <img src={newAdImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                    <button
+                                                        onClick={removeImage}
+                                                        className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center backdrop-blur-sm transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4 text-white" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border/50 rounded-xl text-muted-foreground hover:bg-secondary/40 hover:text-foreground hover:border-border transition-all"
+                                                >
+                                                    <ImageIcon className="w-5 h-5" />
+                                                    <span className="font-medium text-sm">Upload Image (Optional)</span>
                                                 </button>
-                                            ))}
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -610,9 +731,9 @@ export default function AdsCreatePage() {
                                     <div className="space-y-4 mb-6">
                                         {/* Post */}
                                         <div className="bg-secondary/40 rounded-xl p-4 border border-border/20">
-                                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2">Post</p>
+                                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-2">{newAdMode ? 'Direct Ad Copy' : 'Post'}</p>
                                             <p className="text-sm text-foreground font-medium truncate">
-                                                {selectedPost?.content?.substring(0, 80)}{(selectedPost?.content?.length ?? 0) > 80 ? '…' : ''}
+                                                {newAdMode ? newAdContent.substring(0, 80) + (newAdContent.length > 80 ? '…' : '') : (selectedPost?.content?.substring(0, 80) + ((selectedPost?.content?.length ?? 0) > 80 ? '…' : ''))}
                                             </p>
                                         </div>
 

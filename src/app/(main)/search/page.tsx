@@ -89,6 +89,7 @@ export default function SearchPage() {
                         business:business_details(business_name, category)
                     `)
                     .or(`content.ilike.%${query}%,content.ilike.%#${cleanQuery}%`)
+                    .eq('is_hidden', false)
                     .limit(5);
 
                 // 3. Search Profiles
