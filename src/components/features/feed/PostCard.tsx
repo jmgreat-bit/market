@@ -44,6 +44,33 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     const isOwner = profile?.id === post.business?.profile_id;
     const isEligibleForBoost = isOwner && (profile?.trader_tier === 'pro' || profile?.trader_tier === 'national');
 
+    const fetchComments = useCallback(async () => {
+        if (commentsFetched || commentsCount === 0) return;
+        try {
+            const { data } = await supabase
+                .from('comments')
+                .select(`
+                    *,
+                    user:profiles(full_name, username, avatar_url)
+                `)
+                .eq('post_id', post.id)
+                .order('created_at', { ascending: true });
+
+            if (data) {
+                const transformedComments = data.map((c: any) => ({
+                    ...c,
+                    user_name: c.user?.full_name || c.user?.username || 'User',
+                    user_avatar: c.user?.avatar_url
+                }));
+                setComments(transformedComments as Comment[]);
+                setCommentsCount(data.length);
+                setCommentsFetched(true);
+            }
+        } catch (err) {
+            console.warn('Failed to fetch comments:', err);
+        }
+    }, [post.id, commentsFetched, supabase, commentsCount]);
+
     useEffect(() => {
         if (isModalView || autoExpandComments) {
             setShowComments(true);
@@ -90,32 +117,6 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
             });
     }, [post.id, post.is_pinned, profile?.id, supabase]);
 
-    const fetchComments = useCallback(async () => {
-        if (commentsFetched || commentsCount === 0) return;
-        try {
-            const { data } = await supabase
-                .from('comments')
-                .select(`
-                    *,
-                    user:profiles(full_name, username, avatar_url)
-                `)
-                .eq('post_id', post.id)
-                .order('created_at', { ascending: true });
-
-            if (data) {
-                const transformedComments = data.map((c: any) => ({
-                    ...c,
-                    user_name: c.user?.full_name || c.user?.username || 'User',
-                    user_avatar: c.user?.avatar_url
-                }));
-                setComments(transformedComments as Comment[]);
-                setCommentsCount(data.length);
-                setCommentsFetched(true);
-            }
-        } catch (err) {
-            console.warn('Failed to fetch comments:', err);
-        }
-    }, [post.id, commentsFetched, supabase]);
 
     const handleToggleComments = () => {
         const next = !showComments;
