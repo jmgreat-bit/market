@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, MoreHorizontal, Flag } from 'lucide-react';
+import { Clock, MoreHorizontal, Flag, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import TraderBadge from '@/components/ui/TraderBadge';
