@@ -148,7 +148,8 @@ export default function SignupPage() {
                 return;
             }
 
-            // Sign up
+            // Sign up — save all business info in user metadata so the auth callback
+            // can create the business_details row AFTER email verification (when there IS a session)
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
@@ -157,20 +158,29 @@ export default function SignupPage() {
                         full_name: fullName,
                         username: normalizedUsername,
                         role: role,
+                        // Trader-specific fields saved in metadata for the auth callback to use
+                        ...(role === 'trader' ? {
+                            business_name: businessName.trim() || `${fullName}'s Business`,
+                            business_category: businessCategory || 'Retail',
+                            business_phone: businessPhone.trim() || null,
+                            location_lat: locationSet ? locationLat : null,
+                            location_lng: locationSet ? locationLng : null,
+                        } : {}),
                     },
                 },
             });
             if (signUpError) throw signUpError;
 
-            // Update profile
+            // Update profile (this may also fail without a session, but the DB trigger handles it)
             if (data.user) {
                 await supabase.from('profiles').update({
                     username: normalizedUsername,
                     full_name: fullName,
                 }).eq('id', data.user.id);
 
-                // If trader, create business with full details and location
-                if (role === 'trader') {
+                // Try to create business details now — this will only succeed if there's a session
+                // (i.e. email confirmation is disabled). Otherwise the auth callback handles it.
+                if (role === 'trader' && data.session) {
                     await supabase.from('business_details').upsert({
                         profile_id: data.user.id,
                         business_name: businessName.trim() || `${fullName}'s Business`,

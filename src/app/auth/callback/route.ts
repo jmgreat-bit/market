@@ -27,9 +27,19 @@ export async function GET(request: Request) {
                 // Clear the cookie
                 cookieStore.delete('intended_role');
                 
-                // If they signed up as a trader, redirect them to business setup
+                // If they signed up as a trader, create business details from metadata
                 if (intendedRole === 'trader') {
-                    next = '/setup-business';
+                    const meta = data.session.user.user_metadata;
+                    await supabase.from('business_details').upsert({
+                        profile_id: data.session.user.id,
+                        business_name: meta?.business_name || `${meta?.full_name || 'My'}'s Business`,
+                        category: meta?.business_category || 'Retail',
+                        phone: meta?.business_phone || null,
+                        latitude: meta?.location_lat || null,
+                        longitude: meta?.location_lng || null,
+                        address: meta?.location_lat ? `${meta.location_lat.toFixed(6)}, ${meta.location_lng.toFixed(6)}` : null,
+                    }, { onConflict: 'profile_id' });
+                    next = '/feed';
                 }
             } else {
                 // No cookie — this is likely an email verification callback.
@@ -48,10 +58,29 @@ export async function GET(request: Request) {
                         .eq('profile_id', data.session.user.id)
                         .single();
 
-                    // If no business details at all, or still the auto-generated placeholder name
-                    if (!biz || biz.business_name?.endsWith("'s Business")) {
+                    if (!biz) {
+                        // No row — create one from user metadata
+                        const meta = data.session.user.user_metadata;
+                        if (meta?.business_name && !meta.business_name.endsWith("'s Business")) {
+                            await supabase.from('business_details').upsert({
+                                profile_id: data.session.user.id,
+                                business_name: meta.business_name,
+                                category: meta.business_category || 'Retail',
+                                phone: meta.business_phone || null,
+                                latitude: meta.location_lat || null,
+                                longitude: meta.location_lng || null,
+                                address: meta.location_lat ? `${meta.location_lat.toFixed(6)}, ${meta.location_lng.toFixed(6)}` : null,
+                            }, { onConflict: 'profile_id' });
+                            // Business details created from metadata — go to feed
+                            next = '/feed';
+                        } else {
+                            next = '/setup-business';
+                        }
+                    } else if (!biz.business_name || biz.business_name.endsWith("'s Business")) {
+                        // Row exists but still has placeholder name
                         next = '/setup-business';
                     }
+                    // else: business_name is set and not a placeholder — keep default next (/map or /feed)
                 }
             }
             
