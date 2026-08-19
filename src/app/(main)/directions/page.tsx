@@ -37,13 +37,18 @@ export default function DirectionsPage() {
             setIsLoading(true);
             try {
                 const supabase = getSupabaseClient();
-                const { data: biz } = await supabase
+                const { data: biz, error: bizErr } = await supabase
                     .from('business_details')
-                    .select('id, address')
+                    .select('id, address, business_name')
                     .eq('profile_id', profile.id)
                     .single();
                 
-                if (!biz) {
+                if (bizErr || !biz || !biz.business_name) {
+                    if (bizErr) {
+                        await supabase
+                            .from('business_details')
+                            .upsert({ profile_id: profile.id }, { onConflict: 'profile_id' });
+                    }
                     router.replace('/setup-business');
                     return;
                 }
