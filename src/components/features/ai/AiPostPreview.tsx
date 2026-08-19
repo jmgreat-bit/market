@@ -1,6 +1,9 @@
+'use client';
+
 import { PostWithBusiness } from '@/types';
 import { X, MapPin, Store, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 interface AiPostPreviewProps {
     post: PostWithBusiness | null;
@@ -8,6 +11,7 @@ interface AiPostPreviewProps {
 }
 
 export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
+    const router = useRouter();
     if (!post) return null;
 
     const business = post.business;
@@ -86,7 +90,10 @@ export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
                         <button 
                             className="flex-1 h-12 rounded-xl bg-secondary text-foreground font-bold flex items-center justify-center gap-2 hover:bg-secondary/80 transition-colors"
                             onClick={() => {
-                                // Navigate to profile
+                                const profileId = business?.profile_id;
+                                if (profileId) {
+                                    router.push(`/u/${profileId}`);
+                                }
                                 onClose();
                             }}
                         >
@@ -96,11 +103,11 @@ export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
                         <button 
                             className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                             onClick={() => {
-                                // Navigate to post or show full map
+                                router.push(`/p/${post.id}`);
                                 onClose();
                             }}
                         >
-                            <Navigation className="w-5 h-5" />
+                            <Navigation className="w-4 h-4" />
                             View Post
                         </button>
                     </div>

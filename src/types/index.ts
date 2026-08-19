@@ -264,3 +264,32 @@ export interface TraderSubscription {
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   created_at: string;
 }
+
+// Direct Messaging System
+export interface Conversation {
+  id: string;
+  participant1_id: string;
+  participant2_id: string;
+  business_id: string | null;
+  last_message_at: string;
+  last_message_preview: string | null;
+  created_at: string;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: Profile | null;
+}
+
+export interface ConversationWithDetails extends Conversation {
+  other_participant?: Profile | null;
+  business?: BusinessDetails | null;
+  unread_count?: number;
+  last_message?: Message | null;
+}
+

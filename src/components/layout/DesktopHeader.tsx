@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Map, Newspaper, Settings, Search, Compass, Bell, Plus, Sparkles } from 'lucide-react';
+import { Map, Newspaper, Settings, Search, Compass, Bell, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -15,11 +15,19 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
 
     const tabs = [
         { href: ROUTES.FEED, label: t.nav.feed, icon: Newspaper },
-        { href: ROUTES.SEARCH, label: 'Search', icon: Search },
+        { href: ROUTES.INBOX, label: 'Messages', icon: MessageSquare },
         { href: ROUTES.EXPLORE, label: 'Explore', icon: Compass },
         { href: ROUTES.MAP, label: 'Map', icon: Map },
         { href: ROUTES.MENU, label: 'Menu', icon: Settings },
     ];
+
+    const isHidden = pathname?.startsWith('/menu/') 
+                  || pathname?.startsWith('/search') 
+                  || pathname?.startsWith('/ai') 
+                  || pathname?.startsWith('/alerts')
+                  || pathname?.startsWith('/p/')
+                  || pathname?.startsWith('/u/')
+                  || pathname?.startsWith('/inbox/');
 
     return (
         <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/40">
@@ -31,25 +39,27 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
                 </Link>
             </div>
 
-            <div className="flex gap-8">
-                {tabs.map((tab) => {
-                    const isActive = pathname === tab.href;
-                    return (
-                        <Link
-                            key={tab.href}
-                            href={tab.href}
-                            className={cn(
-                                'font-display font-bold tracking-tight transition-colors duration-300 flex items-center gap-2',
-                                isActive
-                                    ? 'text-primary'
-                                    : 'text-muted-foreground hover:text-accent'
-                            )}
-                        >
-                            {tab.label}
-                        </Link>
-                    );
-                })}
-            </div>
+            {!isHidden && (
+                <div className="flex gap-8">
+                    {tabs.map((tab) => {
+                        const isActive = pathname === tab.href;
+                        return (
+                            <Link
+                                key={tab.href}
+                                href={tab.href}
+                                className={cn(
+                                    'font-display font-bold tracking-tight transition-colors duration-300 flex items-center gap-2',
+                                    isActive
+                                        ? 'text-primary'
+                                        : 'text-muted-foreground hover:text-accent'
+                                )}
+                            >
+                                {tab.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+            )}
 
             <div className="flex items-center gap-3">
                 <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">

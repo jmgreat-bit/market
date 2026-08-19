@@ -18,7 +18,8 @@ import {
     FileText,
     Plus,
     Minus,
-    Trash2
+    Trash2,
+    Camera
 } from 'lucide-react';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { 
@@ -36,6 +37,7 @@ export default function ComposePage() {
     const { profile, isAuthenticated, isLoading: authLoading } = useUser();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const cameraInputRef = useRef<HTMLInputElement>(null);
     
     const [content, setContent] = useState('');
     const [postType, setPostType] = useState<PostType>('standard');
@@ -307,6 +309,25 @@ export default function ComposePage() {
                             />
                         </div>
                     </div>
+                    
+                    {/* Category Hash Chips */}
+                    <div className="px-4 pb-4 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest shrink-0">Tags:</span>
+                        {['#Food', '#Housing', '#Car', '#Retail', '#Service', '#Event'].map(cat => (
+                            <button
+                                key={cat}
+                                type="button"
+                                onClick={() => {
+                                    if (!content.toLowerCase().includes(cat.toLowerCase())) {
+                                        setContent(prev => prev ? `${prev} ${cat}` : cat);
+                                    }
+                                }}
+                                className="shrink-0 px-2.5 py-1 rounded-full bg-secondary/80 border border-border/50 text-xs font-semibold text-foreground/80 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
 
                     {/* Counter Input */}
                     {postType === 'counter' && (
@@ -406,11 +427,27 @@ export default function ComposePage() {
                                 className="hidden" 
                                 onChange={handleImageSelect}
                             />
+                            <input 
+                                ref={cameraInputRef}
+                                type="file" 
+                                accept="image/jpeg,image/png,image/webp,image/gif" 
+                                capture="environment"
+                                className="hidden" 
+                                onChange={handleImageSelect}
+                            />
                             <button 
                                 onClick={() => fileInputRef.current?.click()}
                                 className="p-2 rounded-full hover:bg-primary/10 transition-colors"
+                                title="Upload Image"
                             >
                                 <ImageIcon className="w-5 h-5" />
+                            </button>
+                            <button 
+                                onClick={() => cameraInputRef.current?.click()}
+                                className="p-2 rounded-full hover:bg-primary/10 transition-colors"
+                                title="Take Photo"
+                            >
+                                <Camera className="w-5 h-5" />
                             </button>
                         </div>
                         <div className={`text-xs font-medium flex flex-col items-end`}>

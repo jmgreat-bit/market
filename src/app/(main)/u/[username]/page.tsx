@@ -96,7 +96,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     }
 
     const isTrader = profile.role === 'trader';
-    const displayName = profile.full_name || resolvedParams.username || 'Navigator';
+    const displayName = (isTrader && businessInfo?.business_name) 
+        ? businessInfo.business_name 
+        : (profile.full_name || resolvedParams.username || 'Navigator');
     
     let isVerifiedToday = false;
     let daysSinceVerified = null;
@@ -153,7 +155,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                                     {isTrader && <TraderBadge tier={profile.trader_tier || 'free'} />}
                                 </h1>
                                 <p className="text-muted-foreground text-sm font-medium mt-1">
-                                    @{profile.username}
+                                    @{profile.username} {isTrader && businessInfo?.category && `• ${businessInfo.category}`}
                                 </p>
                             </div>
                         </div>
@@ -207,6 +209,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                     <div className="flex flex-wrap gap-3 mb-10 pb-6 border-b border-border/30">
                         <ContactButtons 
                             businessId={businessInfo.id}
+                            targetProfileId={profile.id}
                             phone={businessInfo.phone}
                             websiteUrl={businessInfo.website_url}
                         />
@@ -275,7 +278,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                             </div>
                             
                             {/* Reviews Component */}
-                            {isReviewsEnabled && (
+                            {isReviewsEnabled && businessInfo.business_name && (
                                 <div className="mt-6">
                                     <ProfileReviews 
                                         businessId={businessInfo.id}

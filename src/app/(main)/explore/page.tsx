@@ -9,17 +9,29 @@ import { useAds } from '@/hooks/useAds';
 import { PostWithBusiness, CommercialHub } from '@/types';
 import Link from 'next/link';
 
+let cachedTrending: PostWithBusiness[] | null = null;
+let cachedHubs: CommercialHub[] | null = null;
+let lastExploreFetch = 0;
+const EXPLORE_CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
 export default function ExplorePage() {
-    const [trendingPosts, setTrendingPosts] = useState<PostWithBusiness[]>([]);
-    const [hubs, setHubs] = useState<CommercialHub[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [trendingPosts, setTrendingPosts] = useState<PostWithBusiness[]>(cachedTrending || []);
+    const [hubs, setHubs] = useState<CommercialHub[]>(cachedHubs || []);
+    const [isLoading, setIsLoading] = useState(!cachedTrending);
     const [error, setError] = useState<string | null>(null);
     const { ads: exploreAds } = useAds('explore');
 
     useEffect(() => {
         async function fetchTrending() {
+            if (cachedTrending && Date.now() - lastExploreFetch < EXPLORE_CACHE_TTL) {
+                setTrendingPosts(cachedTrending);
+                setHubs(cachedHubs || []);
+                setIsLoading(false);
+                return;
+            }
+
             try {
-                setIsLoading(true);
+                if (!cachedTrending) setIsLoading(true);
                 const supabase = getSupabaseClient();
 
                 // Fetch Commercial Hubs
@@ -57,10 +69,15 @@ export default function ExplorePage() {
                     (b.likes_count + b.comments_count) - (a.likes_count + a.comments_count)
                 );
 
-                setTrendingPosts(enriched as unknown as PostWithBusiness[]);
+                const finalPosts = enriched as unknown as PostWithBusiness[];
+                cachedTrending = finalPosts;
+                if (hubsData) cachedHubs = hubsData;
+                lastExploreFetch = Date.now();
+
+                setTrendingPosts(finalPosts);
             } catch (err) {
                 console.error('Failed to fetch trending:', err);
-                setError('Failed to load trending pulses');
+                if (!cachedTrending) setError('Failed to load posts');
             } finally {
                 setIsLoading(false);
             }

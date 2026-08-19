@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Share2, Bookmark, Phone } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Phone, MessageSquare, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
+import { useConversations } from '@/hooks/useConversations';
+import { useRouter } from 'next/navigation';
 
 interface PostActionsProps {
     likesCount: number;
@@ -18,10 +20,15 @@ interface PostActionsProps {
     postSlug?: string;
     postContent?: string;
     phone?: string | null;
+    businessProfileId?: string | null;
+    businessId?: string | null;
 }
 
-export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postSlug, postContent, phone }: PostActionsProps) {
-    const { profile } = useUser();
+export function PostActions({ likesCount, isLiked, commentsCount, showComments, onLike, onToggleComments, postId, postSlug, postContent, phone, businessProfileId, businessId }: PostActionsProps) {
+    const { profile, user, isAuthenticated } = useUser();
+    const { getOrCreateConversation } = useConversations();
+    const router = useRouter();
+    const [isStartingChat, setIsStartingChat] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [isCheckingBookmark, setIsCheckingBookmark] = useState(true);
     const [showShareToast, setShowShareToast] = useState(false);
@@ -122,9 +129,31 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
         }
     }, [isSaved, profile?.id, postId]);
 
+    const handleInAppMessage = async () => {
+        if (!isAuthenticated) {
+            router.push('/auth/login');
+            return;
+        }
+
+        if (!businessProfileId || user?.id === businessProfileId) return;
+
+        try {
+            setIsStartingChat(true);
+            const convId = await getOrCreateConversation(businessProfileId, businessId);
+            router.push(`/inbox/${convId}?refPostId=${postId}`);
+        } catch (err: any) {
+            console.error('Failed to open chat from post:', err);
+            alert(err.message || 'Could not start conversation with this business.');
+        } finally {
+            setIsStartingChat(false);
+        }
+    };
+
+    const isOwner = user?.id === businessProfileId;
+
     return (
         <div className="relative px-3 py-1.5 flex flex-wrap items-center justify-between gap-y-2 border-t border-[rgba(72,72,73,0.15)] mt-1 pt-2">
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                 {/* Like Button */}
                 <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -157,6 +186,24 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
                     <span>{commentsCount > 0 ? commentsCount : 'Comment'}</span>
                 </motion.button>
 
+                {/* In-App Direct Message Button */}
+                {!isOwner && businessProfileId && (
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleInAppMessage}
+                        disabled={isStartingChat}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-300 font-sans font-medium text-[13px] text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20 shadow-geo-glow"
+                    >
+                        {isStartingChat ? (
+                            <Loader2 className="w-[16px] h-[16px] animate-spin" />
+                        ) : (
+                            <MessageSquare className="w-[16px] h-[16px]" />
+                        )}
+                        <span>Message</span>
+                    </motion.button>
+                )}
+
                 {/* WhatsApp Contact Button */}
                 {phone && (
                     <motion.button
@@ -171,7 +218,7 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-300 font-sans font-medium text-[13px] text-green-500 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 shadow-[0_0_12px_rgba(34,197,94,0.15)]"
                     >
                         <Phone className="w-[16px] h-[16px] fill-current" />
-                        <span>Contact</span>
+                        <span>WhatsApp</span>
                     </motion.button>
                 )}
             </div>

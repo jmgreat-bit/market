@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useUser } from '@/hooks/useUser';
+import { useConversations } from '@/hooks/useConversations';
 import { useSettings, Theme, Language } from '@/contexts/SettingsContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ import {
     CheckCircle2,
     Shield,
     MessageCircleQuestion,
+    MessageSquare,
     Compass,
     Crown,
     Radar,
@@ -32,6 +34,7 @@ import {
 
 export default function MenuPage() {
     const { profile, user, isLoading, signOut, isAuthenticated } = useUser();
+    const { totalUnread } = useConversations();
     const { isAdmin } = useAdmin();
     const { theme, setTheme, language, setLanguage, t } = useSettings();
     const router = useRouter();
@@ -164,6 +167,17 @@ export default function MenuPage() {
                 <div className="space-y-3">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Navigation Hub</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <MenuButton 
+                            icon={<MessageSquare className="w-5 h-5" />} 
+                            label="Direct Inquiries" 
+                            desc={isTrader ? "Customer chats & questions" : "Merchant messages"} 
+                            href={ROUTES.INBOX}
+                            badge={totalUnread > 0 ? (
+                                <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-black shadow-geo-glow animate-pulse">
+                                    {totalUnread} new
+                                </span>
+                            ) : undefined}
+                        />
                         <MenuButton 
                             icon={<Bookmark className="w-5 h-5" />} 
                             label="Saved Posts" 
@@ -351,7 +365,7 @@ export default function MenuPage() {
     );
 }
 
-function MenuButton({ icon, label, desc, locked = false, href }: { icon: any, label: string, desc: string, locked?: boolean, href?: string }) {
+function MenuButton({ icon, label, desc, locked = false, href, badge }: { icon: any, label: string, desc: string, locked?: boolean, href?: string, badge?: React.ReactNode }) {
     const Component = href && !locked ? Link : 'button';
     return (
         <Component 
@@ -368,7 +382,10 @@ function MenuButton({ icon, label, desc, locked = false, href }: { icon: any, la
                 {icon}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="font-headline font-bold text-[13px] text-foreground mb-0.5 truncate">{label}</p>
+                <div className="flex items-center justify-between gap-1 mb-0.5">
+                    <p className="font-headline font-bold text-[13px] text-foreground truncate">{label}</p>
+                    {badge}
+                </div>
                 <p className="text-[9px] text-muted-foreground uppercase tracking-widest truncate">{desc}</p>
             </div>
         </Component>

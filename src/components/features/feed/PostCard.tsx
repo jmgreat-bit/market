@@ -288,6 +288,8 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                     postSlug={(post as any).slug}
                     postContent={post.content}
                     phone={business?.phone}
+                    businessProfileId={business?.profile_id}
+                    businessId={business?.id}
                 />
 
                 {/* Comments Section */}

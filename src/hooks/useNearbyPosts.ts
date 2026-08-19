@@ -37,17 +37,27 @@ interface UseNearbyPostsResult {
     hasNearby: boolean;
     radiusUsed: number;
 }
+let cachedPosts: PostWithBusiness[] | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
 export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsResult {
-    const [allPosts, setAllPosts] = useState<PostWithBusiness[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [allPosts, setAllPosts] = useState<PostWithBusiness[]>(cachedPosts || []);
+    const [isLoading, setIsLoading] = useState(!cachedPosts);
     const [error, setError] = useState<string | null>(null);
 
     // Fetch all posts once
     useEffect(() => {
         async function fetchPosts() {
+            // Use cache if fresh
+            if (cachedPosts && Date.now() - lastFetchTime < CACHE_TTL) {
+                setAllPosts(cachedPosts);
+                setIsLoading(false);
+                return;
+            }
+
             try {
-                setIsLoading(true);
+                if (!cachedPosts) setIsLoading(true);
                 setError(null);
 
                 const supabase = getSupabaseClient();
@@ -112,10 +122,12 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                 const adPostIds = new Set(adPosts.map((p: any) => p.id));
                 const finalPosts = [...adPosts, ...enriched.filter((p: any) => !adPostIds.has(p.id))];
 
+                cachedPosts = finalPosts;
+                lastFetchTime = Date.now();
                 setAllPosts(finalPosts);
             } catch (err) {
                 console.error('Failed to fetch posts:', err);
-                setError('Failed to load posts');
+                if (!cachedPosts) setError('Failed to load posts');
             } finally {
                 setIsLoading(false);
             }

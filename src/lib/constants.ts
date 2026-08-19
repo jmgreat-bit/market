@@ -41,6 +41,7 @@ export const ROUTES = {
     PREMIUM: '/premium',
     ADS_CREATE: '/ads/create',
     AI: '/ai',
+    INBOX: '/inbox',
 } as const;
 
 // Post/Shout settings
