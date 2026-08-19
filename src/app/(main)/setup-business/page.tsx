@@ -95,30 +95,35 @@ export default function SetupBusinessPage() {
             try {
                 const { error: bizError } = await supabase
                     .from('business_details')
-                    .update({
+                    .upsert({
+                        profile_id: user?.id,
                         business_name: formData.name,
                         category: formData.category,
                         bio: formData.bio,
                         phone: formData.phone.trim() || null,
                         website_url: formData.website.trim() || null,
                         is_reviews_enabled: formData.is_reviews_enabled,
-                        ...(matchedHubId ? { hub_id: matchedHubId } : {})
-                    })
-                    .eq('profile_id', user?.id);
+                        ...(matchedHubId ? { hub_id: matchedHubId } : {}),
+                        // Retain existing lat/lng if we are just upserting
+                        ...(bizData?.latitude ? { latitude: bizData.latitude } : {}),
+                        ...(bizData?.longitude ? { longitude: bizData.longitude } : {})
+                    }, { onConflict: 'profile_id' });
                 if (bizError) throw bizError;
             } catch (e) {
                 // Fallback if column doesn't exist yet
                 const { error: bizError } = await supabase
                     .from('business_details')
-                    .update({
+                    .upsert({
+                        profile_id: user?.id,
                         business_name: formData.name,
                         category: formData.category,
                         bio: formData.bio,
                         phone: formData.phone.trim() || null,
                         website_url: formData.website.trim() || null,
-                        ...(matchedHubId ? { hub_id: matchedHubId } : {})
-                    })
-                    .eq('profile_id', user?.id);
+                        ...(matchedHubId ? { hub_id: matchedHubId } : {}),
+                        ...(bizData?.latitude ? { latitude: bizData.latitude } : {}),
+                        ...(bizData?.longitude ? { longitude: bizData.longitude } : {})
+                    }, { onConflict: 'profile_id' });
                 if (bizError) throw bizError;
             }
 
