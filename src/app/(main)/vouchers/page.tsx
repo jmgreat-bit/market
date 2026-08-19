@@ -1,6 +1,6 @@
 'use client';
 
-import { Timer, QrCode } from 'lucide-react';
+import { Timer, QrCode, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,17 @@ export default function VouchersIntelPage() {
     return (
         <div className="bg-surface text-foreground font-sans min-h-screen selection:bg-primary/30 selection:text-primary">
             {/* Main Content Canvas */}
-            <main className="pt-8 pb-32 px-6 max-w-4xl mx-auto flex flex-col gap-8">
+            <main className="pt-6 pb-32 px-6 max-w-4xl mx-auto flex flex-col gap-6">
+                {/* Top Navigation Bar */}
+                <div className="flex items-center mb-2">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-foreground text-sm font-bold transition-all"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Back</span>
+                    </button>
+                </div>
                 {/* Header & Tabs */}
                 <div className="flex flex-col gap-6">
                     <h2 className="font-display text-4xl font-bold text-foreground leading-tight tracking-tight">

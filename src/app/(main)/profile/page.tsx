@@ -32,7 +32,8 @@ import {
     Twitter,
     Instagram,
     Sparkles,
-    ChevronRight
+    ChevronRight,
+    ChevronLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -369,7 +370,20 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center pb-32 md:pb-12">
-            <div className="w-full max-w-2xl mx-auto px-6 pt-8 flex flex-col gap-6">
+            {/* Top Navigation Bar */}
+            <div className="w-full max-w-2xl mx-auto px-6 pt-6 flex items-center justify-between">
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-foreground text-sm font-bold transition-all"
+                >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Back</span>
+                </button>
+                <h1 className="font-display font-black text-lg text-foreground">Profile</h1>
+                <div className="w-[84px]" /> {/* Balance spacer */}
+            </div>
+
+            <div className="w-full max-w-2xl mx-auto px-6 pt-4 flex flex-col gap-6">
                 
                 {/* Profile Card */}
                 <div className="flex flex-col items-center py-8 bg-card rounded-2xl border border-border/30 relative overflow-hidden">

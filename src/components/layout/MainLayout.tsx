@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { TabNavigation } from './TabNavigation';
 import { PageTransition } from './PageTransition';
 import Link from 'next/link';
@@ -16,7 +17,11 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
     const { profile, signOut } = useUser();
-    const [hasUnreadAlerts, setHasUnreadAlerts] = useState(false);
+    const pathname = usePathname();
+    const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
+
+    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, '/'];
+    const isMainTab = MAIN_TABS.includes(pathname || '');
 
     // Auto-reload the app if it was backgrounded/suspended by the OS for more than 5 minutes.
     // This prevents Supabase auth sessions and fetch connection pools from silently hanging.
@@ -63,11 +68,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             .eq('user_id', profile.id)
             .eq('is_read', false)
             .then(({ count }: { count: number | null }) => {
-                setHasUnreadAlerts((count ?? 0) > 0);
+                setUnreadAlertsCount(count ?? 0);
             })
             .catch(() => {
-                // alerts table may not exist yet — keep dot hidden
-                setHasUnreadAlerts(false);
+                // alerts table may not exist yet — keep badge hidden
+                setUnreadAlertsCount(0);
             });
     }, [profile?.id]);
 
@@ -123,51 +128,55 @@ export function MainLayout({ children }: MainLayoutProps) {
 
                 <div className="relative z-10 h-full flex flex-col min-h-screen">
                     {/* Mobile Top Bar - Logo + Notification Bell */}
-                    <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-5 py-3.5 bg-background/80 backdrop-blur-2xl border-b border-border/10">
-                        <Link href={ROUTES.FEED} className="flex items-center">
-                            <h1 className="font-display font-black text-primary tracking-tighter text-xl">
-                                MarketPLC
-                            </h1>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                            {profile?.role === 'trader' && (
-                                <Link
-                                    href={ROUTES.COMPOSE}
-                                    className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-geo-glow"
-                                >
-                                    <Plus className="w-5 h-5" />
-                                </Link>
-                            )}
-                            <Link
-                                href={ROUTES.SEARCH}
-                                className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
-                            >
-                                <Search className="w-5 h-5" />
+                    {isMainTab && (
+                        <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-5 py-3.5 bg-background/80 backdrop-blur-2xl border-b border-border/10">
+                            <Link href={ROUTES.FEED} className="flex items-center">
+                                <h1 className="font-display font-black text-primary tracking-tighter text-xl">
+                                    MarketPLC
+                                </h1>
                             </Link>
-                            <Link
-                                href="/ai"
-                                suppressHydrationWarning
-                                className="relative w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all"
-                            >
-                                <Sparkles className="w-5 h-5" />
-                            </Link>
-                            <Link
-                                href={ROUTES.ALERTS}
-                                className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
-                            >
-                                <Bell className="w-5 h-5" />
-                                {/* Notification dot — only shown when there are real unread alerts */}
-                                {hasUnreadAlerts && (
-                                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-destructive rounded-full border border-background" />
+                            <div className="flex items-center gap-2">
+                                {profile?.role === 'trader' && (
+                                    <Link
+                                        href={ROUTES.COMPOSE}
+                                        className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-geo-glow"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                    </Link>
                                 )}
-                            </Link>
-                        </div>
-                    </header>
+                                <Link
+                                    href={ROUTES.SEARCH}
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                                >
+                                    <Search className="w-5 h-5" />
+                                </Link>
+                                <Link
+                                    href="/ai"
+                                    suppressHydrationWarning
+                                    className="relative w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all"
+                                >
+                                    <Sparkles className="w-5 h-5" />
+                                </Link>
+                                <Link
+                                    href={ROUTES.ALERTS}
+                                    className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                                >
+                                    <Bell className="w-5 h-5" />
+                                    {/* Notification badge */}
+                                    {unreadAlertsCount > 0 && (
+                                        <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-destructive text-[10px] font-black text-white rounded-full flex items-center justify-center border border-background leading-none">
+                                            {unreadAlertsCount > 99 ? '99+' : unreadAlertsCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            </div>
+                        </header>
+                    )}
 
-                    <TabNavigation hasUnreadAlerts={hasUnreadAlerts} />
+                    <TabNavigation unreadAlertsCount={unreadAlertsCount} />
 
                     {/* Main content area - adjusted for fixed nav */}
-                    <main className="pt-[4.5rem] md:pt-20 pb-20 md:pb-0 flex-1 relative">
+                    <main className={`flex-1 relative ${isMainTab ? 'pt-[4.5rem] md:pt-20 pb-20 md:pb-0' : 'pt-0 md:pt-20 pb-0 md:pb-0'}`}>
                         <PageTransition>
                             {children}
                         </PageTransition>

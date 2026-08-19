@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
     Eye, TrendingUp, Activity, Footprints,
     ArrowRight, Zap, Lock, Heart, MessageCircle,
-    Navigation, Calendar, BarChart3, Crown, RefreshCw, Users, Search as SearchIcon, Loader2, CheckCircle2, AlertTriangle
+    Navigation, Calendar, BarChart3, Crown, RefreshCw, Users, Search as SearchIcon, Loader2, CheckCircle2, AlertTriangle, ChevronLeft
 } from 'lucide-react';
 import { useAnalytics, TimeFilter } from '@/hooks/useAnalytics';
 import { useUser } from '@/hooks/useUser';

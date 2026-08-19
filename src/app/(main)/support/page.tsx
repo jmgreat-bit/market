@@ -111,7 +111,20 @@ function SupportContent() {
     };
 
     return (
-        <div className="max-w-xl mx-auto px-6 pt-10 space-y-8">
+        <div className="max-w-xl mx-auto px-6 pt-6 space-y-8">
+            {/* Top Navigation Bar */}
+            <div className="flex items-center mb-6">
+                {step === 'category' || step === 'success' ? (
+                    <button
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-foreground text-sm font-bold transition-all"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back</span>
+                    </button>
+                ) : null}
+            </div>
+
             {/* Header */}
             <div className="flex items-center gap-4">
                 {step === 'form' && (

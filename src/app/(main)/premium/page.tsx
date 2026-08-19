@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Crown, BadgeCheck, Sparkles, Zap, Globe,
     BarChart3, MessageSquare, Target, Bot,
-    X, Check, ArrowRight, Info
+    X, Check, ArrowRight, Info, ChevronLeft
 } from 'lucide-react';
 import { TraderTier, AiPackage } from '@/types';
 import { MomoPayModal } from '@/components/features/premium/MomoPayModal';
@@ -152,7 +152,17 @@ export default function PremiumPage() {
 
     return (
         <div className="min-h-screen bg-surface text-foreground pb-32 md:pb-12">
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 py-24 md:py-12">
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-12 pt-6 pb-24 md:pb-12">
+                {/* Top Navigation Bar */}
+                <div className="flex items-center mb-12">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-foreground text-sm font-bold transition-all"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Back</span>
+                    </button>
+                </div>
 
                 {/* ── Header ────────────────────────────── */}
                 <motion.header

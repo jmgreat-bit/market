@@ -8,7 +8,7 @@ import { ROUTES } from '@/lib/constants';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useUser } from '@/hooks/useUser';
 
-export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: boolean }) {
+export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: number }) {
     const pathname = usePathname();
     const { t } = useSettings();
     const { profile } = useUser();
@@ -56,32 +56,36 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
                 </div>
             )}
 
-            <div className="flex items-center gap-3">
-                <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <Search className="w-5 h-5" />
-                </Link>
-
-                <Link href="/ai" suppressHydrationWarning className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all">
-                    <Sparkles className="w-5 h-5" />
-                </Link>
-                
-                <Link href={ROUTES.ALERTS} className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <Bell className="w-5 h-5" />
-                    {hasUnreadAlerts && (
-                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-destructive rounded-full border border-background" />
-                    )}
-                </Link>
-
-                {profile?.role === 'trader' && (
-                    <Link 
-                        href={ROUTES.COMPOSE} 
-                        className="ml-2 flex items-center gap-2 bg-primary text-primary-foreground font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <span className="font-display">Create Post</span>
+            {isMainTab && (
+                <div className="flex items-center gap-3">
+                    <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                        <Search className="w-5 h-5" />
                     </Link>
-                )}
-            </div>
+
+                    <Link href="/ai" suppressHydrationWarning className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all">
+                        <Sparkles className="w-5 h-5" />
+                    </Link>
+                    
+                    <Link href={ROUTES.ALERTS} className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                        <Bell className="w-5 h-5" />
+                        {unreadAlertsCount > 0 && (
+                            <span className="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 bg-destructive text-[10px] font-black text-white rounded-full flex items-center justify-center border border-background leading-none">
+                                {unreadAlertsCount > 99 ? '99+' : unreadAlertsCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    {profile?.role === 'trader' && (
+                        <Link 
+                            href={ROUTES.COMPOSE} 
+                            className="ml-2 flex items-center gap-2 bg-primary text-primary-foreground font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
+                        >
+                            <Plus className="w-4 h-4" />
+                            <span className="font-display">Create Post</span>
+                        </Link>
+                    )}
+                </div>
+            )}
         </nav>
     );
 }

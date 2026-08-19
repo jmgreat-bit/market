@@ -4,13 +4,13 @@ import { DesktopHeader } from './DesktopHeader';
 import { MobileTabBar } from './MobileTabBar';
 
 interface TabNavigationProps {
-    hasUnreadAlerts?: boolean;
+    unreadAlertsCount?: number;
 }
 
-export function TabNavigation({ hasUnreadAlerts = false }: TabNavigationProps) {
+export function TabNavigation({ unreadAlertsCount = 0 }: TabNavigationProps) {
     return (
         <>
-            <DesktopHeader hasUnreadAlerts={hasUnreadAlerts} />
+            <DesktopHeader unreadAlertsCount={unreadAlertsCount} />
             <MobileTabBar />
         </>
     );
