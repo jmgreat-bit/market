@@ -130,7 +130,14 @@ export default function ExplorePage() {
                                 <Link key={hub.id} href={`/explore/hub/${hub.id}`} className="snap-start flex-none w-64 md:w-72 bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm hover:shadow-md transition-all group">
                                     <div className="h-32 bg-secondary relative overflow-hidden">
                                         {hub.image_url ? (
-                                            <img src={hub.image_url} alt={hub.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <img 
+                                                src={hub.image_url} 
+                                                alt={hub.name} 
+                                                onError={(e) => { 
+                                                    (e.currentTarget as HTMLElement).style.display = 'none'; 
+                                                }}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                            />
                                         ) : (
                                             <div className="w-full h-full geo-gradient opacity-20" />
                                         )}

@@ -18,6 +18,7 @@ import {
     HelpCircle, 
     FileText, 
     ChevronRight,
+    ChevronLeft,
     Moon,
     Sun,
     Monitor,
@@ -28,7 +29,6 @@ import {
     MessageSquare,
     Compass,
     Crown,
-    Radar,
     AlertTriangle
 } from 'lucide-react';
 
@@ -64,7 +64,20 @@ export default function MenuPage() {
 
     return (
         <div className="min-h-screen bg-surface text-foreground pb-32">
-            <div className="max-w-2xl mx-auto px-6 pt-10 space-y-8">
+            {/* Top Navigation Bar */}
+            <div className="max-w-2xl mx-auto px-6 pt-6 flex items-center justify-between">
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary hover:bg-secondary/80 text-foreground text-sm font-bold transition-all"
+                >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Back</span>
+                </button>
+                <h1 className="font-display font-black text-lg text-foreground">Menu</h1>
+                <div className="w-16" /> {/* Balance spacer */}
+            </div>
+
+            <div className="max-w-2xl mx-auto px-6 pt-6 space-y-8">
                 
                 {/* Profile Header HUD */}
                 <div className="flex items-center gap-5">
@@ -189,12 +202,6 @@ export default function MenuPage() {
                             label="Analytics" 
                             desc={isTrader ? "Business insights" : "Discovery stats"} 
                             href="/analytics"
-                        />
-                        <MenuButton 
-                            icon={<Radar className="w-5 h-5" />} 
-                            label="Intel Settings" 
-                            desc="Proximity & alerts" 
-                            href="/settings/intel"
                         />
                         <MenuButton 
                             icon={<User className="w-5 h-5" />} 

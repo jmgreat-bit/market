@@ -21,15 +21,10 @@ export function MobileTabBar() {
         { href: ROUTES.MENU, label: 'Menu', icon: Settings },
     ];
 
-    const isHidden = pathname?.startsWith('/menu/') 
-                  || pathname?.startsWith('/search') 
-                  || pathname?.startsWith('/ai') 
-                  || pathname?.startsWith('/alerts')
-                  || pathname?.startsWith('/p/')
-                  || pathname?.startsWith('/u/')
-                  || pathname?.startsWith('/inbox/');
+    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, '/'];
+    const isMainTab = MAIN_TABS.includes(pathname || '');
 
-    if (isHidden) return null;
+    if (!isMainTab) return null;
 
     return (
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 pb-safe bg-background/80 backdrop-blur-2xl border-t border-border/50 shadow-[0_-4px_32px_rgba(0,0,0,0.05)]">

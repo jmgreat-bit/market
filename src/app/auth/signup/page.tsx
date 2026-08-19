@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { ROUTES, USERNAME_MAX_LENGTH, FULLNAME_MAX_LENGTH } from '@/lib/constants';
+import { ROUTES, USERNAME_MAX_LENGTH, FULLNAME_MAX_LENGTH, BUSINESS_CATEGORIES } from '@/lib/constants';
 import { UserRole } from '@/types';
 import { useSettings } from '@/contexts/SettingsContext';
 import dynamic from 'next/dynamic';
@@ -26,7 +26,10 @@ import {
     Eye,
     EyeOff,
     MapPin,
-    ChevronRight
+    ChevronRight,
+    Building2,
+    Phone,
+    Briefcase
 } from 'lucide-react';
 
 const OnboardingMap = dynamic(
@@ -40,7 +43,7 @@ const OnboardingMap = dynamic(
 export default function SignupPage() {
     const router = useRouter();
     const { t } = useSettings();
-    const [step, setStep] = useState<'role' | 'details' | 'location' | 'verify-email'>('role');
+    const [step, setStep] = useState<'role' | 'details' | 'business' | 'location' | 'verify-email'>('role');
     const [role, setRole] = useState<UserRole>('client');
     const [fullName, setFullName] = useState('');
     const [username, setUsername] = useState('');
@@ -51,6 +54,11 @@ export default function SignupPage() {
     const [error, setError] = useState<string | null>(null);
     const [agreeToTerms, setAgreeToTerms] = useState(false);
     
+    // Business profile state for traders
+    const [businessName, setBusinessName] = useState('');
+    const [businessCategory, setBusinessCategory] = useState<string>(BUSINESS_CATEGORIES[0]);
+    const [businessPhone, setBusinessPhone] = useState('');
+
     // Location state for traders
     const [locationLat, setLocationLat] = useState(-1.9441);
     const [locationLng, setLocationLng] = useState(30.0619);
@@ -101,12 +109,22 @@ export default function SignupPage() {
         if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
         if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) { setError('Password must contain at least one letter and one number'); return; }
 
-        // If trader, go to location step; if explorer, submit directly
+        // If trader, go to business details step; if explorer, submit directly
         if (role === 'trader') {
-            setStep('location');
+            setStep('business');
         } else {
             handleSubmit();
         }
+    };
+
+    const handleBusinessNext = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        if (!businessName.trim()) {
+            setError('Business name is required');
+            return;
+        }
+        setStep('location');
     };
 
     const handleSubmit = async () => {
@@ -151,15 +169,16 @@ export default function SignupPage() {
                     full_name: fullName,
                 }).eq('id', data.user.id);
 
-                // If trader, create business with location as their stored address
-                if (role === 'trader' && locationSet) {
+                // If trader, create business with full details and location
+                if (role === 'trader') {
                     await supabase.from('business_details').upsert({
                         profile_id: data.user.id,
-                        business_name: fullName + "'s Business",
-                        category: 'Other',
-                        latitude: locationLat,
-                        longitude: locationLng,
-                        address: `${locationLat.toFixed(6)}, ${locationLng.toFixed(6)}`,
+                        business_name: businessName.trim() || `${fullName}'s Business`,
+                        category: businessCategory || 'Retail',
+                        phone: businessPhone.trim() || null,
+                        latitude: locationSet ? locationLat : null,
+                        longitude: locationSet ? locationLng : null,
+                        address: locationSet ? `${locationLat.toFixed(6)}, ${locationLng.toFixed(6)}` : null,
                     });
                 }
             }
@@ -169,12 +188,8 @@ export default function SignupPage() {
                 // Show a success state asking the user to verify email
                 setStep('verify-email');
             } else {
-                // Redirect traders to setup-business to fill remaining details, explorers to feed
-                if (role === 'trader') {
-                    router.push('/setup-business');
-                } else {
-                    router.push(ROUTES.FEED);
-                }
+                // Explore or Trader both go to feed or profile
+                router.push(ROUTES.FEED);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to sign up');
@@ -183,8 +198,14 @@ export default function SignupPage() {
         }
     };
 
-    const getStepIndex = () => step === 'role' ? 0 : step === 'details' ? 1 : 2;
-    const totalSteps = role === 'trader' ? 3 : 2;
+    const getStepIndex = () => {
+        if (step === 'role') return 0;
+        if (step === 'details') return 1;
+        if (step === 'business') return 2;
+        if (step === 'location') return 3;
+        return 0;
+    };
+    const totalSteps = role === 'trader' ? 4 : 2;
 
     return (
         <div className="min-h-screen flex flex-col bg-surface">
@@ -195,7 +216,8 @@ export default function SignupPage() {
                     size="sm"
                     className="gap-2 text-muted-foreground hover:text-foreground"
                     onClick={() => {
-                        if (step === 'location') setStep('details');
+                        if (step === 'location') setStep('business');
+                        else if (step === 'business') setStep('details');
                         else if (step === 'details') setStep('role');
                         else router.push(ROUTES.LOGIN);
                     }}
@@ -443,79 +465,159 @@ export default function SignupPage() {
                                 </Button>
                             </form>
                         </Card>
+                    ) : step === 'business' ? (
+                        /* Business Details Form */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
+                            <form onSubmit={handleBusinessNext} className="space-y-4">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="w-8 h-8 rounded-full bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground shrink-0"
+                                        onClick={() => setStep('details')}
+                                    >
+                                        <ArrowLeft className="w-4 h-4" />
+                                    </Button>
+                                    <div>
+                                        <h2 className="text-xl font-bold font-headline tracking-tight text-foreground leading-none mb-1">Business Info</h2>
+                                        <p className="text-muted-foreground text-xs">Set up your store identity</p>
+                                    </div>
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {/* Business Name */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="bizName" className="text-foreground text-sm">Business / Store Name</Label>
+                                    <div className="relative">
+                                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="bizName"
+                                            type="text"
+                                            placeholder="e.g. Amazing Electronics"
+                                            value={businessName}
+                                            onChange={(e) => setBusinessName(e.target.value)}
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Category */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="category" className="text-foreground text-sm">Category</Label>
+                                    <div className="relative">
+                                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                                        <select
+                                            id="category"
+                                            value={businessCategory}
+                                            onChange={(e) => setBusinessCategory(e.target.value)}
+                                            className="w-full h-10 pl-10 pr-4 bg-input border border-border rounded-md text-foreground text-sm focus:outline-none focus:border-primary/50"
+                                        >
+                                            {BUSINESS_CATEGORIES.map((cat) => (
+                                                <option key={cat} value={cat} className="bg-card text-foreground">
+                                                    {cat}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Phone Number */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="bizPhone" className="text-foreground text-sm">Business Phone / WhatsApp</Label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="bizPhone"
+                                            type="tel"
+                                            placeholder="078..."
+                                            value={businessPhone}
+                                            onChange={(e) => setBusinessPhone(e.target.value)}
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Customers can call or message this number</p>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    className="w-full font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary mt-4"
+                                >
+                                    Next: Set Location <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </form>
+                        </Card>
                     ) : step === 'location' ? (
-                        /* Location Picker for Traders (Full Screen Overlay) */
-                        <div className="fixed inset-0 z-50 bg-background flex flex-col">
-                            {/* Full screen map */}
-                            <div className="flex-1 w-full relative">
+                        /* Location Picker for Traders (Card based instead of full screen) */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="w-8 h-8 rounded-full bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground shrink-0"
+                                    onClick={() => setStep('business')}
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                </Button>
+                                <div>
+                                    <h2 className="text-xl font-bold font-headline tracking-tight text-foreground leading-none mb-1">Pin Your Location</h2>
+                                    <p className="text-muted-foreground text-xs">Where is your business located?</p>
+                                </div>
+                            </div>
+
+                            <div className="h-64 relative rounded-xl overflow-hidden border border-border/50 mb-6 bg-secondary/50">
                                 <OnboardingMap 
                                     initialCenter={[locationLat, locationLng]} 
                                     onLocationSelect={handleLocationSelect} 
                                 />
-                                
-                                {/* Floating Back Button */}
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    className="absolute top-6 left-6 z-[400] gap-2 shadow-lg rounded-full"
-                                    onClick={() => setStep('details')}
-                                >
-                                    <ArrowLeft className="w-4 h-4" />
-                                    Back
-                                </Button>
-
-                                {/* Floating Header */}
-                                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[400] bg-background/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-border/50 text-center">
-                                    <h1 className="text-sm font-bold text-foreground font-display">Pin Your Location</h1>
-                                    <p className="text-[10px] text-muted-foreground mt-0.5">Where is your business located?</p>
-                                </div>
-
-                                {/* Floating Status Pill */}
-                                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[400] bg-primary/10 backdrop-blur-md px-4 py-2 rounded-full border border-primary/20 flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-primary" /> 
-                                    <span className="text-xs font-bold text-primary uppercase tracking-widest">Tap Map or Use GPS</span>
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] pointer-events-none">
+                                    <div className="bg-primary/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-primary/20 flex items-center gap-1.5">
+                                        <MapPin className="w-3.5 h-3.5 text-primary-foreground" /> 
+                                        <span className="text-[10px] font-bold text-primary-foreground uppercase tracking-widest whitespace-nowrap">Tap to set</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Bottom Sheet for Action */}
-                            <div className="bg-card border-t border-border/50 p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[400]">
-                                <div className="max-w-md mx-auto space-y-4">
-                                    {error && (
-                                        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
-                                            {error}
-                                        </div>
-                                    )}
-
-                                    {locationSet ? (
-                                        <div className="flex items-center gap-3 text-sm text-foreground bg-secondary/50 px-4 py-3 rounded-xl border border-border/50">
-                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                                <MapPin className="w-4 h-4 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">Location Selected</p>
-                                                <p className="text-xs text-muted-foreground">{locationLat.toFixed(4)}, {locationLng.toFixed(4)}</p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground text-center">
-                                            Please set your location on the map to continue.
-                                        </p>
-                                    )}
-
-                                    <Button
-                                        onClick={handleSubmit}
-                                        className="w-full h-12 font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary text-lg"
-                                        disabled={isLoading || !locationSet}
-                                    >
-                                        {isLoading ? (
-                                            <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Creating account...</>
-                                        ) : (
-                                            'Create Account & Continue'
-                                        )}
-                                    </Button>
+                            
+                            {error && (
+                                <div className="p-3 mb-4 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20 text-left">
+                                    {error}
                                 </div>
-                            </div>
-                        </div>
+                            )}
+
+                            {locationSet ? (
+                                <div className="flex items-center gap-3 text-sm text-foreground bg-secondary/50 px-4 py-3 rounded-xl border border-border/50 mb-6">
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                        <MapPin className="w-4 h-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-sm">Location Selected</p>
+                                        <p className="text-xs text-muted-foreground">{locationLat.toFixed(4)}, {locationLng.toFixed(4)}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center mb-6">
+                                    Please tap on the map to select your location.
+                                </p>
+                            )}
+
+                            <Button
+                                onClick={handleSubmit}
+                                className="w-full h-12 font-display font-bold text-[#003f43] bg-gradient-to-r from-accent to-primary"
+                                disabled={isLoading || !locationSet}
+                            >
+                                {isLoading ? (
+                                    <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Creating account...</>
+                                ) : (
+                                    'Create Account & Continue'
+                                )}
+                            </Button>
+                        </Card>
                     ) : (
                         /* Verify Email Step */
                         <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl text-center">

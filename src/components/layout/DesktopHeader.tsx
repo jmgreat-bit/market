@@ -21,13 +21,8 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
         { href: ROUTES.MENU, label: 'Menu', icon: Settings },
     ];
 
-    const isHidden = pathname?.startsWith('/menu/') 
-                  || pathname?.startsWith('/search') 
-                  || pathname?.startsWith('/ai') 
-                  || pathname?.startsWith('/alerts')
-                  || pathname?.startsWith('/p/')
-                  || pathname?.startsWith('/u/')
-                  || pathname?.startsWith('/inbox/');
+    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, '/'];
+    const isMainTab = MAIN_TABS.includes(pathname || '');
 
     return (
         <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/40">
@@ -39,7 +34,7 @@ export function DesktopHeader({ hasUnreadAlerts = false }: { hasUnreadAlerts?: b
                 </Link>
             </div>
 
-            {!isHidden && (
+            {isMainTab && (
                 <div className="flex gap-8">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;

@@ -95,8 +95,7 @@ export class MomoClient {
         // Format phone to start with country code (assuming Rwanda 250 for now)
         const formattedPhone = phone.startsWith('0') ? '250' + phone.substring(1) : phone;
         
-        // Fallback to legacy endpoint structure via MADAPI proxy
-        const targetEnv = 'sandbox';
+        const targetEnv = process.env.MOMO_TARGET_ENV || 'sandbox';
         const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
         try {

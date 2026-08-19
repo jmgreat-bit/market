@@ -22,6 +22,9 @@ export async function POST(req: Request) {
 
         const referenceId = crypto.randomUUID();
 
+        // Check if Test Mode is enabled
+        const isTestMode = process.env.MOMO_TEST_MODE === 'true';
+
         // Save pending transaction to DB using admin client (bypasses RLS)
         const adminClient = getSupabaseAdminClient();
 
@@ -33,12 +36,40 @@ export async function POST(req: Request) {
                 tier: tier,
                 amount_rwf: amount,
                 payment_method: 'momo',
-                payment_status: 'pending',
+                payment_status: isTestMode ? 'completed' : 'pending',
                 starts_at: new Date().toISOString(),
                 expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             });
 
         if (dbError) throw dbError;
+
+        if (isTestMode) {
+            // Bypass MTN entirely and grant credits/tiers instantly
+            if (tier.startsWith('ai_')) {
+                const pkgName = tier.replace('ai_', '');
+                let prompts = 0;
+                if (pkgName === 'starter') prompts = 7;
+                if (pkgName === 'standard') prompts = 20;
+                if (pkgName === 'power') prompts = 100;
+
+                await adminClient.from('ai_credits').insert({
+                    user_id: user.id,
+                    total_credits: prompts,
+                    used_credits: 0,
+                    package: pkgName
+                });
+            } else {
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 30);
+                await adminClient.from('profiles').update({ 
+                    trader_tier: tier,
+                    is_premium: true,
+                    tier_expires_at: expiryDate.toISOString()
+                }).eq('id', user.id);
+            }
+            console.log(`[MOMO PAY] Test mode bypassed payment for ${user.id} - tier: ${tier}`);
+            return NextResponse.json({ success: true, referenceId });
+        }
 
         // Initiate payment with MTN
         await momoClient.requestToPay(amount, phone, referenceId);
