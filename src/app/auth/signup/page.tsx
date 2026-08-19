@@ -517,6 +517,7 @@ export default function SignupPage() {
                                             id="category"
                                             value={businessCategory}
                                             onChange={(e) => setBusinessCategory(e.target.value)}
+                                            style={{ colorScheme: 'dark' }}
                                             className="w-full h-10 pl-10 pr-4 bg-input border border-border rounded-md text-foreground text-sm focus:outline-none focus:border-primary/50"
                                         >
                                             {BUSINESS_CATEGORIES.map((cat) => (

@@ -49,6 +49,7 @@
 
 /* GeoPulse - Stripe-Inspired Dark Theme (Default) */
 :root {
+  color-scheme: dark;
   --radius: 0.75rem;
 
   /* Dark theme as default (Stripe-style) */

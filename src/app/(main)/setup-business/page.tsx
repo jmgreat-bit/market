@@ -155,14 +155,15 @@ export default function SetupBusinessPage() {
                         <Label htmlFor="category">Category</Label>
                         <select 
                             className="w-full bg-input border border-border/50 rounded-lg h-12 px-3 text-sm focus:ring-2 focus:ring-primary text-foreground"
+                            style={{ colorScheme: 'dark' }}
                             value={formData.category}
                             onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
                         >
-                            <option>Food</option>
-                            <option>Retail</option>
-                            <option>Events</option>
-                            <option>Services</option>
-                            <option>Other</option>
+                            <option className="bg-[#0f172a] text-white">Food</option>
+                            <option className="bg-[#0f172a] text-white">Retail</option>
+                            <option className="bg-[#0f172a] text-white">Events</option>
+                            <option className="bg-[#0f172a] text-white">Services</option>
+                            <option className="bg-[#0f172a] text-white">Other</option>
                         </select>
                     </div>
                     <div className="space-y-2">

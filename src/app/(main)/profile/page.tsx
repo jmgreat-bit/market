@@ -727,7 +727,7 @@ export default function ProfilePage() {
                                                 style={{ colorScheme: 'dark' }}
                                             >
                                                 {COUNTRY_CODES.map(c => (
-                                                    <option key={c.code} value={c.code}>{c.country}</option>
+                                                    <option key={c.code} value={c.code} className="bg-[#0f172a] text-white">{c.country}</option>
                                                 ))}
                                             </select>
                                             <Input 
