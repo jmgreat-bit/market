@@ -8,11 +8,9 @@ import { PostType } from '@/types';
 import { 
     Image as ImageIcon, 
     Clock, 
-    Globe, 
     ChevronLeft,
     Loader2,
     X,
-    Pin,
     Hash,
     BarChart3,
     FileText,
@@ -41,16 +39,20 @@ export default function ComposePage() {
     
     const [content, setContent] = useState('');
     const [postType, setPostType] = useState<PostType>('standard');
-    const [isPinned, setIsPinned] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    // Duration based on tier (TTL rules)
+    // Duration based on tier (TTL rules: Free = 3h, Pro = 9h, National = 24h)
     const tier = profile?.trader_tier || 'free';
-    const maxDuration = tier === 'national' ? 24 : tier === 'pro' ? 3 : 1;
+    const maxDuration = tier === 'national' ? 24 : tier === 'pro' ? 9 : 3;
     const [durationHours, setDurationHours] = useState(maxDuration);
+
+    useEffect(() => {
+        const calculatedMax = tier === 'national' ? 24 : tier === 'pro' ? 9 : 3;
+        setDurationHours(calculatedMax);
+    }, [tier]);
 
     // Counter fields
     const [counterValue, setCounterValue] = useState(0);
@@ -156,15 +158,6 @@ export default function ComposePage() {
                 imageUrl = urlData.publicUrl;
             }
 
-            // If pinning, unpin existing pinned posts for this business
-            if (isPinned) {
-                await supabase
-                    .from('posts')
-                    .update({ is_pinned: false })
-                    .eq('business_id', business.id)
-                    .eq('is_pinned', true);
-            }
-
             // Calculate expiration
             const expiresAt = new Date();
             expiresAt.setHours(expiresAt.getHours() + durationHours);
@@ -187,7 +180,7 @@ export default function ComposePage() {
                     latitude: business.latitude,
                     longitude: business.longitude,
                     post_type: postType,
-                    is_pinned: isPinned,
+                    is_pinned: false,
                     counter_value: postType === 'counter' ? counterValue : null,
                     counter_label: postType === 'counter' ? counterLabel.trim() : null,
                     expires_at: expiresAt.toISOString(),
@@ -442,39 +435,20 @@ export default function ComposePage() {
                     </div>
                 </div>
 
-                {/* Campaign Settings HUD */}
+                {/* Post Settings HUD */}
                 <div className="space-y-3">
-                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Campaign Settings</h3>
+                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Post Settings</h3>
                     
-                    <div className="bg-card/80 backdrop-blur-[30px] rounded-xl border border-border/30 divide-y divide-border/20">
-                        {/* Pin Toggle */}
-                        <button
-                            onClick={() => setIsPinned(!isPinned)}
-                            className="w-full p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border border-border/20 transition-colors ${isPinned ? 'bg-primary/20' : 'bg-secondary'}`}>
-                                    <Pin className={`w-4 h-4 transition-colors ${isPinned ? 'text-primary' : 'text-muted-foreground'}`} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="font-display font-bold text-sm text-foreground">Pin Post</p>
-                                    <p className="text-xs text-muted-foreground">{isPinned ? 'Pinned — always shown first' : 'Not pinned'}</p>
-                                </div>
-                            </div>
-                            <div className={`w-10 h-5 rounded-full relative border transition-all ${isPinned ? 'bg-primary/20 border-primary/50' : 'bg-secondary border-border/50'}`}>
-                                <div className={`absolute top-0.5 w-4 h-4 rounded-full shadow transition-all ${isPinned ? 'right-0.5 bg-primary shadow-[0_0_8px_rgba(143,245,255,0.8)]' : 'left-0.5 bg-muted-foreground'}`} />
-                            </div>
-                        </button>
-
+                    <div className="bg-card/80 backdrop-blur-[30px] rounded-xl border border-border/30 p-4">
                         {/* Duration */}
-                        <div className="p-4 flex items-center justify-between hover:bg-secondary/30 transition-colors">
+                        <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
-                                    <Clock className="w-4 h-4 text-muted-foreground" />
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                                    <Clock className="w-4 h-4 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-display font-bold text-sm text-foreground">Duration</p>
-                                    <p className="text-xs text-muted-foreground">How long post stays on feed</p>
+                                    <p className="font-display font-bold text-sm text-foreground">Active Duration</p>
+                                    <p className="text-xs text-muted-foreground">How long this post stays visible on the feed</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -484,25 +458,9 @@ export default function ComposePage() {
                                     max={maxDuration} 
                                     value={durationHours} 
                                     onChange={(e) => setDurationHours(parseInt(e.target.value))}
-                                    className="w-20 md:w-24 accent-primary"
+                                    className="w-24 md:w-28 accent-primary cursor-pointer"
                                 />
-                                <span className="text-sm font-bold w-12 text-right">{durationHours} hr{durationHours > 1 ? 's' : ''}</span>
-                            </div>
-                        </div>
-
-                        {/* Visibility */}
-                        <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/30 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center border border-border/20">
-                                    <Globe className="w-4 h-4 text-muted-foreground" />
-                                </div>
-                                <div>
-                                    <p className="font-display font-bold text-sm text-foreground">Network</p>
-                                    <p className="text-xs text-muted-foreground">Global Display</p>
-                                </div>
-                            </div>
-                            <div className="w-10 h-5 bg-primary/20 rounded-full relative border border-primary/50">
-                                <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(143,245,255,0.8)]"></div>
+                                <span className="text-sm font-bold w-12 text-right text-primary">{durationHours} hr{durationHours > 1 ? 's' : ''}</span>
                             </div>
                         </div>
                     </div>

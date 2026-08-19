@@ -39,10 +39,44 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
     const [showBoostModal, setShowBoostModal] = useState(false);
+    const [isPinned, setIsPinned] = useState(post.is_pinned ?? false);
+    const [pinLoading, setPinLoading] = useState(false);
 
-    // Boost Eligibility
+    // Boost Eligibility & Ownership
     const isOwner = profile?.id === post.business?.profile_id;
     const isEligibleForBoost = isOwner && (profile?.trader_tier === 'pro' || profile?.trader_tier === 'national');
+
+    useEffect(() => {
+        setIsPinned(post.is_pinned ?? false);
+    }, [post.is_pinned]);
+
+    const handleTogglePin = useCallback(async () => {
+        if (!profile?.id || !isOwner || pinLoading) return;
+        setPinLoading(true);
+        const nextPinned = !isPinned;
+        try {
+            if (nextPinned && post.business?.id) {
+                // Unpin any previously pinned posts for this business
+                await supabase
+                    .from('posts')
+                    .update({ is_pinned: false })
+                    .eq('business_id', post.business.id)
+                    .eq('is_pinned', true);
+            }
+
+            const { error } = await supabase
+                .from('posts')
+                .update({ is_pinned: nextPinned })
+                .eq('id', post.id);
+
+            if (error) throw error;
+            setIsPinned(nextPinned);
+        } catch (err) {
+            console.error('Pin toggle failed:', err);
+        } finally {
+            setPinLoading(false);
+        }
+    }, [profile?.id, isOwner, pinLoading, isPinned, post.business?.id, post.id, supabase]);
 
     const fetchComments = useCallback(async () => {
         if (commentsFetched || commentsCount === 0) return;
@@ -112,7 +146,7 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
 
     // Check subscription status for pinned posts
     useEffect(() => {
-        if (!profile?.id || !post.is_pinned) return;
+        if (!profile?.id || !isPinned) return;
         const abortController = new AbortController();
 
         supabase
@@ -129,7 +163,7 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
             .catch(() => {});
 
         return () => abortController.abort();
-    }, [post.id, post.is_pinned, profile?.id, supabase]);
+    }, [post.id, isPinned, profile?.id, supabase]);
 
 
     const handleToggleComments = () => {
@@ -208,10 +242,10 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
         >
             <div className="flex flex-col bg-transparent">
                 {/* Pinned Badge */}
-                {post.is_pinned && (
+                {isPinned && (
                     <div className="px-4 pt-3 pb-0 flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-primary">
-                            <Pin className="w-3 h-3" />
+                            <Pin className="w-3 h-3 fill-primary text-primary" />
                             <span className="text-[10px] font-bold uppercase tracking-widest">Pinned</span>
                         </div>
                         {profile?.id && (
@@ -257,6 +291,10 @@ export function PostCard({ post, autoExpandComments = false, isModalView = false
                         profileUsername={(business as any)?.profile?.username}
                         isEligibleForBoost={isEligibleForBoost}
                         onBoostClick={() => setShowBoostModal(true)}
+                        isOwner={isOwner}
+                        isPinned={isPinned}
+                        onTogglePin={handleTogglePin}
+                        pinLoading={pinLoading}
                     />
                 </div>
 

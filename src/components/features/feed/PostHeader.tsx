@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, MoreHorizontal, Flag, Zap } from 'lucide-react';
+import { Clock, MoreHorizontal, Flag, Zap, Pin, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import TraderBadge from '@/components/ui/TraderBadge';
@@ -20,10 +20,31 @@ interface PostHeaderProps {
     profileUsername?: string | null;
     isEligibleForBoost?: boolean;
     onBoostClick?: () => void;
+    isOwner?: boolean;
+    isPinned?: boolean;
+    onTogglePin?: () => void;
+    pinLoading?: boolean;
 }
 
-export function PostHeader({ postId, businessName, category, isPremium, traderTier, createdAt, expiresAt, avatarUrl, profileUsername, isEligibleForBoost, onBoostClick }: PostHeaderProps) {
+export function PostHeader({ 
+    postId, 
+    businessName, 
+    category, 
+    isPremium, 
+    traderTier, 
+    createdAt, 
+    expiresAt, 
+    avatarUrl, 
+    profileUsername, 
+    isEligibleForBoost, 
+    onBoostClick,
+    isOwner,
+    isPinned,
+    onTogglePin,
+    pinLoading
+}: PostHeaderProps) {
     const [mounted, setMounted] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     
     useEffect(() => {
         setMounted(true);
@@ -112,19 +133,60 @@ export function PostHeader({ postId, businessName, category, isPremium, traderTi
                 
                 {/* Options Menu */}
                 {postId && (
-                    <div className="relative group">
-                        <button className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground transition-colors">
+                    <div className="relative">
+                        <button 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setMenuOpen(!menuOpen);
+                            }}
+                            className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                            title="More options"
+                        >
                             <MoreHorizontal className="w-4 h-4" />
                         </button>
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-card border border-border/50 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                            <Link
-                                href={`/support?category=report&reference_type=post&reference_id=${postId}`}
-                                className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
-                            >
-                                <Flag className="w-3.5 h-3.5" />
-                                Report Post
-                            </Link>
-                        </div>
+                        
+                        {menuOpen && (
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-40" 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setMenuOpen(false);
+                                    }} 
+                                />
+                                <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border/50 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-border/30 animate-in fade-in zoom-in-95 duration-150">
+                                    {isOwner && onTogglePin && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setMenuOpen(false);
+                                                onTogglePin();
+                                            }}
+                                            disabled={pinLoading}
+                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 text-xs font-medium text-foreground hover:bg-secondary/70 hover:text-primary transition-colors text-left"
+                                        >
+                                            {pinLoading ? (
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin text-primary shrink-0" />
+                                            ) : (
+                                                <Pin className={`w-3.5 h-3.5 shrink-0 ${isPinned ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
+                                            )}
+                                            <span>{isPinned ? 'Unpin Post' : 'Pin to Profile'}</span>
+                                        </button>
+                                    )}
+                                    <Link
+                                        href={`/support?category=report&reference_type=post&reference_id=${postId}`}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="w-full flex items-center gap-2 px-3.5 py-2.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors text-left"
+                                    >
+                                        <Flag className="w-3.5 h-3.5 shrink-0" />
+                                        <span>Report Post</span>
+                                    </Link>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>

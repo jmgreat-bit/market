@@ -65,7 +65,7 @@ const TIERS: {
             { icon: <Target className="w-4 h-4 text-blue-400" />, text: 'Run local ads (up to 4 km)' },
         ],
         detailedInfo: [
-            { title: '📍 Visibility & Reach', items: ['Posts stay on the public feed for up to 3 hours', '2× higher priority in the feed algorithm', 'Your comments float to the top of any post'] },
+            { title: '📍 Visibility & Reach', items: ['Posts stay on the public feed for up to 9 hours', '2× higher priority in the feed algorithm', 'Your comments float to the top of any post'] },
             { title: '✅ Verification', items: ['Blue verified badge appears next to your name everywhere', 'Badge is shown on your profile, posts, AI results, and map'] },
             { title: '📊 Analytics', items: ['Full analytics dashboard with post views, impressions, and engagement data', 'Track how your business is performing over time'] },
             { title: '📢 Advertising', items: ['Run boosted ads on up to 4 km radius', 'Select placements: In-Feed, In-Comments, Explore, Search', 'Dynamic pricing: 350–500 RWF/day depending on duration', 'Bundle multiplier: up to 2× for 4 placements'] },
