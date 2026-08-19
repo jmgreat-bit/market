@@ -58,73 +58,24 @@ export default function SetupBusinessPage() {
         setLoading(true);
 
         try {
-            const supabase = getSupabaseClient();
-            
-            // 1. Check if business is near a Commercial Hub
-            const { data: bizData } = await supabase
-                .from('business_details')
-                .select('latitude, longitude')
-                .eq('profile_id', user?.id)
-                .single();
+            // Use the server API route which has admin privileges to bypass RLS
+            const res = await fetch('/api/setup-business', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    business_name: formData.name,
+                    category: formData.category,
+                    bio: formData.bio,
+                    phone: formData.phone,
+                    website_url: formData.website,
+                    is_reviews_enabled: formData.is_reviews_enabled,
+                }),
+            });
 
-            let matchedHubId = null;
+            const result = await res.json();
 
-            if (bizData?.latitude && bizData?.longitude) {
-                const { data: hubs } = await supabase.from('commercial_hubs').select('id, latitude, longitude, polygon');
-                if (hubs) {
-                    for (const hub of hubs) {
-                        if (hub.polygon && Array.isArray(hub.polygon) && hub.polygon.length >= 3) {
-                            if (isPointInPolygon({ lat: bizData.latitude, lng: bizData.longitude }, hub.polygon)) {
-                                matchedHubId = hub.id;
-                                break;
-                            }
-                        } else {
-                            // Fallback to radius if no polygon is defined
-                            const distance = getDistanceFromLatLonInKm(bizData.latitude, bizData.longitude, hub.latitude, hub.longitude);
-                            if (distance <= 0.5) { // 500 meters
-                                matchedHubId = hub.id;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Update Business Details
-            // Use try/catch so it doesn't fail completely if the user hasn't run the SQL for is_reviews_enabled
-            try {
-                const { error: bizError } = await supabase
-                    .from('business_details')
-                    .upsert({
-                        profile_id: user?.id,
-                        business_name: formData.name,
-                        category: formData.category,
-                        bio: formData.bio,
-                        phone: formData.phone.trim() || null,
-                        website_url: formData.website.trim() || null,
-                        is_reviews_enabled: formData.is_reviews_enabled,
-                        ...(matchedHubId ? { hub_id: matchedHubId } : {}),
-                        // Retain existing lat/lng if we are just upserting
-                        ...(bizData?.latitude ? { latitude: bizData.latitude } : {}),
-                        ...(bizData?.longitude ? { longitude: bizData.longitude } : {})
-                    }, { onConflict: 'profile_id' });
-                if (bizError) throw bizError;
-            } catch (e) {
-                // Fallback if column doesn't exist yet
-                const { error: bizError } = await supabase
-                    .from('business_details')
-                    .upsert({
-                        profile_id: user?.id,
-                        business_name: formData.name,
-                        category: formData.category,
-                        bio: formData.bio,
-                        phone: formData.phone.trim() || null,
-                        website_url: formData.website.trim() || null,
-                        ...(matchedHubId ? { hub_id: matchedHubId } : {}),
-                        ...(bizData?.latitude ? { latitude: bizData.latitude } : {}),
-                        ...(bizData?.longitude ? { longitude: bizData.longitude } : {})
-                    }, { onConflict: 'profile_id' });
-                if (bizError) throw bizError;
+            if (!res.ok) {
+                throw new Error(result.error || 'Failed to save');
             }
 
             await refreshProfile();

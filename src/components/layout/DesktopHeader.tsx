@@ -21,7 +21,7 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
         { href: ROUTES.MENU, label: 'Menu', icon: Settings },
     ];
 
-    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, '/'];
+    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, ROUTES.MENU, '/'];
     const isMainTab = MAIN_TABS.includes(pathname || '');
 
     return (

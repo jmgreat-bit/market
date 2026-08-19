@@ -59,35 +59,6 @@ export default function ComposePage() {
     // Poll fields
     const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
 
-    // Redirect to setup if business name is missing
-    useEffect(() => {
-        if (!authLoading && isAuthenticated && profile?.role === 'trader') {
-            const checkBusiness = async () => {
-                const supabase = getSupabaseClient();
-                const { data, error } = await supabase
-                    .from('business_details')
-                    .select('business_name')
-                    .eq('profile_id', profile.id)
-                    .single();
-                
-                // If no row exists at all, create a blank one first so setup page can upsert
-                if (error || !data) {
-                    await supabase
-                        .from('business_details')
-                        .upsert({ profile_id: profile.id }, { onConflict: 'profile_id' });
-                    router.replace('/setup-business');
-                    return;
-                }
-
-                // Row exists but business_name is empty — still needs setup
-                if (!data.business_name) {
-                    router.replace('/setup-business');
-                }
-            };
-            checkBusiness();
-        }
-    }, [authLoading, isAuthenticated, profile, router]);
-
     if (authLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">

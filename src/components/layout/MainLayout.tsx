@@ -20,7 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     const pathname = usePathname();
     const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
 
-    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, '/'];
+    const MAIN_TABS = [ROUTES.FEED, ROUTES.INBOX, ROUTES.EXPLORE, ROUTES.MAP, ROUTES.MENU, '/'];
     const isMainTab = MAIN_TABS.includes(pathname || '');
 
     // Auto-reload the app if it was backgrounded/suspended by the OS for more than 5 minutes.

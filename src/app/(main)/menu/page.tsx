@@ -55,7 +55,22 @@ export default function MenuPage() {
     }
 
     if (!isAuthenticated) {
-        return null; // Middleware will redirect
+        return (
+            <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <User className="w-8 h-8 text-primary" />
+                </div>
+                <h1 className="text-xl font-bold text-foreground mb-2 font-display">Sign In Required</h1>
+                <p className="text-muted-foreground text-sm max-w-xs mb-6">
+                    Sign in to access your settings, saved posts, analytics, and business tools.
+                </p>
+                <Link href={ROUTES.LOGIN} className="w-full max-w-xs">
+                    <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold shadow-geo-glow hover:bg-primary/90 transition-colors">
+                        Sign In
+                    </button>
+                </Link>
+            </div>
+        );
     }
 
     const isTrader = profile?.role === 'trader';

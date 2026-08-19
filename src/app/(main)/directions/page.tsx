@@ -43,13 +43,8 @@ export default function DirectionsPage() {
                     .eq('profile_id', profile.id)
                     .single();
                 
-                if (bizErr || !biz || !biz.business_name) {
-                    if (bizErr) {
-                        await supabase
-                            .from('business_details')
-                            .upsert({ profile_id: profile.id }, { onConflict: 'profile_id' });
-                    }
-                    router.replace('/setup-business');
+                if (bizErr || !biz) {
+                    setIsLoading(false);
                     return;
                 }
                 setBusinessId(biz.id);
