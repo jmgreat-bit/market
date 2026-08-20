@@ -153,7 +153,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
         <div className="min-h-screen bg-surface text-foreground flex flex-col justify-between">
             
             {/* ── Fixed Chat Top Header HUD ── */}
-            <header className="sticky top-[60px] md:top-[76px] z-40 bg-background/90 backdrop-blur-2xl border-b border-border/40 px-4 py-3 sm:px-6">
+            <header className="sticky top-0 md:top-[76px] z-40 bg-background/90 backdrop-blur-2xl border-b border-border/40 px-4 py-3 sm:px-6">
                 <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
                     
                     {/* Left: Back & Avatar Info */}
@@ -308,13 +308,16 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4 mt-4">
                         {messages.map((msg, index) => {
                             const isMe = msg.sender_id === user?.id;
                             const isTemp = msg.id.startsWith('temp-');
                             const timeString = msg.created_at
                                 ? format(new Date(msg.created_at), 'HH:mm')
                                 : '';
+                            
+                            // To avoid repeating avatars in consecutive messages from the same sender
+                            const showAvatar = index === 0 || messages[index - 1].sender_id !== msg.sender_id;
 
                             return (
                                 <motion.div
@@ -322,49 +325,80 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                                     initial={{ opacity: 0, y: 8, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ duration: 0.18 }}
-                                    className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                                    className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}
                                 >
-                                    <div
-                                        className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all relative ${
-                                            isMe
-                                                ? 'bg-gradient-to-r from-cyan-600 via-primary to-blue-600 text-primary-foreground font-medium rounded-br-sm shadow-[0_0_20px_rgba(143,245,255,0.15)]'
-                                                : 'bg-card border border-border/50 text-foreground font-normal rounded-bl-sm backdrop-blur-xl'
-                                        }`}
-                                    >
-                                        {(() => {
-                                            const refMatch = msg.content.match(/\[Reference:\s*(.+?)\]/);
-                                            const cleanContent = msg.content.replace(/\[Reference:\s*.+?\]/, '').trim();
-                                            return (
-                                                <div className="flex flex-col gap-2">
-                                                    {cleanContent && <p className="whitespace-pre-wrap break-words">{cleanContent}</p>}
-                                                    {refMatch && (
-                                                        <ChatPostCard 
-                                                            postId={refMatch[1].split('/').pop() || ''}
-                                                            onClick={(post) => setPreviewPost(post)}
-                                                        />
+                                    <div className={`flex gap-2 max-w-[85%] sm:max-w-[75%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        
+                                        {/* Avatar */}
+                                        <div className="shrink-0 w-6 h-6 sm:w-8 sm:h-8 flex flex-col justify-end">
+                                            {showAvatar && (
+                                                <div className="w-full h-full rounded-full overflow-hidden bg-secondary border border-border/50">
+                                                    {isMe ? (
+                                                        profile?.avatar_url ? (
+                                                            <img src={profile.avatar_url} alt="Me" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold">
+                                                                {profile?.full_name?.charAt(0) || 'U'}
+                                                            </div>
+                                                        )
+                                                    ) : (
+                                                        otherParticipant?.avatar_url ? (
+                                                            <img src={otherParticipant.avatar_url} alt={displayName} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-secondary text-muted-foreground text-xs font-bold">
+                                                                {displayName.charAt(0) || 'U'}
+                                                            </div>
+                                                        )
                                                     )}
                                                 </div>
-                                            );
-                                        })()}
-                                        <div className={`flex items-center gap-1 mt-1 text-[10px] ${isMe ? 'justify-end text-primary-foreground/75' : 'justify-start text-muted-foreground'}`}>
-                                            <span>{timeString}</span>
-                                            {isMe && (
-                                                <span>
-                                                    {isTemp ? (
-                                                        <Clock className="w-3 h-3 animate-pulse opacity-70" />
-                                                    ) : msg.is_read ? (
-                                                        <CheckCheck className="w-3.5 h-3.5 text-white" />
-                                                    ) : (
-                                                        <Check className="w-3.5 h-3.5 opacity-70" />
-                                                    )}
-                                                </span>
                                             )}
+                                        </div>
+
+                                        {/* Bubble */}
+                                        <div
+                                            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm transition-all relative overflow-hidden ${
+                                                isMe
+                                                    ? 'bg-gradient-to-r from-cyan-600 via-primary to-blue-600 text-primary-foreground font-medium rounded-br-sm shadow-[0_0_20px_rgba(143,245,255,0.15)]'
+                                                    : 'bg-card border border-border/50 text-foreground font-normal rounded-bl-sm backdrop-blur-xl'
+                                            }`}
+                                        >
+                                            {(() => {
+                                                const refMatch = msg.content.match(/\[Reference:\s*(.+?)\]/);
+                                                const cleanContent = msg.content.replace(/\[Reference:\s*.+?\]/, '').trim();
+                                                return (
+                                                    <div className="flex flex-col gap-2">
+                                                        {cleanContent && <p className="whitespace-pre-wrap break-words">{cleanContent}</p>}
+                                                        {refMatch && (
+                                                            <div className={`mt-2 ${isMe ? 'opacity-90 grayscale-[20%]' : ''}`}>
+                                                                <ChatPostCard 
+                                                                    postId={refMatch[1].split('/').pop() || ''}
+                                                                    onClick={(post) => setPreviewPost(post)}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                            <div className={`flex items-center gap-1 mt-1.5 text-[10px] ${isMe ? 'justify-end text-primary-foreground/75' : 'justify-start text-muted-foreground'}`}>
+                                                <span>{timeString}</span>
+                                                {isMe && (
+                                                    <span>
+                                                        {isTemp ? (
+                                                            <Clock className="w-3 h-3 animate-pulse opacity-70" />
+                                                        ) : msg.is_read ? (
+                                                            <CheckCheck className="w-3.5 h-3.5 text-white" />
+                                                        ) : (
+                                                            <Check className="w-3.5 h-3.5 opacity-70" />
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>
                             );
                         })}
-                        <div ref={messagesEndRef} />
+                        <div ref={messagesEndRef} className="h-4" />
                     </div>
                 )}
 

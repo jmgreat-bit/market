@@ -136,6 +136,17 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
                     fetchConversations();
                 }
             )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'direct_messages',
+                },
+                () => {
+                    fetchConversations();
+                }
+            )
             .subscribe();
 
         return () => {

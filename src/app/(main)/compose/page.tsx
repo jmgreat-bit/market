@@ -468,9 +468,9 @@ export default function ComposePage() {
                     
                     <div className="bg-card/80 backdrop-blur-[30px] rounded-xl border border-border/30 p-4">
                         {/* Duration */}
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
                                     <Clock className="w-4 h-4 text-primary" />
                                 </div>
                                 <div>
@@ -478,16 +478,16 @@ export default function ComposePage() {
                                     <p className="text-xs text-muted-foreground">How long this post stays visible on the feed</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <input 
                                     type="range" 
                                     min="1" 
                                     max={maxDuration} 
                                     value={durationHours} 
                                     onChange={(e) => setDurationHours(parseInt(e.target.value))}
-                                    className="w-24 md:w-28 accent-primary cursor-pointer"
+                                    className="flex-1 sm:w-28 accent-primary cursor-pointer"
                                 />
-                                <span className="text-sm font-bold w-12 text-right text-primary">{durationHours} hr{durationHours > 1 ? 's' : ''}</span>
+                                <span className="text-sm font-bold w-12 text-right text-primary shrink-0">{durationHours} hr{durationHours > 1 ? 's' : ''}</span>
                             </div>
                         </div>
                     </div>
