@@ -105,27 +105,27 @@ export default function ExplorePage() {
 
     return (
         <div className="min-h-screen bg-background pb-32 md:pb-12 text-foreground">
-            {/* Compact Explore Header */}
-            <div className="relative pt-16 md:pt-20 pb-4 px-4 md:px-8 max-w-3xl mx-auto w-full z-10">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-40 pointer-events-none" />
-                <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-xl md:text-2xl font-display font-black text-foreground tracking-tight">
-                        Explore
-                    </h1>
-                    <span className="bg-primary/15 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-primary/25 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> Trending
-                    </span>
+            {/* Explore Header (Identical sizing to Feed) */}
+            <div className="px-4 md:px-8 pt-16 md:pt-20 max-w-3xl mx-auto w-full">
+                <div className="flex flex-col gap-1 mb-4">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight">
+                            Explore
+                        </h1>
+                        <span className="bg-primary/15 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-primary/25 flex items-center gap-1">
+                            <Sparkles className="w-3.5 h-3.5" /> Trending
+                        </span>
+                    </div>
+                    <p className="text-muted-foreground text-xs md:text-sm">
+                        Discover popular businesses, active markets, and trending items.
+                    </p>
                 </div>
-                <p className="text-muted-foreground text-xs md:text-sm mb-4 max-w-md">
-                    Discover popular businesses, active markets, and trending items.
-                </p>
 
-                {/* Sub-navigation Chips Bar */}
-                <div className="pb-1">
+                {/* Sub-navigation Chips Bar (Matches Feed size) */}
+                <div className="mb-6">
                     <DiscoveryChipBar 
                         activeTopicId={selectedTopic.id} 
                         onSelectTopic={setSelectedTopic} 
-                        compact={true}
                     />
                 </div>
             </div>
