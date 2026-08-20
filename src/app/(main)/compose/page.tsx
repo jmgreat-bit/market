@@ -22,7 +22,8 @@ import {
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { 
     SHOUT_MAX_LENGTH, SHOUT_MIN_WORDS, IMAGE_MIN_BYTES, IMAGE_MAX_BYTES,
-    COUNTER_LABEL_MAX_LENGTH, POLL_MIN_OPTIONS, POLL_MAX_OPTIONS, POLL_OPTION_MAX_LENGTH
+    COUNTER_LABEL_MAX_LENGTH, POLL_MIN_OPTIONS, POLL_MAX_OPTIONS, POLL_OPTION_MAX_LENGTH,
+    DEFAULT_MAP_CENTER
 } from '@/lib/constants';
 
 const POST_TYPES: { id: PostType; label: string; desc: string; icon: React.ReactNode }[] = [
@@ -136,14 +137,40 @@ export default function ComposePage() {
 
         try {
             const supabase = getSupabaseClient();
-            
-            const { data: business, error: businessError } = await supabase
+
+            let { data: business } = await supabase
                 .from('business_details')
                 .select('id, latitude, longitude')
                 .eq('profile_id', profile.id)
-                .single();
+                .maybeSingle();
 
-            if (businessError || !business) throw new Error("Could not find your business profile.");
+            // If business profile row is missing, auto-create it seamlessly
+            if (!business) {
+                const autoName = profile.full_name || profile.username || 'My Shop';
+                try {
+                    const createRes = await fetch('/api/setup-business', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            business_name: autoName,
+                            category: 'Retail',
+                        }),
+                    });
+
+                    if (createRes.ok) {
+                        const { data: createdBiz } = await supabase
+                            .from('business_details')
+                            .select('id, latitude, longitude')
+                            .eq('profile_id', profile.id)
+                            .maybeSingle();
+                        business = createdBiz;
+                    }
+                } catch (e) {
+                    console.error('Failed to auto-create business profile:', e);
+                }
+            }
+
+            if (!business) throw new Error("Could not find or initialize your business profile. Please try again.");
 
             let imageUrl: string | null = null;
 
@@ -177,8 +204,8 @@ export default function ComposePage() {
                     content: content.trim(),
                     slug: slug,
                     image_url: imageUrl,
-                    latitude: business.latitude,
-                    longitude: business.longitude,
+                    latitude: business.latitude ?? DEFAULT_MAP_CENTER.lat,
+                    longitude: business.longitude ?? DEFAULT_MAP_CENTER.lng,
                     post_type: postType,
                     is_pinned: false,
                     counter_value: postType === 'counter' ? counterValue : null,

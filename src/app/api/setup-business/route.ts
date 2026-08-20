@@ -13,10 +13,14 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { business_name, category, bio, phone, website_url, is_reviews_enabled } = body;
+        const { business_name, category, bio, phone, website_url, is_reviews_enabled, latitude, longitude } = body;
 
         if (!business_name?.trim()) {
             return NextResponse.json({ error: 'Business name is required' }, { status: 400 });
+        }
+
+        if (latitude === undefined || longitude === undefined) {
+            return NextResponse.json({ error: 'Location coordinates are required' }, { status: 400 });
         }
 
         // Use admin client to bypass RLS
@@ -36,6 +40,9 @@ export async function POST(request: NextRequest) {
             bio: bio?.trim() || null,
             phone: phone?.trim() || null,
             website_url: website_url?.trim() || null,
+            latitude: latitude,
+            longitude: longitude,
+            address: `${Number(latitude).toFixed(6)}, ${Number(longitude).toFixed(6)}`,
             ...(is_reviews_enabled !== undefined ? { is_reviews_enabled } : {}),
         }, { onConflict: 'profile_id' });
 

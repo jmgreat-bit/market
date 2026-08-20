@@ -40,18 +40,17 @@ export async function GET(request: Request) {
                 // Clear the cookie
                 cookieStore.delete('intended_role');
                 
-                // If they signed up as a trader, create business details from metadata
+                // If they signed up as a trader with Google, initialize shop and route to setup-business
                 if (intendedRole === 'trader') {
                     await dbClient.from('business_details').upsert({
                         profile_id: userId,
-                        business_name: meta?.business_name || `${meta?.full_name || 'My'}'s Business`,
+                        business_name: meta?.business_name || null,
                         category: meta?.business_category || 'Retail',
                         phone: meta?.business_phone || null,
                         latitude: meta?.location_lat || null,
                         longitude: meta?.location_lng || null,
-                        address: meta?.location_lat ? `${Number(meta.location_lat).toFixed(6)}, ${Number(meta.location_lng).toFixed(6)}` : null,
                     }, { onConflict: 'profile_id' });
-                    next = '/feed';
+                    next = '/setup-business';
                 }
             } else {
                 // No cookie — this is likely an email verification callback.
