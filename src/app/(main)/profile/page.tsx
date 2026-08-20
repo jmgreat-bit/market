@@ -108,6 +108,7 @@ export default function ProfilePage() {
     const [editCountryCode, setEditCountryCode] = useState('+250');
     const [editPhone, setEditPhone] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     // Sync avatar from profile
     useEffect(() => {
@@ -189,7 +190,7 @@ export default function ProfilePage() {
         if (profile?.id) fetchStats();
     }, [profile?.id, fetchStats]);
 
-    if (isLoading) {
+    if (isLoading || isLoggingOut) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -358,9 +359,9 @@ export default function ProfilePage() {
     };
 
     const handleSignOut = async () => {
+        setIsLoggingOut(true);
         await signOut();
-        router.replace('/auth/login');
-        router.refresh();
+        window.location.href = '/feed'; // Force a clean clear
     };
 
     const isTrader = profile?.role === 'trader';

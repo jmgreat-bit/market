@@ -39,14 +39,15 @@ export default function MenuPage() {
     const { theme, setTheme, language, setLanguage, t } = useSettings();
     const router = useRouter();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleSignOut = async () => {
+        setIsLoggingOut(true);
         await signOut();
-        router.replace('/auth/login');
-        router.refresh();
+        window.location.href = '/feed'; // Force a full page reload to clear all states cleanly
     };
 
-    if (isLoading) {
+    if (isLoading || isLoggingOut) {
         return (
             <div className="min-h-screen bg-surface flex items-center justify-center">
                 <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
