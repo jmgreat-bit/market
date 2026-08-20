@@ -44,20 +44,53 @@ function SponsoredFeedList({ posts, isLoading: listLoading, error: listError, ad
     return <div className="space-y-4">{items}</div>;
 }
 
+import { useState, useMemo } from 'react';
+import { DiscoveryChipBar } from '@/components/features/feed/DiscoveryChipBar';
+import { DISCOVERY_TOPICS, DiscoveryTopic } from '@/lib/constants';
+
 export default function FeedPage() {
     const { coordinates, isLoading: locationLoading, error: geoError, requestLocation } = useGeolocation();
     const { nearbyPosts, trendingPosts, isLoading, error, hasNearby, radiusUsed } = useNearbyPosts(coordinates);
     const { ads } = useAds('feed');
+    const [selectedTopic, setSelectedTopic] = useState<DiscoveryTopic>(DISCOVERY_TOPICS[0]);
+
+    // Filter posts based on selected topic
+    const filterPostsByTopic = (list: PostWithBusiness[]) => {
+        if (!selectedTopic || selectedTopic.id === 'all') return list;
+        return list.filter((p) => {
+            const contentLower = (p.content || '').toLowerCase();
+            const categoryLower = (p.business?.category || '').toLowerCase();
+            const matchesKeyword = selectedTopic.keywords.some(
+                (kw) => contentLower.includes(kw.toLowerCase()) || categoryLower.includes(kw.toLowerCase())
+            );
+            const matchesCategory = selectedTopic.categoryFilter 
+                && categoryLower === selectedTopic.categoryFilter.toLowerCase();
+            return matchesKeyword || matchesCategory;
+        });
+    };
+
+    const filteredNearby = useMemo(() => filterPostsByTopic(nearbyPosts), [nearbyPosts, selectedTopic]);
+    const filteredTrending = useMemo(() => filterPostsByTopic(trendingPosts), [trendingPosts, selectedTopic]);
 
     return (
         <div className="min-h-screen">
             <div className="flex-1 px-4 md:px-8 pt-16 md:pt-20 max-w-3xl mx-auto w-full pb-32 md:pb-10">
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight mb-2">
-                    Your Feed
-                </h1>
-                <p className="text-muted-foreground text-sm mb-6 max-w-lg">
-                    Discover what&apos;s happening around you.
-                </p>
+                <div className="flex flex-col gap-1 mb-4">
+                    <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight">
+                        Your Feed
+                    </h1>
+                    <p className="text-muted-foreground text-xs md:text-sm">
+                        Discover what&apos;s happening around you.
+                    </p>
+                </div>
+
+                {/* Horizontal Quick Discovery & Filter Bar */}
+                <div className="mb-6">
+                    <DiscoveryChipBar 
+                        activeTopicId={selectedTopic.id} 
+                        onSelectTopic={setSelectedTopic} 
+                    />
+                </div>
 
 
 
@@ -103,8 +136,8 @@ export default function FeedPage() {
                                 </div>
                             </div>
 
-                            {hasNearby ? (
-                                <SponsoredFeedList posts={nearbyPosts} isLoading={false} error={error} ads={ads} />
+                            {filteredNearby.length > 0 ? (
+                                <SponsoredFeedList posts={filteredNearby} isLoading={false} error={error} ads={ads} />
                             ) : (
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
@@ -115,19 +148,29 @@ export default function FeedPage() {
                                         <MapPin className="w-7 h-7 text-primary" />
                                     </div>
                                     <h3 className="font-display font-bold text-foreground text-lg mb-2">
-                                        No traders nearby yet
+                                        {selectedTopic.id !== 'all' ? `No ${selectedTopic.label} posts nearby yet` : 'No traders nearby yet'}
                                     </h3>
                                     <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                                        {coordinates
-                                            ? "There are no active traders within 2km of your location yet. Be the first to discover what's happening nearby!"
-                                            : "Enable location access to see what's happening around you."}
+                                        {selectedTopic.id !== 'all' 
+                                            ? `Try selecting another category or "All" to explore other posts in your area.`
+                                            : coordinates
+                                                ? "There are no active traders within 2km of your location yet. Be the first to discover what's happening nearby!"
+                                                : "Enable location access to see what's happening around you."}
                                     </p>
+                                    {selectedTopic.id !== 'all' && (
+                                        <button
+                                            onClick={() => setSelectedTopic(DISCOVERY_TOPICS[0])}
+                                            className="mt-4 px-4 py-2 bg-primary/10 text-primary rounded-full text-xs font-bold hover:bg-primary/20 transition-all"
+                                        >
+                                            View All Posts
+                                        </button>
+                                    )}
                                 </motion.div>
                             )}
                         </section>
 
                         {/* ── Trending Section ── */}
-                        {trendingPosts.length > 0 && (
+                        {filteredTrending.length > 0 && (
                             <section>
                                 <div className="flex items-center gap-2 mb-5">
                                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -135,15 +178,15 @@ export default function FeedPage() {
                                     </div>
                                     <div>
                                         <h2 className="font-display font-bold text-lg text-foreground">
-                                            Trending
+                                            Trending {selectedTopic.id !== 'all' ? `in ${selectedTopic.label}` : ''}
                                         </h2>
                                         <p className="text-xs text-muted-foreground">
-                                            Popular posts across Rwanda
+                                            Most active posts right now
                                         </p>
                                     </div>
                                 </div>
 
-                                <SponsoredFeedList posts={trendingPosts} isLoading={false} error={null} ads={ads} />
+                                <SponsoredFeedList posts={filteredTrending} isLoading={false} error={null} ads={[]} />
                             </section>
                         )}
                     </>

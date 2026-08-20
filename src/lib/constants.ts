@@ -22,6 +22,30 @@ export const BUSINESS_CATEGORIES = [
     'Other',
 ] as const;
 
+export interface DiscoveryTopic {
+    id: string;
+    label: string;
+    kinyarwandaLabel?: string;
+    icon: string;
+    keywords: string[];
+    categoryFilter?: string;
+}
+
+export const DISCOVERY_TOPICS: DiscoveryTopic[] = [
+    { id: 'all', label: 'All', icon: '✨', keywords: [] },
+    { id: 'inzu', label: 'Inzu / Housing', kinyarwandaLabel: 'Inzu', icon: '🏠', keywords: ['inzu', 'house', 'apartment', 'rent', 'housing', 'lodging', 'real estate', 'chambre', 'ikode'], categoryFilter: 'Housing' },
+    { id: 'imodoka', label: 'Imodoka / Cars', kinyarwandaLabel: 'Imodoka', icon: '🚗', keywords: ['imodoka', 'car', 'auto', 'taxi', 'garage', 'moto', 'transport', 'vehicle', 'ibinyabiziga'], categoryFilter: 'Automotive' },
+    { id: 'isoko', label: 'Isoko / Market', kinyarwandaLabel: 'Isoko', icon: '🛒', keywords: ['isoko', 'market', 'amasaka', 'groceries', 'supermarket', 'food', 'ibiryo', 'fruits', 'vegetables', 'bazaar'], categoryFilter: 'Retail' },
+    { id: 'mtn', label: 'MTN MoMo', kinyarwandaLabel: 'MTN', icon: '🟡', keywords: ['mtn', 'momo', 'airtime', 'sim', 'internet', 'yolo', 'mobile money'], categoryFilter: 'Services' },
+    { id: 'airtel', label: 'Airtel Money', kinyarwandaLabel: 'Airtel', icon: '🔴', keywords: ['airtel', 'airtel money', 'airtime', 'internet'], categoryFilter: 'Services' },
+    { id: 'food', label: 'Ibiryo / Food', kinyarwandaLabel: 'Ibiryo', icon: '🍔', keywords: ['food', 'restaurant', 'cafe', 'fast food', 'ibiryo', 'nyama', 'brochettes', 'pizza', 'coffee', 'resitora'], categoryFilter: 'Restaurant' },
+    { id: 'fashion', label: 'Imyenda & Shoes', kinyarwandaLabel: 'Imyenda', icon: '👗', keywords: ['imyenda', 'clothes', 'inkweto', 'shoes', 'boutique', 'fashion', 'wear', 'dress'], categoryFilter: 'Retail' },
+    { id: 'tech', label: 'Telefone & Tech', kinyarwandaLabel: 'Telefone', icon: '📱', keywords: ['telefone', 'phone', 'laptop', 'iphone', 'samsung', 'gadgets', 'electronics', 'charger'], categoryFilter: 'Retail' },
+    { id: 'health', label: 'Farumasi / Health', kinyarwandaLabel: 'Farumasi', icon: '💊', keywords: ['farumasi', 'pharmacy', 'clinic', 'hospital', 'health', 'medicine', 'doctor', 'ubuvuzi'], categoryFilter: 'Health & Beauty' },
+    { id: 'services', label: 'Akazi & Services', kinyarwandaLabel: 'Serivisi', icon: '🔧', keywords: ['akazi', 'services', 'repair', 'plumbing', 'electrician', 'cleaning', 'mechanic', 'salon', 'barber'], categoryFilter: 'Services' },
+    { id: 'events', label: 'Ibikorwa / Events', kinyarwandaLabel: 'Ibikorwa', icon: '🎉', keywords: ['events', 'party', 'concert', 'nightlife', 'club', 'lounge', 'music', 'weekend'], categoryFilter: 'Entertainment' },
+];
+
 // Navigation routes
 export const ROUTES = {
     HOME: '/',

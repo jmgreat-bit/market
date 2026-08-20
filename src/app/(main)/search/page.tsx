@@ -26,6 +26,7 @@ import { useUser } from '@/hooks/useUser';
 import { createClient } from '@/lib/supabase/client';
 import { useAds } from '@/hooks/useAds';
 import { PostCard } from '@/components/features/feed/PostCard';
+import { DiscoveryChipBar } from '@/components/features/feed/DiscoveryChipBar';
 import type { BusinessDetails, PostWithBusiness, Profile } from '@/types';
 
 export default function SearchPage() {
@@ -181,26 +182,35 @@ export default function SearchPage() {
                             </div>
                         </section>
 
-                        <section className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-                            {[
-                                { name: 'Food', icon: Utensils },
-                                { name: 'Retail', icon: ShoppingBag },
-                                { name: 'Events', icon: Ticket },
-                                { name: 'Other', icon: Sparkles }
-                            ].map((cat) => (
-                                <button
-                                    key={cat.name}
-                                    onClick={() => setQuery(cat.name)}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-border/50 hover:border-primary/40 transition-all whitespace-nowrap"
-                                >
-                                    <cat.icon className="w-4 h-4 text-primary" />
-                                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary">
-                                        {cat.name}
-                                    </span>
-                                </button>
-                            ))}
+                        <section className="space-y-3">
+                            <h2 className="font-headline text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                Popular Categories
+                            </h2>
+                            <DiscoveryChipBar 
+                                onSelectTopic={(topic) => {
+                                    if (topic.id !== 'all') {
+                                        setQuery(topic.kinyarwandaLabel || topic.label.split(' ')[0]);
+                                    }
+                                }} 
+                            />
                         </section>
                     </>
+                )}
+
+                {/* Always-accessible Quick Search Filter Bar when searching */}
+                {query && (
+                    <div className="pb-2">
+                        <DiscoveryChipBar 
+                            compact={true}
+                            onSelectTopic={(topic) => {
+                                if (topic.id === 'all') {
+                                    setQuery('');
+                                } else {
+                                    setQuery(topic.kinyarwandaLabel || topic.label.split(' ')[0]);
+                                }
+                            }} 
+                        />
+                    </div>
                 )}
 
                 {/* Search Results View */}

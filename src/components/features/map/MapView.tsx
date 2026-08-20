@@ -119,11 +119,16 @@ export function MapView({ targetLat, targetLng }: MapViewProps = {}) {
         });
     }, []);
 
-    // Filter businesses based on active category
+    // Filter businesses based on active category or search keyword
     const filteredBusinesses = useMemo(() => {
-        return categoryFilter
-            ? businesses.filter(b => b.category?.toLowerCase() === categoryFilter.toLowerCase())
-            : businesses;
+        if (!categoryFilter) return businesses;
+        const q = categoryFilter.toLowerCase();
+        return businesses.filter(b => {
+            const cat = (b.category || '').toLowerCase();
+            const name = (b.business_name || '').toLowerCase();
+            const bio = (b.bio || '').toLowerCase();
+            return cat.includes(q) || name.includes(q) || bio.includes(q);
+        });
     }, [businesses, categoryFilter]);
 
     // If target coordinates were passed (from "View on map" button), fly there
