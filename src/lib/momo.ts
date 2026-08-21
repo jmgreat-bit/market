@@ -60,27 +60,22 @@ export class MomoClient {
         const targetEnv = process.env.MOMO_TARGET_ENV || 'sandbox';
         const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay/${referenceId}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Target-Environment': targetEnv,
-                    'Ocp-Apim-Subscription-Key': subKey,
-                }
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`MTN API GetTransactionStatus Error: ${response.status} - ${errorText}`);
+        const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay/${referenceId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-Target-Environment': targetEnv,
+                'Ocp-Apim-Subscription-Key': subKey,
             }
+        });
 
-            const data = await response.json();
-            return data.status; // Usually "SUCCESSFUL", "FAILED", or "PENDING"
-        } catch (error) {
-            console.error('MomoClient.getTransactionStatus Exception:', error);
-            throw error;
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`MTN API GetTransactionStatus Error: ${response.status} - ${errorText}`);
         }
+
+        const data = await response.json();
+        return data.status; // Usually "SUCCESSFUL", "FAILED", or "PENDING"
     }
 
     /**
@@ -98,45 +93,39 @@ export class MomoClient {
         const targetEnv = process.env.MOMO_TARGET_ENV || 'sandbox';
         const subKey = process.env.MOMO_SUBSCRIPTION_KEY || '';
 
-        try {
-            // Standard MoMo API collection endpoint
-            const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Reference-Id': referenceId,
-                    'X-Target-Environment': targetEnv,
-                    'Ocp-Apim-Subscription-Key': subKey,
-                    'X-Callback-Url': callbackUrl,
-                    'Content-Type': 'application/json'
+        // Standard MoMo API collection endpoint
+        const response = await fetch(`${API_BASE_URL}/collection/v1_0/requesttopay`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'X-Reference-Id': referenceId,
+                'X-Target-Environment': targetEnv,
+                'Ocp-Apim-Subscription-Key': subKey,
+                'X-Callback-Url': callbackUrl,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                amount: amount.toString(),
+                currency: "EUR",
+                externalId: referenceId,
+                payer: {
+                    partyIdType: "MSISDN",
+                    partyId: formattedPhone
                 },
-                body: JSON.stringify({
-                    amount: amount.toString(),
-                    currency: "EUR",
-                    externalId: referenceId,
-                    payer: {
-                        partyIdType: "MSISDN",
-                        partyId: formattedPhone
-                    },
-                    payerMessage: "Payment for MarketPLC",
-                    payeeNote: "MarketPLC Subscription"
-                })
-            });
+                payerMessage: "Payment for MarketPLC",
+                payeeNote: "MarketPLC Subscription"
+            })
+        });
 
-            if (!response.ok && response.status !== 202) {
-                const errorText = await response.text();
-                console.error('MTN API RequestToPay Failed:', response.status, errorText);
-                
-                // If it fails due to exact endpoint path, it might be due to the new MADAPI v1 Payments interface,
-                // but usually the proxy handles `/collection/v1_0/requesttopay`.
-                throw new Error(`MTN API Error: ${response.status} - ${errorText}`);
-            }
+        if (!response.ok && response.status !== 202) {
+            const errorText = await response.text();
             
-            return true;
-        } catch (error) {
-            console.error('MomoClient.requestToPay Exception:', error);
-            throw error;
+            // If it fails due to exact endpoint path, it might be due to the new MADAPI v1 Payments interface,
+            // but usually the proxy handles `/collection/v1_0/requesttopay`.
+            throw new Error(`MTN API RequestToPay Failed: ${response.status} - ${errorText}`);
         }
+
+        return true;
     }
 }
 
