@@ -141,9 +141,9 @@ export function PostActions({ likesCount, isLiked, commentsCount, showComments, 
             setIsStartingChat(true);
             const convId = await getOrCreateConversation(businessProfileId, businessId);
             router.push(`/inbox/${convId}?refPostId=${postId}`);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Failed to open chat from post:', err);
-            alert(err.message || 'Could not start conversation with this business.');
+            alert(err instanceof Error ? err.message : 'Could not start conversation with this business.');
         } finally {
             setIsStartingChat(false);
         }
