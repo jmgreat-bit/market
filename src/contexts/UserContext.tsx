@@ -10,6 +10,7 @@ interface AuthState {
     profile: Profile | null;
     isLoading: boolean;
     isAuthenticated: boolean;
+    error: string | null;
     signOut: () => Promise<void>;
     refreshProfile: () => Promise<void>;
 }
@@ -22,11 +23,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
         profile: Profile | null;
         isLoading: boolean;
         isAuthenticated: boolean;
+        error: string | null;
     }>({
         user: null,
         profile: null,
         isLoading: true,
         isAuthenticated: false,
+        error: null,
     });
 
     const fetchProfile = useCallback(async (userId: string) => {
@@ -63,8 +66,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         try {
             supabase = getSupabaseClient();
         } catch (err) {
-            console.error('[UserProvider] Failed to initialize Supabase client:', err);
-            if (mounted) setState(prev => ({ ...prev, isLoading: false }));
+            if (mounted) setState(prev => ({ ...prev, isLoading: false, error: err instanceof Error ? err.message : String(err) }));
             return;
         }
 
@@ -73,16 +75,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 const { data: { session }, error } = await supabase.auth.getSession();
                 
                 if (error || !session?.user) {
-                    if (mounted) setState({ user: null, profile: null, isLoading: false, isAuthenticated: false });
+                    if (mounted) setState(prev => ({ ...prev, user: null, profile: null, isLoading: false, isAuthenticated: false }));
                 } else {
                     const profile = await fetchProfile(session.user.id);
                     if (mounted) {
-                        setState({
+                        setState(prev => ({
+                            ...prev,
                             user: session.user,
                             profile,
                             isLoading: false,
                             isAuthenticated: true,
-                        });
+                        }));
                     }
                 }
 
@@ -94,22 +97,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
                             if (['SIGNED_IN', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
                                 const profile = await fetchProfile(currentSession.user.id);
                                 if (mounted) {
-                                    setState({
+                                    setState(prev => ({
+                                        ...prev,
                                         user: currentSession.user,
                                         profile,
                                         isLoading: false,
                                         isAuthenticated: true,
-                                    });
+                                    }));
                                 }
                             }
                         } else if (event === 'SIGNED_OUT') {
                             if (mounted) {
-                                setState({
+                                setState(prev => ({
+                                    ...prev,
                                     user: null,
                                     profile: null,
                                     isLoading: false,
                                     isAuthenticated: false,
-                                });
+                                }));
                             }
                         }
                     }
@@ -117,8 +122,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 authSubscription = subscription;
 
             } catch (err) {
-                console.error('[UserProvider] Fatal error initializing auth:', err);
-                if (mounted) setState(prev => ({ ...prev, isLoading: false }));
+                if (mounted) setState(prev => ({ ...prev, isLoading: false, error: err instanceof Error ? err.message : String(err) }));
             }
         };
 
@@ -127,7 +131,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 // Force a session refresh to prevent stale token hangs when tab wakes up
-                supabase.auth.getSession().catch(console.error);
+                supabase.auth.getSession().catch((err: unknown) => {
+                    if (mounted) setState(prev => ({ ...prev, error: err instanceof Error ? err.message : String(err) }));
+                });
             }
         };
 
