@@ -38,7 +38,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
         };
     }
 
-    const businessName = (post.business as any)?.[0]?.business_name || (post.business as any)?.business_name || 'MarketPLC';
+    type BusinessResult = { business_name: string };
+    const businessData = post.business as BusinessResult | BusinessResult[] | null;
+    const businessName = (Array.isArray(businessData) ? businessData[0]?.business_name : businessData?.business_name) || 'MarketPLC';
     const contentPreview = post.content ? `"${post.content.substring(0, 100)}..."` : 'Check out this post on MarketPLC';
 
     return {
@@ -106,8 +108,12 @@ export default async function PostPage({ params }: PostPageProps) {
     }
 
     // Map counts from relations
-    post.likes_count = (data.likes as any)?.[0]?.count ?? 0;
-    post.comments_count = (data.comments as any)?.[0]?.count ?? 0;
+    type CountResult = { count: number };
+    const likesData = data.likes as CountResult | CountResult[] | null;
+    post.likes_count = (Array.isArray(likesData) ? likesData[0]?.count : likesData?.count) ?? 0;
+
+    const commentsData = data.comments as CountResult | CountResult[] | null;
+    post.comments_count = (Array.isArray(commentsData) ? commentsData[0]?.count : commentsData?.count) ?? 0;
 
     return (
         <div className="min-h-screen bg-background pb-32 pt-6">
