@@ -58,47 +58,50 @@ export async function GET(req: NextRequest) {
         ]);
 
         // Process Signups Over Time (Group by YYYY-MM-DD)
-        const signupsMap: Record<string, number> = {};
-        profiles?.forEach(p => {
-            const d = p.created_at.split('T')[0];
-            signupsMap[d] = (signupsMap[d] || 0) + 1;
-        });
-        const usersOverTime = Object.keys(signupsMap).sort().map(date => ({
-            date,
-            signups: signupsMap[date]
-        }));
+        const signupsMap = new Map<string, number>();
+        if (profiles) {
+            for (let i = 0; i < profiles.length; i++) {
+                const d = profiles[i].created_at.substring(0, 10);
+                const count = signupsMap.get(d);
+                signupsMap.set(d, count ? count + 1 : 1);
+            }
+        }
+        const usersOverTime = Array.from(signupsMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([date, signups]) => ({ date, signups }));
 
         // Process Revenue Over Time (Group by YYYY-MM-DD)
-        const revenueMap: Record<string, number> = {};
+        const revenueMap = new Map<string, number>();
         if (isMaster && subscriptions) {
-            subscriptions.forEach(s => {
-                const d = s.created_at.split('T')[0];
-                revenueMap[d] = (revenueMap[d] || 0) + (s.amount_rwf || 0);
-            });
+            for (let i = 0; i < subscriptions.length; i++) {
+                const d = subscriptions[i].created_at.substring(0, 10);
+                const amount = subscriptions[i].amount_rwf || 0;
+                const current = revenueMap.get(d);
+                revenueMap.set(d, current ? current + amount : amount);
+            }
         }
-        const revenueOverTime = Object.keys(revenueMap).sort().map(date => ({
-            date,
-            revenue: revenueMap[date]
-        }));
+        const revenueOverTime = Array.from(revenueMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([date, revenue]) => ({ date, revenue }));
 
         // Process Peak Usage (Group by hour 00-23)
-        const hourMap: Record<string, { searches: number, views: number }> = {};
+        const hourMap = new Array<{ hour: string; searches: number; views: number }>(24);
         for (let i = 0; i < 24; i++) {
-            hourMap[i.toString().padStart(2, '0')] = { searches: 0, views: 0 };
+            hourMap[i] = { hour: `${i.toString().padStart(2, '0')}:00`, searches: 0, views: 0 };
         }
-        searchLogs?.forEach(s => {
-            const h = new Date(s.created_at).getHours().toString().padStart(2, '0');
-            if (hourMap[h]) hourMap[h].searches++;
-        });
-        profileViews?.forEach(v => {
-            const h = new Date(v.created_at).getHours().toString().padStart(2, '0');
-            if (hourMap[h]) hourMap[h].views++;
-        });
-        const peakUsage = Object.keys(hourMap).sort().map(hour => ({
-            hour: `${hour}:00`,
-            searches: hourMap[hour].searches,
-            views: hourMap[hour].views
-        }));
+        if (searchLogs) {
+            for (let i = 0; i < searchLogs.length; i++) {
+                const h = parseInt(searchLogs[i].created_at.substring(11, 13), 10);
+                if (h >= 0 && h < 24) hourMap[h].searches++;
+            }
+        }
+        if (profileViews) {
+            for (let i = 0; i < profileViews.length; i++) {
+                const h = parseInt(profileViews[i].created_at.substring(11, 13), 10);
+                if (h >= 0 && h < 24) hourMap[h].views++;
+            }
+        }
+        const peakUsage = hourMap;
 
         // Process Top Searches
         const searchCounts: Record<string, number> = {};
