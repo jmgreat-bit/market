@@ -1,0 +1,13 @@
+--- src/hooks/useChat.ts
++++ src/hooks/useChat.ts
+@@ -122,8 +122,8 @@
+                     table: 'direct_messages',
+                     filter: `conversation_id=eq.${conversationId}`,
+                 },
+-                (payload) => {
+-                    const newMsg = (payload as { new: Message }).new;
++                (payload: unknown) => {
++                    const newMsg = (payload as { new: Message }).new;
+
+                     setMessages((prev) => {
+                         // Avoid duplicates if optimistic message exists
