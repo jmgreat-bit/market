@@ -49,16 +49,18 @@ export async function GET(req: NextRequest) {
         for (const msg of history || []) {
             if (!msg.session_id) continue;
             
-            if (!sessionsMap.has(msg.session_id)) {
-                sessionsMap.set(msg.session_id, {
+            let session = sessionsMap.get(msg.session_id);
+            if (!session) {
+                session = {
                     id: msg.session_id,
                     created_at: msg.created_at,
                     preview: msg.role === 'user' ? msg.content : 'New Conversation',
                     messages: [],
                     timestamp: new Date(msg.created_at).getTime()
-                });
+                };
+                sessionsMap.set(msg.session_id, session);
             }
-            sessionsMap.get(msg.session_id)!.messages.push(msg);
+            session.messages.push(msg);
         }
 
         // Sort sessions by newest first
