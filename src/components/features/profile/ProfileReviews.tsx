@@ -49,8 +49,9 @@ export default function ProfileReviews({ businessId, initialReviews, averageRati
                     .in('id', userIds);
                 
                 if (users) {
+                    const userMap = new Map(users.map((user: any) => [user.id, user]));
                     const enriched = initialReviews.map(r => {
-                        const u = users.find((user: any) => user.id === r.user_id);
+                        const u = userMap.get(r.user_id);
                         return { ...r, user: u };
                     });
                     setReviews(enriched);
