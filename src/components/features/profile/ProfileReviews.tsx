@@ -51,10 +51,10 @@ export default function ProfileReviews({ businessId, initialReviews, averageRati
                 if (users) {
                     const userMap = new Map(users.map((user: any) => [user.id, user]));
                     const enriched = initialReviews.map(r => {
-                        const u = userMap.get(r.user_id);
+                        const u = userMap.get(r.user_id) as any;
                         return { ...r, user: u };
                     });
-                    setReviews(enriched);
+                    setReviews(enriched as any); // Cast entire array due to loose initial review types
                 }
             } catch(e) {}
         }
