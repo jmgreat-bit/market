@@ -39,6 +39,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // Skip non-HTTP(S) requests (e.g. chrome-extension://) — Cache API doesn't support them
+  if (!url.protocol.startsWith('http')) return;
+
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 

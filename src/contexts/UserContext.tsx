@@ -29,15 +29,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isAuthenticated: false,
     });
 
-    const fetchProfile = useCallback(async (userId: string) => {
-        const supabase = getSupabaseClient();
-        const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
+    const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
+        try {
+            const supabase = getSupabaseClient();
+            const profilePromise = supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .maybeSingle();
 
-        return data as Profile | null;
+            // Race against 8s timeout — never hang forever on a stalled query
+            const result = await Promise.race([
+                profilePromise,
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error('fetchProfile timeout (8s)')), 8000)
+                )
+            ]);
+
+            return (result as any).data as Profile | null;
+        } catch (err) {
+            console.warn('[UserProvider] fetchProfile failed:', err);
+            return null;
+        }
     }, []);
 
     const refreshProfile = useCallback(async () => {
@@ -126,8 +139,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                // Force a session refresh to prevent stale token hangs when tab wakes up
-                supabase.auth.getSession().catch(console.error);
+                // getUser() forces a real server round-trip to refresh expired tokens
+                // (getSession() only reads cached tokens and misses expiry)
+                supabase.auth.getUser().catch(console.error);
+                // Restart background auto-refresh timer (browsers throttle timers in hidden tabs)
+                supabase.auth.startAutoRefresh();
+            } else {
+                supabase.auth.stopAutoRefresh();
             }
         };
 
@@ -145,8 +163,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }, [fetchProfile]);
 
     const signOut = useCallback(async () => {
-        const supabase = getSupabaseClient();
-        await supabase.auth.signOut();
+        // Clear local state IMMEDIATELY so UI doesn't hang
+        setState({ user: null, profile: null, isLoading: false, isAuthenticated: false });
+
+        try {
+            const supabase = getSupabaseClient();
+            // Race signOut against a 3s timeout — expired tokens can hang forever
+            await Promise.race([
+                supabase.auth.signOut(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('signOut timeout')), 3000))
+            ]);
+        } catch (err) {
+            console.warn('[UserProvider] signOut failed or timed out, forcing redirect:', err);
+        }
+
+        // Always redirect, even if signOut failed
+        window.location.href = '/feed';
     }, []);
 
     const value = {

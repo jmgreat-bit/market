@@ -43,8 +43,7 @@ export default function MenuPage() {
 
     const handleSignOut = async () => {
         setIsLoggingOut(true);
-        await signOut();
-        window.location.href = '/feed'; // Force a full page reload to clear all states cleanly
+        await signOut(); // signOut now handles clearing state + redirect with timeout
     };
 
     if (isLoading || isLoggingOut) {

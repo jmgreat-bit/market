@@ -360,8 +360,7 @@ export default function ProfilePage() {
 
     const handleSignOut = async () => {
         setIsLoggingOut(true);
-        await signOut();
-        window.location.href = '/feed'; // Force a clean clear
+        await signOut(); // signOut now handles clearing state + redirect with timeout
     };
 
     const isTrader = profile?.role === 'trader';
