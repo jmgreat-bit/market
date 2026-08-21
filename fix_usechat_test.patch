@@ -1,0 +1,62 @@
+--- src/hooks/useChat.test.ts
++++ src/hooks/useChat.test.ts
+@@ -16,10 +16,10 @@
+ }));
+
+ describe('useChat', () => {
+-    let mockSupabase: unknown;
+-    let mockQuery: unknown;
+-    let mockChannel: unknown;
+-    let channelOnCallback: unknown;
++    let mockSupabase: Record<string, jest.Mock>;
++    let mockQuery: Record<string, jest.Mock>;
++    let mockChannel: Record<string, jest.Mock>;
++    let channelOnCallback: (payload: any) => void;
+
+     const mockUser = { id: 'user-1' };
+     const conversationId = 'conv-1';
+@@ -46,7 +46,7 @@
+         };
+
+         mockChannel = {
+-            on: jest.fn().mockImplementation((type, config, callback) => {
++            on: jest.fn().mockImplementation((type: string, config: any, callback: any) => {
+                 channelOnCallback = callback;
+                 return mockChannel;
+             }),
+@@ -83,7 +83,7 @@
+
+         // Mocks for fetchMessages
+         mockQuery.order.mockReturnThis();
+-        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: mockMsgs, error: null }));
++        mockQuery.then.mockImplementationOnce((resolve: any) => resolve({ data: mockMsgs, error: null }));
+
+         // Provide a custom mock for eq that doesn't shadow the chained update call
+         mockQuery.eq.mockImplementation(() => mockQuery);
+@@ -106,7 +106,7 @@
+         mockQuery.single.mockResolvedValueOnce({ data: null, error: mockError });
+
+         mockQuery.order.mockReturnThis();
+-        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
++        mockQuery.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
+
+         const { result } = renderHook(() => useChat(conversationId));
+
+@@ -131,7 +131,7 @@
+
+         // fetch messages resolves empty
+         mockQuery.order.mockReturnThis();
+-        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
++        mockQuery.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
+
+         mockQuery.eq.mockImplementation(() => mockQuery);
+         mockQuery.neq.mockImplementation(() => mockQuery);
+@@ -171,7 +171,7 @@
+         mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+         mockQuery.order.mockReturnThis();
+-        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
++        mockQuery.then.mockImplementationOnce((resolve: any) => resolve({ data: [], error: null }));
+
+         mockQuery.eq.mockImplementation(() => mockQuery);
+         mockQuery.neq.mockImplementation(() => mockQuery);

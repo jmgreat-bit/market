@@ -1,0 +1,202 @@
+/** @jest-environment jsdom */
+import { renderHook, waitFor, act } from '@testing-library/react';
+import { useChat } from './useChat';
+import { getSupabaseClient } from '@/lib/supabase/client';
+import { useUser } from '@/hooks/useUser';
+
+// Mock scrollToBottom to avoid scrollIntoView errors in jsdom
+window.HTMLElement.prototype.scrollIntoView = jest.fn();
+
+jest.mock('@/lib/supabase/client', () => ({
+    getSupabaseClient: jest.fn()
+}));
+
+jest.mock('@/hooks/useUser', () => ({
+    useUser: jest.fn()
+}));
+
+describe('useChat', () => {
+    let mockSupabase: unknown;
+    let mockQuery: unknown;
+    let mockChannel: unknown;
+    let channelOnCallback: unknown;
+
+    const mockUser = { id: 'user-1' };
+    const conversationId = 'conv-1';
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        // Suppress console.error in tests to avoid polluting the output
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        (useUser as jest.Mock).mockReturnValue({ user: mockUser });
+
+        mockQuery = {
+            select: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
+            neq: jest.fn().mockReturnThis(),
+            order: jest.fn().mockReturnThis(),
+            insert: jest.fn().mockReturnThis(),
+            update: jest.fn().mockReturnThis(),
+            single: jest.fn(),
+            maybeSingle: jest.fn(),
+            then: jest.fn().mockImplementation((resolve) => resolve({ data: null, error: null }))
+        };
+
+        mockChannel = {
+            on: jest.fn().mockImplementation((type, config, callback) => {
+                channelOnCallback = callback;
+                return mockChannel;
+            }),
+            subscribe: jest.fn().mockReturnThis()
+        };
+
+        mockSupabase = {
+            from: jest.fn().mockReturnValue(mockQuery),
+            channel: jest.fn().mockReturnValue(mockChannel),
+            removeChannel: jest.fn()
+        };
+
+        (getSupabaseClient as jest.Mock).mockReturnValue(mockSupabase);
+    });
+
+    afterEach(() => {
+        (console.error as jest.Mock).mockRestore();
+    });
+
+    it('should initialize and fetch data successfully', async () => {
+        const mockConv = {
+            id: conversationId,
+            participant1_id: 'user-1',
+            participant2_id: 'user-2',
+            business_id: null
+        };
+        const mockProf = { id: 'user-2', role: 'client' };
+        const mockMsgs = [
+            { id: 'msg-1', content: 'hello', sender_id: 'user-2', created_at: '2023-01-01' }
+        ];
+
+        // Mocks for fetchConversationDetails
+        mockQuery.single
+            .mockResolvedValueOnce({ data: mockConv, error: null }) // direct_conversations
+            .mockResolvedValueOnce({ data: mockProf, error: null }); // profiles
+
+        mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+        // Mocks for fetchMessages
+        mockQuery.order.mockReturnThis();
+        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: mockMsgs, error: null }));
+
+        // Provide a custom mock for eq that doesn't shadow the chained update call
+        mockQuery.eq.mockImplementation(() => mockQuery);
+        mockQuery.neq.mockImplementation(() => mockQuery);
+
+        const { result } = renderHook(() => useChat(conversationId));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.conversation).toEqual(mockConv);
+        expect(result.current.otherParticipant).toEqual(mockProf);
+        expect(result.current.messages).toEqual(mockMsgs);
+        expect(result.current.error).toBeNull();
+    });
+
+    it('should handle fetch errors', async () => {
+        const mockError = new Error('Not found');
+        mockQuery.single.mockResolvedValueOnce({ data: null, error: mockError });
+
+        mockQuery.order.mockReturnThis();
+        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
+
+        const { result } = renderHook(() => useChat(conversationId));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.error).toBe('Not found');
+    });
+
+    it('should send a message and handle optimistic UI', async () => {
+        const mockConv = {
+            id: conversationId,
+            participant1_id: 'user-1',
+            participant2_id: 'user-2'
+        };
+        mockQuery.single
+            .mockResolvedValueOnce({ data: mockConv, error: null }) // conv
+            .mockResolvedValueOnce({ data: {}, error: null }); // profile
+
+        mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+        // fetch messages resolves empty
+        mockQuery.order.mockReturnThis();
+        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
+
+        mockQuery.eq.mockImplementation(() => mockQuery);
+        mockQuery.neq.mockImplementation(() => mockQuery);
+
+
+        const { result } = renderHook(() => useChat(conversationId));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        const sentMsg = { id: 'db-msg-1', content: 'test msg', sender_id: 'user-1' };
+        // The single inside sendMessage:
+        mockQuery.single.mockResolvedValueOnce({ data: sentMsg, error: null });
+
+        await act(async () => {
+            await result.current.sendMessage('test msg');
+        });
+
+        expect(mockSupabase.from).toHaveBeenCalledWith('direct_messages');
+        expect(mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+            content: 'test msg',
+            sender_id: 'user-1',
+            conversation_id: conversationId
+        }));
+
+        expect(result.current.messages).toEqual([sentMsg]);
+        expect(result.current.isSending).toBe(false);
+    });
+
+    it('should handle real-time message insertion', async () => {
+        const mockConv = {
+            id: conversationId,
+            participant1_id: 'user-1',
+            participant2_id: 'user-2'
+        };
+        mockQuery.single
+            .mockResolvedValueOnce({ data: mockConv, error: null }) // conv
+            .mockResolvedValueOnce({ data: {}, error: null }); // profile
+
+        mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+        mockQuery.order.mockReturnThis();
+        mockQuery.then.mockImplementationOnce((resolve: unknown) => resolve({ data: [], error: null }));
+
+        mockQuery.eq.mockImplementation(() => mockQuery);
+        mockQuery.neq.mockImplementation(() => mockQuery);
+
+        const { result } = renderHook(() => useChat(conversationId));
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(mockSupabase.channel).toHaveBeenCalledWith(`chat-${conversationId}`);
+
+        const newMsg = { id: 'rt-msg-1', content: 'new message', sender_id: 'user-2' };
+
+        act(() => {
+            channelOnCallback({ new: newMsg });
+        });
+
+        expect(result.current.messages).toEqual([newMsg]);
+    });
+});
