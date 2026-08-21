@@ -323,7 +323,12 @@ function LoginForm() {
 
                     {/* Password */}
                     <div className="space-y-2">
-                        <Label htmlFor="password" className="text-foreground text-sm">Password</Label>
+                        <div className="flex justify-between items-center">
+                            <Label htmlFor="password" className="text-foreground text-sm">Password</Label>
+                            <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
+                                Forgot password?
+                            </Link>
+                        </div>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
