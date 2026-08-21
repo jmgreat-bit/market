@@ -37,14 +37,18 @@ describe('POST /api/momo/pay', () => {
         mockSupabase = {
             auth: {
                 getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user123' } } })
-            }
+            },
+            from: jest.fn().mockReturnThis(),
+            insert: jest.fn().mockResolvedValue({ error: null })
         };
 
         (createClient as jest.Mock).mockResolvedValue(mockSupabase);
 
         mockAdminClient = {
             from: jest.fn().mockReturnThis(),
-            insert: jest.fn().mockResolvedValue({ error: null })
+            insert: jest.fn().mockResolvedValue({ error: null }),
+            update: jest.fn().mockReturnThis(),
+            eq: jest.fn().mockReturnThis(),
         };
 
         (getSupabaseAdminClient as jest.Mock).mockReturnValue(mockAdminClient);
@@ -81,7 +85,7 @@ describe('POST /api/momo/pay', () => {
     });
 
     it('returns 500 if database insert fails', async () => {
-        mockAdminClient.insert.mockResolvedValue({ error: new Error('DB error') });
+        mockSupabase.insert.mockResolvedValue({ error: new Error('DB error') });
 
         const req = new NextRequest('http://localhost:3000/api/momo/pay', {
             method: 'POST',
@@ -107,10 +111,10 @@ describe('POST /api/momo/pay', () => {
         expect(res.status).toBe(200);
         expect(data).toEqual({ success: true, referenceId: mockUUID });
 
-        // Verify admin client insertion
-        expect(mockAdminClient.from).toHaveBeenCalledWith('trader_subscriptions');
-        expect(mockAdminClient.insert).toHaveBeenCalledTimes(1);
-        const insertArgs = mockAdminClient.insert.mock.calls[0][0];
+        // Verify supabase client insertion
+        expect(mockSupabase.from).toHaveBeenCalledWith('trader_subscriptions');
+        expect(mockSupabase.insert).toHaveBeenCalledTimes(1);
+        const insertArgs = mockSupabase.insert.mock.calls[0][0];
         expect(insertArgs).toMatchObject({
             id: mockUUID,
             profile_id: 'user123',
