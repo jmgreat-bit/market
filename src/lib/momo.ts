@@ -78,7 +78,6 @@ export class MomoClient {
             const data = await response.json();
             return data.status; // Usually "SUCCESSFUL", "FAILED", or "PENDING"
         } catch (error) {
-            console.error('MomoClient.getTransactionStatus Exception:', error);
             throw error;
         }
     }
@@ -125,7 +124,6 @@ export class MomoClient {
 
             if (!response.ok && response.status !== 202) {
                 const errorText = await response.text();
-                console.error('MTN API RequestToPay Failed:', response.status, errorText);
                 
                 // If it fails due to exact endpoint path, it might be due to the new MADAPI v1 Payments interface,
                 // but usually the proxy handles `/collection/v1_0/requesttopay`.
@@ -134,7 +132,6 @@ export class MomoClient {
             
             return true;
         } catch (error) {
-            console.error('MomoClient.requestToPay Exception:', error);
             throw error;
         }
     }
