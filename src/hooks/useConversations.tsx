@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { useUser } from '@/hooks/useUser';
-import { ConversationWithDetails } from '@/types';
+import { ConversationWithDetails, Conversation, Profile, BusinessDetails } from '@/types';
 
 interface ConversationsContextValue {
     conversations: ConversationWithDetails[];
@@ -51,28 +51,32 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            const otherUserIds = (convData as any[]).map((c: any) =>
+            const conversationsData = convData as Conversation[];
+
+            const otherUserIds = conversationsData.map((c) =>
                 c.participant1_id === user.id ? c.participant2_id : c.participant1_id
             );
-            const businessIds = (convData as any[]).map((c: any) => c.business_id).filter(Boolean) as string[];
+            const businessIds = conversationsData.map((c) => c.business_id).filter(Boolean) as string[];
 
             const { data: profilesData } = await supabase
                 .from('profiles')
                 .select('id, full_name, username, avatar_url, role, trader_tier, is_premium')
                 .in('id', otherUserIds);
 
-            const profilesMap = new Map((profilesData || []).map((p: any) => [p.id, p]));
+            const profiles = (profilesData || []) as Partial<Profile>[];
+            const profilesMap = new Map(profiles.map((p) => [p.id, p]));
 
-            let businessMap = new Map();
+            let businessMap = new Map<string, Partial<BusinessDetails>>();
             if (businessIds.length > 0) {
                 const { data: bizData } = await supabase
                     .from('business_details')
                     .select('id, profile_id, business_name, category, phone')
                     .in('id', businessIds);
-                businessMap = new Map((bizData || []).map((b: any) => [b.id, b]));
+                const businesses = (bizData || []) as Partial<BusinessDetails>[];
+                businessMap = new Map(businesses.map((b) => [b.id as string, b]));
             }
 
-            const unreadCountsPromises = (convData as any[]).map(async (c: any) => {
+            const unreadCountsPromises = conversationsData.map(async (c) => {
                 const { count } = await supabase
                     .from('direct_messages')
                     .select('id', { count: 'exact', head: true })
@@ -85,20 +89,20 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
             const unreadCounts = await Promise.all(unreadCountsPromises);
             const unreadMap = new Map(unreadCounts.map(u => [u.conversationId, u.unreadCount]));
 
-            const enriched: ConversationWithDetails[] = (convData as any[]).map((c: any) => {
+            const enriched: ConversationWithDetails[] = conversationsData.map((c) => {
                 const otherId = c.participant1_id === user.id ? c.participant2_id : c.participant1_id;
                 return {
                     ...c,
-                    other_participant: profilesMap.get(otherId) || null,
-                    business: c.business_id ? businessMap.get(c.business_id) || null : null,
+                    other_participant: (profilesMap.get(otherId) as Profile) || null,
+                    business: c.business_id ? (businessMap.get(c.business_id) as BusinessDetails) || null : null,
                     unread_count: unreadMap.get(c.id) || 0,
                 };
             });
 
             setConversations(enriched);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error fetching conversations:', err);
-            setError(err.message || 'Failed to load conversations');
+            setError(err instanceof Error ? err.message : 'Failed to load conversations');
         } finally {
             setIsLoading(false);
         }
