@@ -59,7 +59,7 @@ export function useGeolocation() {
         navigator.geolocation.getCurrentPosition(
             handlePosition,
             (error) => {
-                let errorMessage = 'Unable to retrieve your location';
+                let errorMessage = error.message || 'Unable to retrieve your location';
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         errorMessage = "Location access is blocked. Please turn on your device's GPS, or check your app permissions in settings, then click Retry.";

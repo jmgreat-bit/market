@@ -156,7 +156,7 @@ describe('useGeolocation', () => {
         expect(result.current.error).toBe("Location request timed out. Please ensure your phone's GPS is turned on and try again.");
     });
 
-    it('should handle unknown error', () => {
+    it('should handle unknown error without message', () => {
         mockGetCurrentPosition.mockImplementationOnce((successCb, errorCb) => {
             errorCb({ code: 999 }); // some unknown code
         });
@@ -170,6 +170,22 @@ describe('useGeolocation', () => {
         expect(result.current.isLoading).toBe(false);
         expect(result.current.coordinates).toBeNull();
         expect(result.current.error).toBe("Unable to retrieve your location");
+    });
+
+    it('should handle unknown error and fall back to error.message', () => {
+        mockGetCurrentPosition.mockImplementationOnce((successCb, errorCb) => {
+            errorCb({ code: 999, message: "Custom API error message" });
+        });
+
+        const { result } = renderHook(() => useGeolocation());
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.coordinates).toBeNull();
+        expect(result.current.error).toBe("Custom API error message");
     });
 
     it('should allow manual requestLocation call', () => {
