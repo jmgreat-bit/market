@@ -64,9 +64,9 @@ export function useChat(conversationId: string) {
                     .maybeSingle();
                 if (biz) setBusiness(biz);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error fetching conversation:', err);
-            setError(err.message || 'Failed to load conversation');
+            setError(err instanceof Error ? err.message : 'Failed to load conversation');
         }
     }, [conversationId, user?.id, supabase]);
 
@@ -95,9 +95,9 @@ export function useChat(conversationId: string) {
                 .eq('is_read', false);
 
             setTimeout(() => scrollToBottom(false), 50);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error loading messages:', err);
-            setError(err.message || 'Failed to load messages');
+            setError(err instanceof Error ? err.message : 'Failed to load messages');
         } finally {
             setIsLoading(false);
         }
@@ -209,7 +209,7 @@ export function useChat(conversationId: string) {
             setMessages((prev) =>
                 prev.map((m) => (m.id === tempId ? (sentMsg as Message) : m))
             );
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Failed to send message:', err);
             // Remove failed optimistic message
             setMessages((prev) => prev.filter((m) => m.id !== tempId));
