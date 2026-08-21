@@ -33,7 +33,8 @@ import {
     Instagram,
     Sparkles,
     ChevronRight,
-    ChevronLeft
+    ChevronLeft,
+    QrCode
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ import { ROUTES } from '@/lib/constants';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import TraderBadge from '@/components/ui/TraderBadge';
 import { FeedList } from '@/components/features/feed/FeedList';
+import ProfileQrModal from '@/components/features/profile/ProfileQrModal';
 
 const COUNTRY_CODES = [
     { code: '+1', country: 'US/CA (+1)' },
@@ -93,8 +95,9 @@ export default function ProfilePage() {
     const [myPosts, setMyPosts] = useState<any[]>([]);
     const [statsLoading, setStatsLoading] = useState(true);
 
-    // Share Hub State
+    // Share & QR State
     const [isCopied, setIsCopied] = useState(false);
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
     // Edit Profile Modal State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -444,17 +447,24 @@ export default function ProfilePage() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 mt-5 z-10">
+                    <div className="flex flex-wrap gap-2.5 mt-5 z-10 justify-center">
                         <button 
                             onClick={openEditModal}
-                            className="bg-primary text-primary-foreground font-display font-bold py-2.5 px-6 rounded-full text-sm flex items-center gap-2 hover:opacity-90 transition-opacity"
+                            className="bg-primary text-primary-foreground font-display font-bold py-2.5 px-5 rounded-full text-sm flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
                         >
                             <Edit3 className="w-4 h-4" />
                             Edit Profile
                         </button>
                         <button 
+                            onClick={() => setIsQrModalOpen(true)}
+                            className="bg-secondary border border-border text-foreground font-display font-medium py-2.5 px-5 rounded-full text-sm flex items-center gap-2 hover:border-primary/50 transition-colors cursor-pointer"
+                        >
+                            <QrCode className="w-4 h-4 text-primary" />
+                            <span>{isTrader ? 'Store QR & Stand' : 'My QR Code'}</span>
+                        </button>
+                        <button 
                             onClick={handleShare}
-                            className="bg-secondary border border-border text-foreground font-display font-medium py-2.5 px-6 rounded-full text-sm flex items-center gap-2 hover:border-primary/50 transition-colors"
+                            className="bg-secondary border border-border text-foreground font-display font-medium py-2.5 px-5 rounded-full text-sm flex items-center gap-2 hover:border-primary/50 transition-colors cursor-pointer"
                         >
                             {isCopied ? (
                                 <>
@@ -464,7 +474,7 @@ export default function ProfilePage() {
                             ) : (
                                 <>
                                     <Share2 className="w-4 h-4" />
-                                    <span>Share Hub</span>
+                                    <span>Share</span>
                                 </>
                             )}
                         </button>
@@ -780,6 +790,18 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Profile QR & Stand Modal */}
+            {profile && (
+                <ProfileQrModal
+                    isOpen={isQrModalOpen}
+                    onClose={() => setIsQrModalOpen(false)}
+                    profile={profile}
+                    businessName={businessInfo?.business_name}
+                    category={businessInfo?.category}
+                    address={businessInfo?.address}
+                />
             )}
         </div>
     );

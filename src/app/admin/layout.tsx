@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <div className="bg-[#0f172a] p-4 rounded-xl border border-slate-800 text-xs text-slate-400 text-left space-y-2">
                         <p className="font-bold text-white uppercase tracking-wider text-[10px]">Authorized Admin Email:</p>
                         <p>• Master Admin: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">thegreat@admin.sir</code></p>
-                        <p>• Staff Accounts: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">*@staff.marketplc.com</code></p>
+                        <p>• Staff Accounts: <code className="text-blue-400 bg-blue-950/50 px-1.5 py-0.5 rounded">*@staff.synchromarket.com</code></p>
                     </div>
 
                     <div className="space-y-3 pt-2">

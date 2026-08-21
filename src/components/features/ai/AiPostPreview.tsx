@@ -50,7 +50,7 @@ export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
 
                             <div className="absolute bottom-4 left-4 right-4">
                                 <h3 className="text-xl font-bold text-white drop-shadow-md truncate">
-                                    {business?.business_name || 'MarketPLC Trader'}
+                                    {business?.business_name || 'SynchroMarket Trader'}
                                 </h3>
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className="text-xs font-bold text-black bg-[#ffcc00] px-2 py-0.5 rounded-full uppercase tracking-wide">
@@ -63,7 +63,7 @@ export function AiPostPreview({ post, onClose }: AiPostPreviewProps) {
                         <div className="p-6 border-b border-border/50 flex justify-between items-start shrink-0 relative">
                             <div>
                                 <h3 className="text-xl font-bold text-foreground">
-                                    {business?.business_name || 'MarketPLC Trader'}
+                                    {business?.business_name || 'SynchroMarket Trader'}
                                 </h3>
                                 <span className="text-xs font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded-full uppercase tracking-wide mt-2 inline-block">
                                     {business?.category || 'General'}

@@ -30,16 +30,16 @@ export default function PrivacyPage() {
                     <h3 className="font-display font-bold text-xl text-primary">1. Introduction</h3>
                     <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                         <p>
-                            Welcome to <strong>MarketPLC</strong>, a location-based marketplace platform operated by <strong>SynchroSphere Ltd</strong> (TIN: 156004518), a company registered under the laws of the Republic of Rwanda.
+                            Welcome to <strong>SynchroMarket</strong>, a location-based marketplace platform operated by <strong>SynchroSphere Ltd</strong> (TIN: 156004518), a company registered under the laws of the Republic of Rwanda.
                         </p>
                         <p>
-                            This Privacy Notice explains how we collect, use, store, share, and protect your personal data when you use the MarketPLC application and related services. It applies to all users, including <strong>Explorers</strong> (consumers who browse and discover local shops) and <strong>Vendors</strong> (traders who register and manage their shops on the platform).
+                            This Privacy Notice explains how we collect, use, store, share, and protect your personal data when you use the SynchroMarket application and related services. It applies to all users, including <strong>Explorers</strong> (consumers who browse and discover local shops) and <strong>Vendors</strong> (traders who register and manage their shops on the platform).
                         </p>
                         <p>
                             This notice is issued in compliance with <strong>Law Nº 058/2021 of 13/10/2021</strong> relating to the protection of personal data and privacy in Rwanda, and all applicable regulations thereunder.
                         </p>
                         <p>
-                            By creating an account or using MarketPLC, you acknowledge that you have read, understood, and agree to this Privacy Notice.
+                            By creating an account or using SynchroMarket, you acknowledge that you have read, understood, and agree to this Privacy Notice.
                         </p>
                     </div>
                 </section>
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
                         <p>In accordance with Law Nº 058/2021, we process your personal data based on the following legal grounds:</p>
                         <ul className="list-disc list-inside space-y-2 pl-2">
                             <li><strong>Consent (Article 34):</strong> You provide consent when creating your account and agreeing to this Privacy Notice. For Explorers, location access is granted through explicit browser/device permission. You may withdraw consent at any time.</li>
-                            <li><strong>Contractual Necessity:</strong> Processing is necessary to perform our contract with you — i.e., to provide the MarketPLC service, display your shop listing (Vendors), or enable marketplace discovery (Explorers).</li>
+                            <li><strong>Contractual Necessity:</strong> Processing is necessary to perform our contract with you — i.e., to provide the SynchroMarket service, display your shop listing (Vendors), or enable marketplace discovery (Explorers).</li>
                             <li><strong>Legitimate Interest:</strong> We process certain data for legitimate interests such as platform security, fraud prevention, service improvement, and analytics — provided these interests do not override your fundamental rights.</li>
                             <li><strong>Legal Obligation:</strong> We may retain certain data (e.g., financial and transaction records) to comply with Rwandan tax law and other regulatory requirements.</li>
                         </ul>
@@ -237,7 +237,7 @@ export default function PrivacyPage() {
                     <h3 className="font-display font-bold text-xl text-primary">9. Children&apos;s Privacy</h3>
                     <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                         <p>
-                            MarketPLC is not intended for use by individuals under the age of <strong>16</strong>. We do not knowingly collect personal data from children under 16 years of age.
+                            SynchroMarket is not intended for use by individuals under the age of <strong>16</strong>. We do not knowingly collect personal data from children under 16 years of age.
                         </p>
                         <p>
                             If we become aware that we have inadvertently collected personal data from a child under 16, we will take immediate steps to delete such data from our systems. If you believe a child has provided us with personal data, please contact our DPO at <a href="mailto:synchrosphere@proton.me" className="text-primary underline">synchrosphere@proton.me</a>.

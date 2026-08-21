@@ -30,7 +30,7 @@ export default function TermsPage() {
                     <h3 className="font-display font-bold text-xl text-accent">1. Introduction</h3>
                     <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                         <p>
-                            These Terms of Service (&quot;Terms&quot;) govern your access to and use of MarketPLC (also known as GeoPulse), a digital marketplace platform operated by <strong className="text-foreground">SynchroSphere Ltd</strong>, a company registered in Rwanda (TIN: 156004518).
+                            These Terms of Service (&quot;Terms&quot;) govern your access to and use of SynchroMarket (also known as GeoPulse), a digital marketplace platform operated by <strong className="text-foreground">SynchroSphere Ltd</strong>, a company registered in Rwanda (TIN: 156004518).
                         </p>
                         <p>
                             By creating an account or using the platform, you agree to be bound by these Terms, our <Link href="/legal/privacy" className="text-primary hover:underline font-medium">Privacy Policy</Link>, and all applicable laws, including <strong className="text-foreground">Law Nº 058/2021</strong> of 13/10/2021 relating to the protection of personal data and privacy in Rwanda.
@@ -70,7 +70,7 @@ export default function TermsPage() {
                     <h3 className="font-display font-bold text-xl text-accent">5. Data Processing & Privacy</h3>
                     <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
                         <p>
-                            Your personal data is processed in accordance with our <Link href="/legal/privacy" className="text-primary hover:underline font-medium">Privacy Policy</Link> and Rwandan data protection law. By using MarketPLC, you consent to the collection and processing of your data as described in our Privacy Policy.
+                            Your personal data is processed in accordance with our <Link href="/legal/privacy" className="text-primary hover:underline font-medium">Privacy Policy</Link> and Rwandan data protection law. By using SynchroMarket, you consent to the collection and processing of your data as described in our Privacy Policy.
                         </p>
                         <p>
                             Your data is stored on secure cloud infrastructure (Supabase/AWS) located in the <strong className="text-foreground">United States and Germany</strong>. All data transfers are protected by Standard Contractual Clauses and industry-standard encryption.
@@ -91,7 +91,7 @@ export default function TermsPage() {
                 <section className="space-y-4">
                     <h3 className="font-display font-bold text-xl text-accent">7. Limitation of Liability</h3>
                     <p className="text-sm leading-relaxed text-muted-foreground italic">
-                        MarketPLC is a marketplace discovery platform. While we verify vendor registration, SynchroSphere Ltd is not responsible for the quality, safety, legality, or accuracy of goods and services offered by independent vendors listed on the platform. All transactions between Explorers and Vendors are conducted at the parties&apos; own risk.
+                        SynchroMarket is a marketplace discovery platform. While we verify vendor registration, SynchroSphere Ltd is not responsible for the quality, safety, legality, or accuracy of goods and services offered by independent vendors listed on the platform. All transactions between Explorers and Vendors are conducted at the parties&apos; own risk.
                     </p>
                 </section>
 

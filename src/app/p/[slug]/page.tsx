@@ -34,25 +34,25 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
     if (!post) {
         return {
-            title: 'Post Not Found | MarketPLC',
+            title: 'Post Not Found | SynchroMarket',
         };
     }
 
-    const businessName = (post.business as any)?.[0]?.business_name || (post.business as any)?.business_name || 'MarketPLC';
-    const contentPreview = post.content ? `"${post.content.substring(0, 100)}..."` : 'Check out this post on MarketPLC';
+    const businessName = (post.business as any)?.[0]?.business_name || (post.business as any)?.business_name || 'SynchroMarket';
+    const contentPreview = post.content ? `"${post.content.substring(0, 100)}..."` : 'Check out this post on SynchroMarket';
 
     return {
-        title: `${businessName} on MarketPLC`,
+        title: `${businessName} on SynchroMarket`,
         description: contentPreview,
         openGraph: {
-            title: `${businessName} on MarketPLC`,
+            title: `${businessName} on SynchroMarket`,
             description: contentPreview,
             images: post.image_url ? [{ url: post.image_url }] : [],
             type: 'website',
         },
         twitter: {
             card: 'summary_large_image',
-            title: `${businessName} on MarketPLC`,
+            title: `${businessName} on SynchroMarket`,
             description: contentPreview,
             images: post.image_url ? [post.image_url] : [],
         },
@@ -77,6 +77,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     trader_tier
                 )
             ),
+                        media:post_media(*),
             likes:likes(count),
             comments:comments(count),
             poll_options:poll_options(id, post_id, label, votes_count, created_at)

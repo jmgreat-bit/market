@@ -365,7 +365,7 @@ export default function AdsCreatePage() {
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full">
                         <a
-                            href="https://wa.me/250780000000?text=Hi%2C%20I%20want%20to%20activate%20my%20ad%20on%20MarketPLC"
+                            href="https://wa.me/250780000000?text=Hi%2C%20I%20want%20to%20activate%20my%20ad%20on%20SynchroMarket"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700 transition-colors"
@@ -406,7 +406,7 @@ export default function AdsCreatePage() {
                         Promote a Post
                     </h1>
                     <p className="text-muted-foreground text-sm">
-                        Boost your reach with targeted ads across MarketPLC.
+                        Boost your reach with targeted ads across SynchroMarket.
                     </p>
                 </motion.header>
 

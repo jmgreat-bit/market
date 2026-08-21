@@ -7,6 +7,7 @@ import ProfileTracker from '@/components/features/profile/ProfileTracker';
 import ContactButtons from '@/components/features/profile/ContactButtons';
 import ProfileReviews from '@/components/features/profile/ProfileReviews';
 import TraderBadge from '@/components/ui/TraderBadge';
+import PublicShareButtons from '@/components/features/profile/PublicShareButtons';
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,6 +85,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                 ...post,
                 likes_count: post.likes?.[0]?.count ?? 0,
                 comments_count: post.comments?.[0]?.count ?? 0,
+                    images: (post.media && post.media.length > 0) ? post.media.filter((m: any) => m.type === "image").sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)).map((m: any) => ({ id: m.id, url: m.url, alt: m.alt_text })) : (post.image_url ? [{ id: "legacy", url: post.image_url }] : []),
             }));
 
             const { data: dirPhotos } = await supabase
@@ -214,11 +216,25 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
                             websiteUrl={businessInfo.website_url}
                         />
                         {businessInfo.latitude && businessInfo.longitude && (
-                            <Link href="/map" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all text-sm flex-1 sm:flex-none">
+                            <Link href="/map" className="flex items-center justify-center gap-2 px-4 py-2.5 bg-secondary text-foreground font-bold rounded-full hover:bg-secondary/80 border border-border/50 hover:border-primary/40 transition-all text-sm shrink-0">
                                 <MapPin className="w-4 h-4 text-primary" />
                                 Map
                             </Link>
                         )}
+                        <PublicShareButtons
+                            profile={profile}
+                            businessName={businessInfo?.business_name}
+                            category={businessInfo?.category}
+                            address={businessInfo?.address}
+                        />
+                    </div>
+                )}
+
+                {(!isTrader || !businessInfo) && (
+                    <div className="flex flex-wrap gap-3 mb-10 pb-6 border-b border-border/30">
+                        <PublicShareButtons
+                            profile={profile}
+                        />
                     </div>
                 )}
 

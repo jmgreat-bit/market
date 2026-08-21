@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
             .single();
 
         const isMaster = profile?.email === 'thegreat@admin.sir';
-        const isStaff = profile?.email?.endsWith('@staff.marketplc.com');
+        const isStaff = profile?.email?.endsWith('@staff.synchromarket.com') || profile?.email?.endsWith('@staff.marketplc.com');
 
         if (!isMaster && !isStaff) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

@@ -253,7 +253,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                                     Direct Verified Channel
                                 </p>
                                 <p className="text-[11px] text-muted-foreground">
-                                    Inquiries sent here reach {displayName} directly on MarketPLC.
+                                    Inquiries sent here reach {displayName} directly on SynchroMarket.
                                 </p>
                             </div>
                         </div>

@@ -70,6 +70,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                             *,
                             profile:profiles(avatar_url, full_name, username, trader_tier)
                         ),
+                        media:post_media(*),
                         likes:likes(count),
                         comments:comments(count),
                         poll_options:poll_options(id, post_id, label, votes_count, created_at)
@@ -86,6 +87,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                     ...post,
                     likes_count: post.likes?.[0]?.count ?? 0,
                     comments_count: post.comments?.[0]?.count ?? 0,
+                    images: (post.media && post.media.length > 0) ? post.media.filter((m: any) => m.type === "image").sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)).map((m: any) => ({ id: m.id, url: m.url, alt: m.alt_text })) : (post.image_url ? [{ id: "legacy", url: post.image_url }] : []),
                 }));
 
                 // Fetch active ads
@@ -99,6 +101,7 @@ export function useNearbyPosts(coordinates: Coordinates | null): UseNearbyPostsR
                                 *,
                                 profile:profiles(avatar_url, full_name, username, trader_tier)
                             ),
+                        media:post_media(*),
                             likes:likes(count),
                             comments:comments(count),
                             poll_options:poll_options(id, post_id, label, votes_count, created_at)

@@ -13,18 +13,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MarketPLC - Discover Local Businesses",
-  description: "Find amazing local businesses and their latest deals on an interactive map",
-  keywords: ["local business", "deals", "map", "discovery", "nearby", "Rwanda", "Kigali"],
+  title: "SynchroMarket - Discover Local Businesses & Live Pulses",
+  description: "Find amazing local businesses, stores, and their latest live pulses on SynchroMarket",
+  keywords: ["local business", "deals", "map", "discovery", "nearby", "Rwanda", "Kigali", "SynchroMarket"],
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon-192.png?v=2",
-    apple: "/icon-192.png?v=2",
+    icon: "/icon-192.png?v=3",
+    apple: "/icon-192.png?v=3",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "MarketPLC",
+    title: "SynchroMarket",
   },
 };
 

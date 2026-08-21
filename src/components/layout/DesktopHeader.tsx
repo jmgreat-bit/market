@@ -27,9 +27,10 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
     return (
         <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/40">
             <div className="flex items-center gap-4">
-                <Link href={ROUTES.FEED} className="flex items-center">
-                    <h1 className="font-display font-black text-primary tracking-tighter text-2xl">
-                        MarketPLC
+                <Link href={ROUTES.FEED} className="flex items-center gap-2.5">
+                    <img src="/logo.png" alt="SynchroMarket" className="w-8 h-8 object-contain" />
+                    <h1 className="font-display font-black text-foreground tracking-tighter text-2xl">
+                        Synchro<span className="text-primary">Market</span>
                     </h1>
                 </Link>
             </div>

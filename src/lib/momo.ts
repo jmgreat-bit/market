@@ -90,7 +90,7 @@ export class MomoClient {
      */
     public async requestToPay(amount: number, phone: string, referenceId: string): Promise<boolean> {
         const token = await this.getToken();
-        const callbackUrl = 'https://marketplc.vercel.app/api/momo/callback';
+        const callbackUrl = 'https://synchromarket.com/api/momo/callback';
 
         // Format phone to start with country code (assuming Rwanda 250 for now)
         const formattedPhone = phone.startsWith('0') ? '250' + phone.substring(1) : phone;
@@ -118,8 +118,8 @@ export class MomoClient {
                         partyIdType: "MSISDN",
                         partyId: formattedPhone
                     },
-                    payerMessage: "Payment for MarketPLC",
-                    payeeNote: "MarketPLC Subscription"
+                    payerMessage: "Payment for SynchroMarket",
+                    payeeNote: "SynchroMarket Subscription"
                 })
             });
 

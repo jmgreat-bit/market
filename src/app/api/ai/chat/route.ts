@@ -176,7 +176,7 @@ Task:
         const synthesisModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: "application/json" } });
         
         const synthesisPrompt = `
-You are MarketPLC AI, a friendly and helpful local assistant in Rwanda.
+You are SynchroMarket AI, a friendly and helpful local assistant in Rwanda.
 User request: "${message}"
 
 Here are the candidate posts from our database based on the user's keywords:

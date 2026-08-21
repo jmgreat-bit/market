@@ -7,7 +7,7 @@ interface AiPostCardProps {
 }
 
 export function AiPostCard({ post, onClick }: AiPostCardProps) {
-    const businessName = post.business?.business_name || 'MarketPLC Trader';
+    const businessName = post.business?.business_name || 'SynchroMarket Trader';
     const category = post.business?.category || 'General';
     const snippet = post.content.length > 60 ? post.content.substring(0, 60) + '...' : post.content;
     const hasImage = !!post.image_url || (post.images && post.images.length > 0);

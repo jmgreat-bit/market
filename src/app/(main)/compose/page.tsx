@@ -42,8 +42,9 @@ export default function ComposePage() {
     const [postType, setPostType] = useState<PostType>('standard');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const MAX_PHOTOS = 5;
 
     // Duration based on tier (TTL rules: Free = 3h, Pro = 9h, National = 24h)
     const tier = profile?.trader_tier || 'free';
@@ -83,22 +84,41 @@ export default function ComposePage() {
     }
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (file.size > IMAGE_MAX_BYTES) { setError('Image must be under 4MB'); return; }
-        if (file.size < IMAGE_MIN_BYTES) { setError('Image is too small (minimum 10KB)'); return; }
-        if (!file.type.startsWith('image/')) { setError('Only image files are allowed.'); return; }
-        setSelectedImage(file);
-        const reader = new FileReader();
-        reader.onloadend = () => setImagePreview(reader.result as string);
-        reader.readAsDataURL(file);
-        setError(null);
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        
+        const remainingSlots = MAX_PHOTOS - selectedImages.length;
+        const validFiles = files.filter(f => {
+            if (!f.type.startsWith('image/')) return false;
+            if (f.size > IMAGE_MAX_BYTES || f.size < IMAGE_MIN_BYTES) return false;
+            return true;
+        }).slice(0, remainingSlots);
+        
+        if (validFiles.length < files.length) {
+            setError(remainingSlots === 0 ? 'Maximum 5 photos allowed.' : 'Some files were skipped (max 5 images allowed).');
+        } else {
+            setError(null);
+        }
+
+        if (validFiles.length > 0) {
+            setSelectedImages(prev => [...prev, ...validFiles]);
+            
+            validFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreviews(prev => [...prev, reader.result as string]);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        if (cameraInputRef.current) cameraInputRef.current.value = '';
     };
 
-    const removeImage = () => {
-        setSelectedImage(null);
-        setImagePreview(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+    const removeImage = (index: number) => {
+        setSelectedImages(prev => prev.filter((_, i) => i !== index));
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     const addPollOption = () => {
@@ -173,16 +193,25 @@ export default function ComposePage() {
             if (!business) throw new Error("Could not find or initialize your business profile. Please try again.");
 
             let imageUrl: string | null = null;
+            let uploadedUrls: string[] = [];
 
-            if (selectedImage) {
-                const fileExt = selectedImage.name.split('.').pop();
-                const fileName = `${profile.id}/${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('post-media')
-                    .upload(fileName, selectedImage, { cacheControl: '3600', upsert: false });
-                if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
-                const { data: urlData } = supabase.storage.from('post-media').getPublicUrl(fileName);
-                imageUrl = urlData.publicUrl;
+            if (selectedImages.length > 0) {
+                uploadedUrls = await Promise.all(selectedImages.map(async (img) => {
+                    const fileExt = img.name.split('.').pop();
+                    const fileName = `${profile.id}/${Date.now()}-${Math.random().toString(36).substring(2,8)}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('post-media')
+                        .upload(fileName, img, { cacheControl: '3600', upsert: false });
+                    
+                    if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+                    
+                    const { data: urlData } = supabase.storage.from('post-media').getPublicUrl(fileName);
+                    return urlData.publicUrl;
+                }));
+                
+                if (uploadedUrls.length > 0) {
+                    imageUrl = uploadedUrls[0];
+                }
             }
 
             // Calculate expiration
@@ -227,6 +256,18 @@ export default function ComposePage() {
                     .from('poll_options')
                     .insert(options);
                 if (pollError) throw pollError;
+            }
+
+            // Insert post media for multi-photo
+            if (uploadedUrls.length > 0 && newPost) {
+                const mediaRows = uploadedUrls.map((url, i) => ({
+                    post_id: newPost.id,
+                    type: 'image',
+                    url: url,
+                    order: i
+                }));
+                const { error: mediaError } = await supabase.from('post_media').insert(mediaRows);
+                if (mediaError) throw mediaError;
             }
 
             clearTimeout(timeoutId);
@@ -404,16 +445,24 @@ export default function ComposePage() {
                     )}
 
                     {/* Image Preview */}
-                    {imagePreview && (
+                    {imagePreviews.length > 0 && (
                         <div className="px-4 pb-3">
-                            <div className="relative rounded-xl overflow-hidden border border-border/30">
-                                <img src={imagePreview} alt="Selected" className="w-full max-h-64 object-cover" />
-                                <button 
-                                    onClick={removeImage}
-                                    className="absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/80 transition-colors"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attached Media</span>
+                                <span className="text-[10px] font-bold text-primary">{imagePreviews.length} / {MAX_PHOTOS}</span>
+                            </div>
+                            <div className={`grid gap-2 ${imagePreviews.length === 1 ? 'grid-cols-1' : imagePreviews.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                                {imagePreviews.map((preview, idx) => (
+                                    <div key={idx} className="relative rounded-xl overflow-hidden border border-border/30 aspect-square group">
+                                        <img src={preview} alt={`Selected ${idx}`} className="w-full h-full object-cover" />
+                                        <button 
+                                            onClick={() => removeImage(idx)}
+                                            className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
@@ -424,6 +473,7 @@ export default function ComposePage() {
                             <input 
                                 ref={fileInputRef}
                                 type="file" 
+                                multiple
                                 accept="image/jpeg,image/png,image/webp,image/gif" 
                                 className="hidden" 
                                 onChange={handleImageSelect}
@@ -431,6 +481,7 @@ export default function ComposePage() {
                             <input 
                                 ref={cameraInputRef}
                                 type="file" 
+                                multiple
                                 accept="image/jpeg,image/png,image/webp,image/gif" 
                                 capture="environment"
                                 className="hidden" 

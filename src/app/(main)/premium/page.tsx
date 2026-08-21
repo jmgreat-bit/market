@@ -94,7 +94,7 @@ const TIERS: {
             { title: '👑 Verification', items: ['Gold verified badge with crown icon appears next to your name everywhere', 'Badge is shown on your profile, posts, AI results, and map', 'Maximum trust and credibility with customers'] },
             { title: '📊 Analytics', items: ['Full analytics dashboard with post views, impressions, and engagement data', 'Track nationwide performance metrics'] },
             { title: '📢 Advertising', items: ['Everything Pro gets, PLUS:', 'Run boosted ads Citywide (3× multiplier) or Nationwide (10× multiplier)', 'Maximum organic + paid reach combination in Rwanda', 'Dynamic pricing: 350–500 RWF/day depending on duration'] },
-            { title: '⭐ Exclusive Perks', items: ['All Pro features included automatically', 'Priority support from the MarketPLC team', 'Early access to new features'] },
+            { title: '⭐ Exclusive Perks', items: ['All Pro features included automatically', 'Priority support from the SynchroMarket team', 'Early access to new features'] },
         ],
     },
 ];
@@ -173,7 +173,7 @@ export default function PremiumPage() {
                 >
                     <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-5">
                         <Crown className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-bold text-primary uppercase tracking-widest">MarketPLC Premium</span>
+                        <span className="text-xs font-bold text-primary uppercase tracking-widest">SynchroMarket Premium</span>
                     </div>
                     <h1 className="font-headline text-3xl sm:text-4xl font-black tracking-tight mb-3">
                         Upgrade Your Trade Game

@@ -47,6 +47,7 @@ export default function PostDetailPage() {
                             *,
                             profile:profiles(avatar_url, full_name, username, trader_tier)
                         ),
+                        media:post_media(*),
                         likes:likes(count),
                         comments:comments(
                             *,

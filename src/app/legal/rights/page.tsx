@@ -32,7 +32,7 @@ export default function RightsPage() {
                             Under <strong>Law Nº 058/2021 of 13/10/2021</strong> relating to the protection of personal data and privacy in Rwanda, you have specific rights regarding your personal data. This page explains each right and provides clear guidance on how to exercise them.
                         </p>
                         <p>
-                            <strong>SynchroSphere Ltd</strong> (TIN: 156004518), the operator of MarketPLC, is committed to upholding your data protection rights and making it easy for you to control your personal information.
+                            <strong>SynchroSphere Ltd</strong> (TIN: 156004518), the operator of SynchroMarket, is committed to upholding your data protection rights and making it easy for you to control your personal information.
                         </p>
                     </div>
                 </section>
@@ -61,7 +61,7 @@ export default function RightsPage() {
 
                         <div className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-2">
                             <p className="font-bold text-foreground">④ Right to Erasure (Right to Be Forgotten)</p>
-                            <p>You can request the complete deletion of your personal data. When you delete your MarketPLC account, all your data — profile, posts, comments, and business listings — is permanently and irreversibly removed through cascading deletion.</p>
+                            <p>You can request the complete deletion of your personal data. When you delete your SynchroMarket account, all your data — profile, posts, comments, and business listings — is permanently and irreversibly removed through cascading deletion.</p>
                         </div>
 
                         <div className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-2">
@@ -89,7 +89,7 @@ export default function RightsPage() {
 
                         <div className="p-5 rounded-xl bg-primary/5 border border-primary/10 space-y-3">
                             <p className="font-bold text-foreground text-base">Option A: In the App</p>
-                            <p>Many rights can be exercised directly within MarketPLC without needing to contact us:</p>
+                            <p>Many rights can be exercised directly within SynchroMarket without needing to contact us:</p>
                             <ul className="list-disc list-inside space-y-2 pl-2">
                                 <li><strong>Edit Your Profile:</strong> Update your name, avatar, business details, and other information through your profile settings at any time.</li>
                                 <li><strong>Delete Your Account:</strong> Navigate to <strong>Menu → Delete Account</strong> to permanently delete your account and all associated data. This action is immediate and irreversible — all your personal data, posts, comments, and business listings will be permanently erased through cascading deletion.</li>
@@ -109,7 +109,7 @@ export default function RightsPage() {
                                 <p><strong>Include in your email:</strong></p>
                                 <ul className="list-disc list-inside space-y-1 pl-2">
                                     <li>Your full name</li>
-                                    <li>The email address registered with your MarketPLC account</li>
+                                    <li>The email address registered with your SynchroMarket account</li>
                                     <li>A clear description of the right you wish to exercise</li>
                                     <li>Any relevant details to help us locate and process your request</li>
                                 </ul>

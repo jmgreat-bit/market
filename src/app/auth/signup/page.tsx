@@ -212,14 +212,14 @@ export default function SignupPage() {
                     {/* Logo */}
                     <div className="flex flex-col items-center mb-8">
                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 overflow-hidden shadow-[0_0_30px_rgba(143,245,255,0.2)]">
-                            <img src="/logo.png" alt="MarketPLC Logo" className="w-full h-full object-cover" />
+                            <img src="/logo.png" alt="SynchroMarket Logo" className="w-full h-full object-cover" />
                         </div>
                         <h1 className="text-2xl font-bold text-foreground font-display">
-                            {step === 'role' ? 'Join MarketPLC' : step === 'location' ? 'Pin Your Location' : step === 'verify-email' ? 'Almost there!' : 'Create Account'}
+                            {step === 'role' ? 'Join SynchroMarket' : step === 'location' ? 'Pin Your Location' : step === 'verify-email' ? 'Almost there!' : 'Create Account'}
                         </h1>
                         <p className="text-muted-foreground text-sm text-center mt-1">
                             {step === 'role'
-                                ? 'Choose how you want to use MarketPLC'
+                                ? 'Choose how you want to use SynchroMarket'
                                 : step === 'location'
                                     ? 'Drop a pin where your business is located'
                                     : step === 'verify-email'

@@ -14,7 +14,7 @@ export function useAdmin() {
         }
         
         // Staff accounts
-        if (user.email.endsWith('@staff.marketplc.com')) {
+        if (user.email.endsWith('@staff.synchromarket.com') || user.email.endsWith('@staff.marketplc.com')) {
             return 'staff';
         }
         
