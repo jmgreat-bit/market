@@ -52,7 +52,6 @@ export async function POST(req: Request) {
                         used_credits: 0,
                         package: pkgName
                     });
-                    console.log(`[MOMO WEBHOOK] Successfully granted ${prompts} AI credits to user ${sub.profile_id}`);
                 } else {
                     const expiryDate = new Date();
                     expiryDate.setDate(expiryDate.getDate() + 30);
