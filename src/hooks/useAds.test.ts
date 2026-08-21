@@ -76,6 +76,22 @@ describe('useAds hook', () => {
         expect(mockContains).toHaveBeenCalledWith('placements', ['comments']);
     });
 
+    it('handles no active ads (empty array returned)', async () => {
+        // Simulates the scenario where no ads are currently active for the given placement
+        mockGte.mockResolvedValueOnce({ data: [], error: null });
+
+        const { result } = renderHook(() => useAds('feed'));
+
+        expect(result.current.isLoading).toBe(true);
+
+        await waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
+        });
+
+        expect(result.current.ads).toEqual([]);
+        expect(mockContains).toHaveBeenCalledWith('placements', ['feed']);
+    });
+
     it('handles null data gracefully', async () => {
         mockGte.mockResolvedValueOnce({ data: null, error: null });
 
