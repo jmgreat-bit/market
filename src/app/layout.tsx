@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   keywords: ["local business", "deals", "map", "discovery", "nearby", "Rwanda", "Kigali"],
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon-192.png",
-    apple: "/icon-192.png",
+    icon: "/icon-192.png?v=2",
+    apple: "/icon-192.png?v=2",
   },
   appleWebApp: {
     capable: true,

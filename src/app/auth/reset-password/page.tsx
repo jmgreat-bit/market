@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
                                         minLength={6}
                                         value={password}
                                         onChange={e => setPassword(e.target.value)}
-                                        placeholder="••••••••"
+                                        placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                                         className="w-full bg-background/50 border border-border/50 rounded-xl px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
                                     />
                                     <button 

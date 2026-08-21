@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { ArrowLeft, Loader2, MailCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
         try {
             const supabase = getSupabaseClient();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: \\/auth/reset-password\
+                redirectTo: window.location.origin + '/auth/reset-password'
             });
 
             if (error) throw error;
