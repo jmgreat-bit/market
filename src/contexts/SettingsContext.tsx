@@ -48,7 +48,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                     setLanguageState(storedLang);
                 }
             } catch (e) {
-                console.error('Failed to load settings', e);
+                // If localStorage is unavailable (e.g., restricted by privacy settings),
+                // we gracefully fall back to default settings without throwing an error.
+                console.warn('Failed to load settings from localStorage, using defaults', e);
             }
             setMounted(true);
         }, 0);
