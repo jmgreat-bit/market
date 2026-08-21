@@ -140,6 +140,27 @@ describe('useSavedPosts', () => {
         consoleSpy.mockRestore();
     });
 
+    it('handles unexpected exceptions during fetch', async () => {
+        (useUser as jest.Mock).mockReturnValue({ profile: { id: 'user-123' } });
+
+        mockSupabase.order.mockRejectedValueOnce(new Error('Network failure'));
+
+        // Spy on console.error to avoid test output noise
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useSavedPosts());
+
+        // Wait for fetch to complete and state to update
+        await waitFor(() => {
+            expect(result.current.error).toBe('Failed to fetch saved posts');
+        });
+
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.posts).toEqual([]);
+
+        consoleSpy.mockRestore();
+    });
+
     it('allows manual refetching of posts', async () => {
         (useUser as jest.Mock).mockReturnValue({ profile: { id: 'user-123' } });
 
