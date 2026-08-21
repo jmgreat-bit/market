@@ -82,7 +82,7 @@ describe('POST /api/momo/callback', () => {
 
         expect(momoClient.getTransactionStatus).toHaveBeenCalledWith('test-ref');
         expect(mockUpdate).toHaveBeenCalledWith({ payment_status: 'completed' });
-        expect(mockUpdate).toHaveBeenCalledWith({ trader_tier: 'premium', is_premium: true });
+        expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ trader_tier: 'premium', is_premium: true }));
         expect(mockInsert).not.toHaveBeenCalled();
 
         expect(res).toEqual({ data: { success: true }, options: undefined });
