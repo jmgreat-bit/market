@@ -25,10 +25,7 @@ export async function POST(req: Request) {
         // Check if Test Mode is enabled
         const isTestMode = process.env.MOMO_TEST_MODE === 'true';
 
-        // Save pending transaction to DB using admin client (bypasses RLS)
-        const adminClient = getSupabaseAdminClient();
-
-        const { error: dbError } = await adminClient
+        const { error: dbError } = await supabase
             .from('trader_subscriptions')
             .insert({
                 id: referenceId,
@@ -44,6 +41,7 @@ export async function POST(req: Request) {
         if (dbError) throw dbError;
 
         if (isTestMode) {
+            const adminClient = getSupabaseAdminClient();
             // Bypass MTN entirely and grant credits/tiers instantly
             if (tier.startsWith('ai_')) {
                 const pkgName = tier.replace('ai_', '');
