@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,17 +22,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Location coordinates are required' }, { status: 400 });
         }
 
-        // Use admin client to bypass RLS
-        let admin;
-        try {
-            admin = getSupabaseAdminClient();
-        } catch {
-            // Fallback to regular client
-            admin = supabase;
-        }
-
         // Upsert business details
-        const { error: upsertError } = await admin.from('business_details').upsert({
+        const { error: upsertError } = await supabase.from('business_details').upsert({
             profile_id: user.id,
             business_name: business_name.trim(),
             category: category || 'Retail',
