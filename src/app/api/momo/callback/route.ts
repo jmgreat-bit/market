@@ -65,8 +65,6 @@ export async function POST(req: Request) {
                             tier_expires_at: expiryDate.toISOString()
                         })
                         .eq('id', sub.profile_id);
-
-                    console.log(`[MOMO WEBHOOK] Successfully upgraded user ${sub.profile_id} to ${sub.tier}`);
                 }
             }
         }
