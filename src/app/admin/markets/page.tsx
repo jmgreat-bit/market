@@ -33,22 +33,24 @@ export default function AdminMarketsPage() {
         setLoading(true);
         const supabase = getSupabaseClient();
         
-        // Fetch hubs with business count
+        // Fetch hubs with business count in a single query
         const { data } = await supabase
             .from('commercial_hubs')
-            .select('*')
+            .select('*, business_details(count)')
             .order('name');
             
         if (data) {
-            // Get business counts
-            const hubsWithCounts = await Promise.all(data.map(async (hub: CommercialHub) => {
-                const { count } = await supabase
-                    .from('business_details')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('hub_id', hub.id);
-                return { ...hub, business_count: count || 0 };
-            }));
-            setHubs(hubsWithCounts);
+            // Map the returned counts
+            const hubsWithCounts = data.map((hub: any) => {
+                const count = hub.business_details && hub.business_details.length > 0
+                    ? hub.business_details[0].count
+                    : 0;
+
+                // Remove the nested relation data so it matches the expected type
+                const { business_details, ...restHub } = hub;
+                return { ...restHub, business_count: count };
+            });
+            setHubs(hubsWithCounts as CommercialHub[]);
         }
         setLoading(false);
     }
