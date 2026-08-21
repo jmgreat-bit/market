@@ -16,7 +16,6 @@ export async function POST(req: Request) {
         if (referenceId) {
             try {
                 actualStatus = await momoClient.getTransactionStatus(referenceId);
-                console.log(`[MOMO WEBHOOK] Verified status for ${referenceId}:`, actualStatus);
             } catch (err) {
                 console.error(`[MOMO WEBHOOK] Failed to verify status for ${referenceId}`, err);
             }
