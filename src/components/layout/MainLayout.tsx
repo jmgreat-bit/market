@@ -130,7 +130,8 @@ export function MainLayout({ children }: MainLayoutProps) {
                     {/* Mobile Top Bar - Logo + Notification Bell */}
                     {isMainTab && (
                         <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-5 py-3.5 bg-background/80 backdrop-blur-2xl border-b border-border/10">
-                            <Link href={ROUTES.FEED} className="flex items-center">
+                            <Link href={ROUTES.FEED} className="flex items-center gap-2">
+                                <img src="/logo.png" alt="Logo" className="w-6 h-6 rounded object-cover" />
                                 <h1 className="font-display font-black text-primary tracking-tighter text-xl">
                                     MarketPLC
                                 </h1>
