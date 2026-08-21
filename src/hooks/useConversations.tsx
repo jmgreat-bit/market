@@ -96,9 +96,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
             });
 
             setConversations(enriched);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error fetching conversations:', err);
-            setError(err.message || 'Failed to load conversations');
+            setError(err instanceof Error ? err.message : 'Failed to load conversations');
         } finally {
             setIsLoading(false);
         }
