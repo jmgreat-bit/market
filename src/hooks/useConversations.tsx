@@ -72,18 +72,21 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
                 businessMap = new Map((bizData || []).map((b: any) => [b.id, b]));
             }
 
-            const unreadCountsPromises = (convData as any[]).map(async (c: any) => {
-                const { count } = await supabase
-                    .from('direct_messages')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('conversation_id', c.id)
-                    .neq('sender_id', user.id)
-                    .eq('is_read', false);
-                return { conversationId: c.id, unreadCount: count || 0 };
-            });
+            const conversationIds = (convData as any[]).map((c: any) => c.id);
+            const { data: unreadData } = await supabase
+                .from('direct_messages')
+                .select('conversation_id')
+                .in('conversation_id', conversationIds)
+                .neq('sender_id', user.id)
+                .eq('is_read', false);
 
-            const unreadCounts = await Promise.all(unreadCountsPromises);
-            const unreadMap = new Map(unreadCounts.map(u => [u.conversationId, u.unreadCount]));
+            const unreadMap = new Map<string, number>();
+            if (unreadData) {
+                for (const msg of unreadData) {
+                    const cid = msg.conversation_id;
+                    unreadMap.set(cid, (unreadMap.get(cid) || 0) + 1);
+                }
+            }
 
             const enriched: ConversationWithDetails[] = (convData as any[]).map((c: any) => {
                 const otherId = c.participant1_id === user.id ? c.participant2_id : c.participant1_id;
