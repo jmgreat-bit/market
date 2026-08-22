@@ -110,6 +110,8 @@ export default function ProfilePage() {
     const [editInstagram, setEditInstagram] = useState('');
     const [editCountryCode, setEditCountryCode] = useState('+250');
     const [editPhone, setEditPhone] = useState('');
+    const [editBusinessName, setEditBusinessName] = useState('');
+    const [editCategory, setEditCategory] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -287,6 +289,8 @@ export default function ProfilePage() {
         setEditHeadline(profile?.headline || '');
         setEditBio(profile?.bio || '');
         if (profile?.role === 'trader' && businessInfo) {
+            setEditBusinessName(businessInfo.business_name || '');
+            setEditCategory(businessInfo.category || '');
             setEditWebsite(businessInfo.website_url || '');
             setEditTwitter(businessInfo.twitter_url || '');
             setEditInstagram(businessInfo.instagram_url || '');
@@ -342,6 +346,8 @@ export default function ProfilePage() {
             if (profile.role === 'trader' && businessInfo) {
                 const finalPhone = editPhone.trim() ? `${editCountryCode} ${editPhone.trim()}` : '';
                 const { error: bizError } = await supabase.from('business_details').update({
+                    business_name: editBusinessName.trim() || businessInfo.business_name,
+                    category: editCategory.trim() || businessInfo.category,
                     website_url: editWebsite.trim(),
                     twitter_url: editTwitter.trim(),
                     instagram_url: editInstagram.trim(),
@@ -727,7 +733,27 @@ export default function ProfilePage() {
                             
                             {isTrader && (
                                 <>
-                                    <div className="space-y-2 pt-2 border-t border-border/30">
+                                    <div className="space-y-2 pt-4 mt-2 border-t border-border/30">
+                                        <Label className="text-foreground flex items-center gap-1">Business Name <span className="text-destructive">*</span></Label>
+                                        <Input 
+                                            value={editBusinessName} 
+                                            onChange={e => setEditBusinessName(e.target.value)} 
+                                            placeholder="Your business name"
+                                            className="bg-input border-border focus:border-primary/50"
+                                            maxLength={50}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-foreground">Category</Label>
+                                        <Input 
+                                            value={editCategory} 
+                                            onChange={e => setEditCategory(e.target.value)} 
+                                            placeholder="e.g. Restaurant, Electronics, Fashion"
+                                            className="bg-input border-border focus:border-primary/50"
+                                            maxLength={30}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
                                         <Label className="text-foreground">WhatsApp Number</Label>
                                         <div className="flex gap-2">
                                             <select
@@ -783,7 +809,7 @@ export default function ProfilePage() {
                             <Button 
                                 className="flex-1 bg-primary text-primary-foreground font-bold" 
                                 onClick={handleSaveProfile}
-                                disabled={!editUsername || !editFullName || isSaving}
+                                disabled={!editUsername || !editFullName || (isTrader && !editBusinessName) || isSaving}
                             >
                                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
                             </Button>
