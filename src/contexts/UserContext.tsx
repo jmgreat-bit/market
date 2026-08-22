@@ -46,7 +46,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 )
             ]);
 
-            return (result as any).data as Profile | null;
+            const profile = (result as any).data as Profile | null;
+            if (profile && profile.tier_expires_at && profile.trader_tier !== 'free') {
+                const isExpired = new Date(profile.tier_expires_at).getTime() < Date.now();
+                if (isExpired) {
+                    profile.trader_tier = 'free';
+                    profile.is_premium = false;
+                    // Fire-and-forget sync to DB
+                    supabase.from('profiles').update({
+                        trader_tier: 'free',
+                        is_premium: false,
+                    }).eq('id', userId).then(() => {});
+                }
+            }
+            return profile;
         } catch (err) {
             console.warn('[UserProvider] fetchProfile failed:', err);
             return null;
