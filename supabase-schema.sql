@@ -155,11 +155,36 @@ CREATE POLICY "Traders can delete own posts" ON public.posts FOR DELETE USING (
   AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'trader')
 );
 
--- Policies: Media/Links (Viewable by everyone)
+-- Policies: Media/Links
 DROP POLICY IF EXISTS "Media viewable by everyone" ON public.post_media;
 CREATE POLICY "Media viewable by everyone" ON public.post_media FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Traders can insert media for own posts" ON public.post_media;
+CREATE POLICY "Traders can insert media for own posts" ON public.post_media FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.posts p
+    JOIN public.business_details b ON b.id = p.business_id
+    WHERE p.id = post_id AND b.profile_id = auth.uid()
+  )
+);
+DROP POLICY IF EXISTS "Traders can delete media for own posts" ON public.post_media;
+CREATE POLICY "Traders can delete media for own posts" ON public.post_media FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM public.posts p
+    JOIN public.business_details b ON b.id = p.business_id
+    WHERE p.id = post_id AND b.profile_id = auth.uid()
+  )
+);
+
 DROP POLICY IF EXISTS "Links viewable by everyone" ON public.post_links;
 CREATE POLICY "Links viewable by everyone" ON public.post_links FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Traders can insert links for own posts" ON public.post_links;
+CREATE POLICY "Traders can insert links for own posts" ON public.post_links FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.posts p
+    JOIN public.business_details b ON b.id = p.business_id
+    WHERE p.id = post_id AND b.profile_id = auth.uid()
+  )
+);
 
 -- Policies: Likes
 DROP POLICY IF EXISTS "Likes viewable by everyone" ON public.likes;

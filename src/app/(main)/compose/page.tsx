@@ -136,13 +136,19 @@ export default function ComposePage() {
     };
 
     const canSubmit = () => {
-        if (!content.trim() || content.trim().split(/\s+/).length < SHOUT_MIN_WORDS) return false;
-        if (postType === 'counter' && !counterLabel.trim()) return false;
+        const hasContent = content.trim().length > 0;
+        const hasImages = selectedImages.length > 0;
+
+        if (postType === 'counter') {
+            return counterLabel.trim().length > 0;
+        }
+
         if (postType === 'poll') {
             const filled = pollOptions.filter(o => o.trim());
-            if (filled.length < POLL_MIN_OPTIONS) return false;
+            return filled.length >= POLL_MIN_OPTIONS;
         }
-        return true;
+
+        return hasContent || hasImages;
     };
 
     const handleSubmit = async () => {
@@ -157,47 +163,6 @@ export default function ComposePage() {
 
         try {
             const supabase = getSupabaseClient();
-
-            let { data: business } = await supabase
-                .from('business_details')
-                .select('id, latitude, longitude')
-                .eq('profile_id', profile.id)
-                .maybeSingle();
-
-            // If business profile row is missing, auto-create it seamlessly
-            if (!business) {
-                const autoName = profile.full_name || profile.username || 'My Shop';
-                try {
-                    const createRes = await fetch('/api/setup-business', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            business_name: autoName,
-                            category: 'Retail',
-                            latitude: DEFAULT_MAP_CENTER.lat,
-                            longitude: DEFAULT_MAP_CENTER.lng,
-                        }),
-                    });
-
-                    if (createRes.ok) {
-                        const createData = await createRes.json();
-                        if (createData.business) {
-                            business = createData.business;
-                        } else {
-                            const { data: createdBiz } = await supabase
-                                .from('business_details')
-                                .select('id, latitude, longitude')
-                                .eq('profile_id', profile.id)
-                                .maybeSingle();
-                            business = createdBiz;
-                        }
-                    }
-                } catch (e) {
-                    console.error('Failed to auto-create business profile:', e);
-                }
-            }
-
-            if (!business) throw new Error("Could not find or initialize your business profile. Please try again.");
 
             let imageUrl: string | null = null;
             let uploadedUrls: string[] = [];
@@ -221,60 +186,24 @@ export default function ComposePage() {
                 }
             }
 
-            // Calculate expiration
-            const expiresAt = new Date();
-            expiresAt.setHours(expiresAt.getHours() + durationHours);
-
-            // Generate a slug from the first few words of the content + random string
-            const baseSlug = content
-                ? content.substring(0, 30).toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '-')
-                : 'post';
-            const randomSuffix = Math.random().toString(36).substring(2, 8);
-            const slug = `${baseSlug || 'post'}-${randomSuffix}`;
-
-            // Create post
-            const { data: newPost, error: postError } = await supabase
-                .from('posts')
-                .insert({
-                    business_id: business.id,
+            const response = await fetch('/api/posts/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     content: content.trim(),
-                    slug: slug,
-                    image_url: imageUrl,
-                    latitude: business.latitude ?? DEFAULT_MAP_CENTER.lat,
-                    longitude: business.longitude ?? DEFAULT_MAP_CENTER.lng,
-                    post_type: postType,
-                    is_pinned: false,
-                    counter_value: postType === 'counter' ? counterValue : null,
-                    counter_label: postType === 'counter' ? counterLabel.trim() : null,
-                    expires_at: expiresAt.toISOString(),
-                })
-                .select('id')
-                .single();
+                    imageUrl,
+                    uploadedUrls,
+                    postType,
+                    durationHours,
+                    counterValue: postType === 'counter' ? counterValue : null,
+                    counterLabel: postType === 'counter' ? counterLabel.trim() : null,
+                    pollOptions: postType === 'poll' ? pollOptions : [],
+                }),
+            });
 
-            if (postError) throw postError;
-
-            // Create poll options if poll type
-            if (postType === 'poll' && newPost) {
-                const options = pollOptions
-                    .filter(o => o.trim())
-                    .map(label => ({ post_id: newPost.id, label: label.trim() }));
-                
-                const { error: pollError } = await supabase
-                    .from('poll_options')
-                    .insert(options);
-                if (pollError) throw pollError;
-            }
-
-            // Insert post media for multi-photo
-            if (uploadedUrls.length > 0 && newPost) {
-                const mediaRows = uploadedUrls.map((url, i) => ({
-                    post_id: newPost.id,
-                    type: 'image',
-                    url: url,
-                    order: i
-                }));
-                const { error: mediaError } = await supabase.from('post_media').insert(mediaRows);
-                if (mediaError) throw mediaError;
+            const result = await response.json();
+            if (!response.ok || result.error) {
+                throw new Error(result.error || "Failed to publish post. Please try again.");
             }
 
             clearTimeout(timeoutId);
