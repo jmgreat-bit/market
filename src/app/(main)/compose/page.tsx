@@ -174,16 +174,23 @@ export default function ComposePage() {
                         body: JSON.stringify({
                             business_name: autoName,
                             category: 'Retail',
+                            latitude: DEFAULT_MAP_CENTER.lat,
+                            longitude: DEFAULT_MAP_CENTER.lng,
                         }),
                     });
 
                     if (createRes.ok) {
-                        const { data: createdBiz } = await supabase
-                            .from('business_details')
-                            .select('id, latitude, longitude')
-                            .eq('profile_id', profile.id)
-                            .maybeSingle();
-                        business = createdBiz;
+                        const createData = await createRes.json();
+                        if (createData.business) {
+                            business = createData.business;
+                        } else {
+                            const { data: createdBiz } = await supabase
+                                .from('business_details')
+                                .select('id, latitude, longitude')
+                                .eq('profile_id', profile.id)
+                                .maybeSingle();
+                            business = createdBiz;
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to auto-create business profile:', e);

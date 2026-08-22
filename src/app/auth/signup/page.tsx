@@ -109,7 +109,18 @@ export default function SignupPage() {
         if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
         if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) { setError('Password must contain at least one letter and one number'); return; }
 
-        handleSubmit();
+        if (role === 'trader') {
+            setStep('business');
+        } else {
+            handleSubmit();
+        }
+    };
+
+    const handleBusinessNext = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!businessName.trim()) { setError('Business name is required'); return; }
+        setError(null);
+        setStep('location');
     };
 
     const handleSubmit = async () => {
@@ -142,6 +153,13 @@ export default function SignupPage() {
                         full_name: fullName,
                         username: normalizedUsername,
                         role: role,
+                        ...(role === 'trader' ? {
+                            business_name: businessName || fullName,
+                            category: businessCategory,
+                            phone: businessPhone,
+                            latitude: locationLat,
+                            longitude: locationLng,
+                        } : {})
                     },
                 },
             });
@@ -436,6 +454,111 @@ export default function SignupPage() {
                                     Continue with Google
                                 </Button>
                             </form>
+                        </Card>
+                    ) : step === 'business' ? (
+                        /* Business Profile Form */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
+                            <form onSubmit={handleBusinessNext} className="space-y-4">
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <div className="space-y-2">
+                                    <Label htmlFor="businessName" className="text-foreground text-sm">Business Name</Label>
+                                    <div className="relative">
+                                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="businessName"
+                                            type="text"
+                                            placeholder="e.g. Kigali Coffee Shop"
+                                            value={businessName}
+                                            onChange={(e) => setBusinessName(e.target.value)}
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="category" className="text-foreground text-sm">Category</Label>
+                                    <div className="relative">
+                                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <select
+                                            id="category"
+                                            value={businessCategory}
+                                            onChange={(e) => setBusinessCategory(e.target.value)}
+                                            className="w-full pl-10 h-10 rounded-md border border-border bg-input text-foreground text-sm focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                                            required
+                                        >
+                                            {BUSINESS_CATEGORIES.map(cat => (
+                                                <option key={cat} value={cat}>{cat}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone" className="text-foreground text-sm">Business Phone (Optional)</Label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Input
+                                            id="phone"
+                                            type="tel"
+                                            placeholder="+250..."
+                                            value={businessPhone}
+                                            onChange={(e) => setBusinessPhone(e.target.value)}
+                                            className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                                        />
+                                    </div>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-accent to-primary text-[#003f43] font-display font-bold"
+                                >
+                                    Next: Set Location <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </form>
+                        </Card>
+                    ) : step === 'location' ? (
+                        /* Location Map Step */
+                        <Card className="p-6 bg-card backdrop-blur-[30px] border border-border rounded-xl">
+                            <div className="space-y-4">
+                                {error && (
+                                    <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20">
+                                        {error}
+                                    </div>
+                                )}
+                                
+                                <div className="space-y-2">
+                                    <Label className="text-foreground text-sm">Where are you located?</Label>
+                                    <p className="text-xs text-muted-foreground mb-2">Drag the marker or click on the map to set your business location.</p>
+                                    <div className="w-full h-64 rounded-xl overflow-hidden border border-border">
+                                        <OnboardingMap
+                                            onLocationSelect={handleLocationSelect}
+                                            initialCenter={[locationLat, locationLng]}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground flex items-center mt-2">
+                                        <MapPin className="w-3 h-3 mr-1" />
+                                        {locationSet ? "Location set" : "Using default location (Kigali)"}
+                                    </p>
+                                </div>
+
+                                <Button
+                                    onClick={handleSubmit}
+                                    disabled={isLoading}
+                                    className="w-full bg-gradient-to-r from-accent to-primary text-[#003f43] font-display font-bold"
+                                >
+                                    {isLoading ? (
+                                        <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Creating account...</>
+                                    ) : (
+                                        'Create Account'
+                                    )}
+                                </Button>
+                            </div>
                         </Card>
                     ) : (
                         /* Verify Email Step */
