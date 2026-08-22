@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { TabNavigation } from './TabNavigation';
 import { PageTransition } from './PageTransition';
+import { ProfileCompletionBanner } from '@/components/features/ProfileCompletionBanner';
 import Link from 'next/link';
 import { Bell, Plus, Sparkles, AlertTriangle, Search } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
@@ -178,6 +179,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
                     {/* Main content area - adjusted for fixed nav */}
                     <main className={`flex-1 relative ${isMainTab ? 'pt-[4.5rem] md:pt-20 pb-20 md:pb-0' : 'pt-0 md:pt-20 pb-0 md:pb-0'}`}>
+                        <ProfileCompletionBanner />
                         <PageTransition>
                             {children}
                         </PageTransition>
