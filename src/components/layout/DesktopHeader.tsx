@@ -26,17 +26,17 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
 
     return (
         <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 justify-between items-center w-full px-6 py-4 bg-background/90 backdrop-blur-xl border-b border-border/40">
-            <div className="flex items-center gap-4">
-                <Link href={ROUTES.FEED} className="flex items-center gap-2.5">
-                    <img src="/logo.png?v=5" alt="SynchroMarket" className="w-8 h-8 object-contain" />
-                    <h1 className="font-display font-black text-foreground tracking-tighter text-2xl">
+            <div className="flex-1 flex items-center gap-4">
+                <Link href={ROUTES.FEED} className="flex items-center gap-2.5 min-w-0">
+                    <img src="/logo.png?v=5" alt="SynchroMarket" className="w-8 h-8 object-contain shrink-0" />
+                    <h1 className="font-display font-black text-foreground tracking-tighter text-2xl truncate hidden lg:block xl:block 2xl:block">
                         Synchro<span className="text-primary">Market</span>
                     </h1>
                 </Link>
             </div>
 
             {isMainTab && (
-                <div className="flex gap-8">
+                <div className="flex-1 flex justify-center gap-4 lg:gap-8 overflow-x-auto no-scrollbar">
                     {tabs.map((tab) => {
                         const isActive = pathname === tab.href;
                         return (
@@ -44,7 +44,7 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
                                 key={tab.href}
                                 href={tab.href}
                                 className={cn(
-                                    'font-display font-bold tracking-tight transition-colors duration-300 flex items-center gap-2',
+                                    'font-display font-bold tracking-tight transition-colors duration-300 flex items-center gap-2 whitespace-nowrap',
                                     isActive
                                         ? 'text-primary'
                                         : 'text-muted-foreground hover:text-accent'
@@ -57,17 +57,17 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
                 </div>
             )}
 
-            {isMainTab && (
-                <div className="flex items-center gap-3">
-                    <Link href={ROUTES.SEARCH} className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+            {isMainTab ? (
+                <div className="flex-1 flex justify-end items-center gap-2 lg:gap-3">
+                    <Link href={ROUTES.SEARCH} className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
                         <Search className="w-5 h-5" />
                     </Link>
 
-                    <Link href="/ai" suppressHydrationWarning className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all">
+                    <Link href="/ai" suppressHydrationWarning className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 transition-all">
                         <Sparkles className="w-5 h-5" />
                     </Link>
                     
-                    <Link href={ROUTES.ALERTS} className="relative w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                    <Link href={ROUTES.ALERTS} className="relative w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
                         <Bell className="w-5 h-5" />
                         {unreadAlertsCount > 0 && (
                             <span className="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-1 bg-destructive text-[10px] font-black text-white rounded-full flex items-center justify-center border border-background leading-none">
@@ -81,12 +81,12 @@ export function DesktopHeader({ unreadAlertsCount = 0 }: { unreadAlertsCount?: n
                             href={ROUTES.COMPOSE} 
                             className="ml-2 flex items-center gap-2 bg-primary text-primary-foreground font-bold px-4 py-2 rounded-full hover:opacity-90 transition-opacity whitespace-nowrap"
                         >
-                            <Plus className="w-4 h-4" />
-                            <span className="font-display">Create Post</span>
+                            <Plus className="w-4 h-4 shrink-0" />
+                            <span className="font-display hidden xl:inline">Create Post</span>
                         </Link>
                     )}
                 </div>
-            )}
+            ) : <div className="flex-1" />}
         </nav>
     );
 }

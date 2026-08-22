@@ -218,17 +218,17 @@ export default function ComposePage() {
 
     return (
         <div className="min-h-screen bg-surface font-sans text-foreground pb-32">
-            <header className="sticky top-[4.5rem] md:top-20 z-40 bg-background/90 backdrop-blur-xl border-b border-[rgba(72,72,73,0.1)] px-4 py-3 flex items-center justify-between">
+            <header className="sticky top-0 md:top-20 z-40 bg-background/95 backdrop-blur-xl border-b border-border/40 px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
                         <ChevronLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="font-display font-bold text-lg text-foreground">Create Post</h1>
+                    <h1 className="font-display font-bold text-lg text-foreground tracking-tight">Create Post</h1>
                 </div>
                 <Button 
                     onClick={handleSubmit} 
                     disabled={!canSubmit() || isSubmitting}
-                    className="bg-primary text-primary-foreground font-display font-bold rounded-full h-8 px-4 disabled:opacity-50"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold rounded-full py-2 px-5 h-auto disabled:opacity-50 transition-all shadow-sm"
                 >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Broadcast'}
                 </Button>
@@ -237,7 +237,7 @@ export default function ComposePage() {
             <main className="max-w-2xl mx-auto w-full p-4 md:p-6 space-y-6">
                 
                 {error && (
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg">
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg font-medium">
                         {error}
                     </div>
                 )}
@@ -245,15 +245,15 @@ export default function ComposePage() {
                 {/* Post Type Selector */}
                 <div className="space-y-2">
                     <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">Post Type</h3>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-2 bg-secondary/30 p-1.5 rounded-2xl">
                         {POST_TYPES.map(pt => (
                             <button
                                 key={pt.id}
                                 onClick={() => setPostType(pt.id)}
-                                className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all text-center ${
+                                className={`flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-xl transition-all duration-300 text-center ${
                                     postType === pt.id
-                                        ? 'bg-primary text-primary-foreground border-primary font-bold'
-                                        : 'bg-card border-border/50 text-muted-foreground hover:border-primary/40'
+                                        ? 'bg-primary text-primary-foreground shadow-md scale-[1.02]'
+                                        : 'bg-transparent text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
                                 }`}
                             >
                                 {pt.icon}
@@ -264,9 +264,9 @@ export default function ComposePage() {
                 </div>
 
                 {/* Main Composer Area — Always visible for all types */}
-                <div className="bg-card rounded-2xl border border-border/30 overflow-hidden shadow-sm">
-                    <div className="p-4 flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-display font-bold mt-1 overflow-hidden">
+                <div className="bg-card rounded-3xl border border-border/40 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div className="p-5 flex gap-4">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-display font-bold mt-1 overflow-hidden border border-primary/20">
                             {profile?.avatar_url ? (
                                 <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -282,15 +282,15 @@ export default function ComposePage() {
                                     : postType === 'poll' ? "Ask your question or describe the poll..."
                                     : "What's happening at your business?"
                                 }
-                                className="w-full bg-transparent border-0 focus:ring-0 p-0 text-lg resize-none min-h-[100px] placeholder:text-muted-foreground/50 text-foreground"
+                                className="w-full bg-transparent border-0 focus:ring-0 p-0 text-lg resize-none min-h-[120px] placeholder:text-muted-foreground/50 text-foreground font-medium leading-relaxed"
                                 maxLength={SHOUT_MAX_LENGTH}
                             />
                         </div>
                     </div>
                     
                     {/* Category Hash Chips */}
-                    <div className="px-4 pb-4 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest shrink-0">Tags:</span>
+                    <div className="px-5 pb-5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest shrink-0 mr-1">Tags:</span>
                         {['#Food', '#Housing', '#Car', '#Retail', '#Service', '#Event'].map(cat => (
                             <button
                                 key={cat}
@@ -300,7 +300,7 @@ export default function ComposePage() {
                                         setContent(prev => prev ? `${prev} ${cat}` : cat);
                                     }
                                 }}
-                                className="shrink-0 px-2.5 py-1 rounded-full bg-secondary/80 border border-border/50 text-xs font-semibold text-foreground/80 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
+                                className="shrink-0 px-3 py-1.5 rounded-full bg-secondary/60 text-xs font-bold text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                             >
                                 {cat}
                             </button>
