@@ -67,6 +67,9 @@ export default function PostDetailPage() {
                     ...data,
                     likes_count: data.likes?.[0]?.count ?? 0,
                     comments_count: data.comments?.length ?? 0,
+                    images: (data.media && data.media.length > 0) 
+                        ? data.media.filter((m: any) => m.type === "image").sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0)).map((m: any) => ({ id: m.id, url: m.url, alt: m.alt_text })) 
+                        : (data.image_url ? [{ id: "legacy", url: data.image_url }] : []),
                 };
 
                 setPost(enriched as PostWithBusiness);

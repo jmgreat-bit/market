@@ -62,52 +62,69 @@ export function PostHeader({
         return expireTime - now < 2 * 60 * 60 * 1000 && expireTime > now;
     }, [expiresAt]);
 
-    const innerContent = (
-        <>
-            <Avatar className="w-9 h-9 ring-1 ring-primary/20 shadow-geo-glow">
-                {avatarUrl && (
-                    <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
-                )}
-                <AvatarFallback className="bg-primary text-primary-foreground font-bold font-display">
-                    {businessName?.charAt(0) || 'B'}
-                </AvatarFallback>
-            </Avatar>
-
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide hover:underline">
-                        {businessName || 'Business'}
-                    </h3>
-                    {(traderTier && traderTier !== 'free') ? (
-                        <TraderBadge tier={traderTier} showLabel />
-                    ) : isPremium ? (
-                        <TraderBadge tier="pro" showLabel />
-                    ) : null}
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 font-sans">
-                    {category && (
-                        <span className="font-semibold text-primary">
-                            {category}
-                        </span>
-                    )}
-                    {category && <span className="opacity-50">•</span>}
-                    <span>{timeAgo}</span>
-                </div>
-            </div>
-        </>
-    );
-
     return (
         <div className="p-3 pb-2 flex items-start gap-2.5">
-            {profileUsername ? (
-                <Link href={`/u/${profileUsername}`} className="flex-1 min-w-0 flex items-start gap-2.5">
-                    {innerContent}
-                </Link>
-            ) : (
-                <div className="flex-1 min-w-0 flex items-start gap-2.5">
-                    {innerContent}
+            <div className="flex-1 min-w-0 flex items-start gap-2.5">
+                {profileUsername ? (
+                    <Link 
+                        href={`/u/${profileUsername}`} 
+                        onClick={(e) => e.stopPropagation()}
+                        className="shrink-0"
+                    >
+                        <Avatar className="w-9 h-9 ring-1 ring-primary/20 shadow-geo-glow hover:ring-primary/50 transition-all">
+                            {avatarUrl && (
+                                <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
+                            )}
+                            <AvatarFallback className="bg-primary text-primary-foreground font-bold font-display">
+                                {businessName?.charAt(0) || 'B'}
+                            </AvatarFallback>
+                        </Avatar>
+                    </Link>
+                ) : (
+                    <Avatar className="w-9 h-9 ring-1 ring-primary/20 shadow-geo-glow shrink-0">
+                        {avatarUrl && (
+                            <AvatarImage src={avatarUrl} alt={businessName || 'Business'} />
+                        )}
+                        <AvatarFallback className="bg-primary text-primary-foreground font-bold font-display">
+                            {businessName?.charAt(0) || 'B'}
+                        </AvatarFallback>
+                    </Avatar>
+                )}
+
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5">
+                        {profileUsername ? (
+                            <Link 
+                                href={`/u/${profileUsername}`} 
+                                onClick={(e) => e.stopPropagation()}
+                                className="truncate"
+                            >
+                                <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide hover:underline hover:text-primary transition-colors">
+                                    {businessName || 'Business'}
+                                </h3>
+                            </Link>
+                        ) : (
+                            <h3 className="text-sm font-bold text-foreground font-display truncate tracking-wide">
+                                {businessName || 'Business'}
+                            </h3>
+                        )}
+                        {(traderTier && traderTier !== 'free') ? (
+                            <TraderBadge tier={traderTier} showLabel />
+                        ) : isPremium ? (
+                            <TraderBadge tier="pro" showLabel />
+                        ) : null}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 font-sans">
+                        {category && (
+                            <span className="font-semibold text-primary">
+                                {category}
+                            </span>
+                        )}
+                        {category && <span className="opacity-50">•</span>}
+                        <span>{timeAgo}</span>
+                    </div>
                 </div>
-            )}
+            </div>
 
             <div className="flex items-center gap-2">
                 {isEligibleForBoost && onBoostClick && (
