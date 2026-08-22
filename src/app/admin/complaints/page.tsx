@@ -1,20 +1,31 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { CheckCircle2, Bug, Flag, HelpCircle } from 'lucide-react';
+import { CheckCircle2, Bug, Flag, HelpCircle, User, Mail, ExternalLink, Building2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 
+interface SubmitterProfile {
+    id: string;
+    full_name: string | null;
+    username: string | null;
+    email: string;
+    avatar_url: string | null;
+    role?: string;
+}
+
 interface SupportTicket {
     id: string;
+    user_id: string | null;
     category: 'help' | 'software' | 'report';
     subject: string;
     message: string;
     reference_type: string | null;
     reference_id: string | null;
     created_at: string;
+    profiles?: SubmitterProfile | null;
 }
 
 export default function AdminComplaintsPage() {
@@ -30,13 +41,24 @@ export default function AdminComplaintsPage() {
         async function fetchTickets() {
             setLoading(true);
             const supabase = getSupabaseClient();
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('support_tickets')
-                .select('*')
+                .select('*, profiles:user_id(id, full_name, username, email, avatar_url, role)')
                 .eq('status', ticketStatus)
                 .order(ticketStatus === 'resolved' ? 'updated_at' : 'created_at', { ascending: false });
             
-            if (data) setTickets(data as SupportTicket[]);
+            if (data) {
+                setTickets(data as unknown as SupportTicket[]);
+            } else if (error) {
+                console.error('Error fetching tickets with profiles:', error);
+                // Fallback query if relation join fails
+                const { data: fallbackData } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .eq('status', ticketStatus)
+                    .order('created_at', { ascending: false });
+                if (fallbackData) setTickets(fallbackData as SupportTicket[]);
+            }
             setLoading(false);
         }
 
@@ -63,7 +85,7 @@ export default function AdminComplaintsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-display font-black text-white tracking-tight">Complaints & Moderation</h2>
-                    <p className="text-slate-400 mt-1">Review user reports and support tickets.</p>
+                    <p className="text-slate-400 mt-1">Review user reports, submitter details, and support tickets.</p>
                 </div>
 
                 <div className="flex p-1 bg-[#1e293b]/50 border border-slate-700/50 rounded-lg">
@@ -97,7 +119,7 @@ export default function AdminComplaintsPage() {
                 </TabsList>
 
                 {loading ? (
-                    <div className="text-center py-12 text-slate-500 animate-pulse">Loading tickets...</div>
+                    <div className="text-center py-12 text-slate-500 animate-pulse">Loading tickets & users...</div>
                 ) : filteredTickets.length === 0 ? (
                     <div className="bg-[#1e293b]/50 border border-slate-700/50 rounded-2xl p-12 text-center flex flex-col items-center justify-center">
                         <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 border border-emerald-500/20">
@@ -109,60 +131,118 @@ export default function AdminComplaintsPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-4">
-                        {filteredTickets.map(ticket => (
-                            <div key={ticket.id} className="bg-[#1e293b]/50 border border-slate-700/50 rounded-xl p-6 hover:border-slate-600 transition-colors">
-                                <div className="flex items-start justify-between gap-4 mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${
-                                            ticket.category === 'report' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                            ticket.category === 'software' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                            'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                                        }`}>
-                                            {ticket.category === 'report' ? <Flag className="w-5 h-5" /> :
-                                             ticket.category === 'software' ? <Bug className="w-5 h-5" /> :
-                                             <HelpCircle className="w-5 h-5" />}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-white">{ticket.subject}</h3>
-                                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 mt-1">
-                                                <span>{ticket.category}</span>
-                                                <span>•</span>
-                                                <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
+                    <div className="grid gap-5">
+                        {filteredTickets.map(ticket => {
+                            const submitter = ticket.profiles;
+
+                            return (
+                                <div key={ticket.id} className="bg-[#1e293b]/60 border border-slate-700/60 rounded-2xl p-6 hover:border-slate-500/80 transition-all shadow-lg">
+                                    {/* Top: Ticket Category & Submitter Info */}
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-slate-700/50">
+                                        <div className="flex items-start gap-3">
+                                            <div className={`p-2.5 rounded-xl shrink-0 ${
+                                                ticket.category === 'report' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                ticket.category === 'software' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                                'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                            }`}>
+                                                {ticket.category === 'report' ? <Flag className="w-5 h-5" /> :
+                                                 ticket.category === 'software' ? <Bug className="w-5 h-5" /> :
+                                                 <HelpCircle className="w-5 h-5" />}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-white leading-snug">{ticket.subject}</h3>
+                                                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1">
+                                                    <span>{ticket.category}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(ticket.created_at).toLocaleString()}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="bg-[#0f172a] p-4 rounded-lg border border-slate-800 text-slate-300 text-sm whitespace-pre-wrap">
-                                    {ticket.message}
-                                </div>
-                                {ticket.reference_id && (
-                                    <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between gap-4 flex-wrap">
-                                        <div className="text-xs text-slate-400">
-                                            <span className="font-bold text-slate-300 uppercase">Target {ticket.reference_type}:</span> {ticket.reference_id}
+
+                                        {/* Submitter Card */}
+                                        <div className="bg-slate-900/90 border border-slate-700/70 rounded-xl p-3 flex items-center justify-between sm:justify-start gap-3 shrink-0">
+                                            <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 overflow-hidden">
+                                                {submitter?.avatar_url ? (
+                                                    <img src={submitter.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <User className="w-4 h-4 text-slate-400" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <p className="text-xs font-bold text-white">
+                                                        {submitter?.full_name || 'Anonymous User'}
+                                                    </p>
+                                                    {submitter?.role && (
+                                                        <span className="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                                            {submitter.role}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-slate-400 font-mono">
+                                                    {submitter?.email || 'No email attached'}
+                                                </p>
+                                            </div>
+
+                                            {submitter?.email && (
+                                                <a 
+                                                    href={`mailto:${submitter.email}?subject=Re: ${encodeURIComponent(ticket.subject)} - SynchroMarket Support`}
+                                                    className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 transition-colors ml-1"
+                                                    title={`Reply directly to ${submitter.email}`}
+                                                >
+                                                    <Mail className="w-4 h-4" />
+                                                </a>
+                                            )}
+
+                                            {submitter?.username && (
+                                                <Link
+                                                    href={`/u/${submitter.username}`}
+                                                    target="_blank"
+                                                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                                    title="View Public Profile"
+                                                >
+                                                    <ExternalLink className="w-3.5 h-3.5" />
+                                                </Link>
+                                            )}
                                         </div>
-                                        <Link 
-                                            href={ticket.reference_type === 'user' ? `/u/${ticket.reference_id}` : `/p/${ticket.reference_id}`}
-                                            target="_blank"
-                                            className="px-3 py-1.5 bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 rounded-md text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
-                                        >
-                                            View Content ↗
-                                        </Link>
                                     </div>
-                                )}
-                                {ticketStatus === 'open' && (
-                                    <div className="mt-4 flex justify-end">
-                                        <button 
-                                            onClick={() => handleResolve(ticket.id)}
-                                            className="px-4 py-2 bg-emerald-600/10 text-emerald-500 hover:bg-emerald-600/20 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
-                                        >
-                                            <CheckCircle2 className="w-4 h-4" />
-                                            Mark Resolved
-                                        </button>
+
+                                    {/* Message Body */}
+                                    <div className="mt-4 bg-[#0f172a] p-4 rounded-xl border border-slate-800/80 text-slate-200 text-sm whitespace-pre-wrap leading-relaxed">
+                                        {ticket.message}
                                     </div>
-                                )}
-                            </div>
-                        ))}
+
+                                    {/* Target Content Link (for Reports) */}
+                                    {ticket.reference_id && (
+                                        <div className="mt-4 pt-4 border-t border-slate-700/50 flex items-center justify-between gap-4 flex-wrap">
+                                            <div className="text-xs text-slate-400">
+                                                <span className="font-bold text-slate-300 uppercase">Target {ticket.reference_type}:</span> {ticket.reference_id}
+                                            </div>
+                                            <Link 
+                                                href={ticket.reference_type === 'user' ? `/u/${ticket.reference_id}` : `/p/${ticket.reference_id}`}
+                                                target="_blank"
+                                                className="px-3 py-1.5 bg-blue-600/10 text-blue-400 hover:bg-blue-600/20 rounded-md text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+                                            >
+                                                View Reported Content ↗
+                                            </Link>
+                                        </div>
+                                    )}
+
+                                    {/* Resolve Action */}
+                                    {ticketStatus === 'open' && (
+                                        <div className="mt-4 flex justify-end">
+                                            <button 
+                                                onClick={() => handleResolve(ticket.id)}
+                                                className="px-4 py-2 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 border border-emerald-500/20 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                                            >
+                                                <CheckCircle2 className="w-4 h-4" />
+                                                Mark Resolved
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
             </Tabs>

@@ -131,7 +131,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     {isMainTab && (
                         <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex justify-between items-center px-5 py-3.5 bg-background/80 backdrop-blur-2xl border-b border-border/10">
                             <Link href={ROUTES.FEED} className="flex items-center gap-2">
-                                <img src="/logo.png" alt="SynchroMarket" className="w-6 h-6 object-contain" />
+                                <img src="/logo.png?v=5" alt="SynchroMarket" className="w-6 h-6 object-contain" />
                                 <h1 className="font-display font-black text-foreground tracking-tighter text-xl">
                                     Synchro<span className="text-primary">Market</span>
                                 </h1>

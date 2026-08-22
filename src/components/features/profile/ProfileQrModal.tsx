@@ -206,7 +206,7 @@ export default function ProfileQrModal({
                 <div ref={cardRef} className="print-qr-section flex flex-col items-center text-center pt-2">
                     {/* Brand Banner */}
                     <div className="flex items-center gap-2 mb-4">
-                        <img src="/logo.png" alt="SynchroMarket" className="w-6 h-6 object-contain" />
+                        <img src="/logo.png?v=5" alt="SynchroMarket" className="w-6 h-6 object-contain" />
                         <span className="font-display font-black tracking-tight text-lg text-foreground">
                             Synchro<span className="text-primary">Market</span>
                         </span>
