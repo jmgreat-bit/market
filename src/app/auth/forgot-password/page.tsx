@@ -44,8 +44,8 @@ export default function ForgotPasswordPage() {
                 className="w-full max-w-sm z-10"
             >
                 <div className="flex flex-col items-center mb-8">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 overflow-hidden shadow-[0_0_30px_rgba(143,245,255,0.2)]">
-                        <img src="/logo.png" alt="SynchroMarket Logo" className="w-full h-full object-cover" />
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 overflow-hidden shadow-[0_0_30px_rgba(143,245,255,0.2)] p-1">
+                        <img src="/logo.png" alt="SynchroMarket Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="text-2xl font-bold text-foreground font-display">Reset Password</h1>
                     <p className="text-muted-foreground text-sm text-center mt-2">
